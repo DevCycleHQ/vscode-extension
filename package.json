@@ -14,6 +14,9 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"capabilities": {
+			"hoverProvider": "true"
+		},
 		"commands": [
 			{
 				"command": "devcycle-featureflags.helloDVC",
