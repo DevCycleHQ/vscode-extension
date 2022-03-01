@@ -3,14 +3,14 @@ import { GlobalStateManager, KEYS } from './GlobalStateManager';
 import { SidebarProvider } from './SidebarProvider';
 
 
-interface featureFlagType {
+interface FeatureFlagType {
 	key: string
 	dev: boolean
 	staging: boolean
 	prod: boolean
 }
 
-const featureFlagsCopy: featureFlagType[] = 
+const featureFlagsCopy: FeatureFlagType[] = 
 [
 	{
 		key: "jiraIntegration",
@@ -24,16 +24,12 @@ const featureFlagsCopy: featureFlagType[] =
 		staging: false,
 		prod: false,
 	}
-]
+];
 
 const REGEX = /[A-Za-z0-9][.A-Za-z_\-0-9]*/;
 const SCHEME_FILE = {
 	scheme: 'file',
 };
-// const bool = '$(symbol-boolean)'
-// const HOVER_ICON = '(symbol-boolean)'
-// import hoverIcon from "hover-on.png"
-// hoverIcon;
 
 export function activate(context: vscode.ExtensionContext) {
 	GlobalStateManager.globalState = context.globalState;
@@ -64,9 +60,9 @@ export function activate(context: vscode.ExtensionContext) {
 
             const range = document.getWordRangeAtPosition(position, REGEX);
             const word = document.getText(range);
-			const hoverString = new vscode.MarkdownString("");
+			const hoverString = new vscode.MarkdownString("", true);
 
-			let flag: featureFlagType = {
+			let flag: FeatureFlagType = {
 				key: '',
 				dev: false,
 				staging: false,
@@ -77,29 +73,26 @@ export function activate(context: vscode.ExtensionContext) {
 				if(object.key === word){
 					flag = object;
 				}
-			})
+			});
 
+			let envOnIcon = '$(pass-filled)';
+			let envOffIcon = '$(pass)';
 
             if (flag.key.length !== 0) {
 				hoverString.isTrusted = true;
-				// hoverString.appendMarkdown(`**${bool}**`)
-				// hoverString.appendMarkdown(`**$(symbol-boolean)**`)
-				// hoverString.appendMarkdown(`**(symbol-boolean)**`)
-				// hoverString.appendMarkdown(`**$(symbol-boolean)**`)
-				// hoverString.appendMarkdown(bool)
-				hoverString.appendMarkdown('`\nFEATURE FLAG KEY:`')
+				hoverString.appendMarkdown('`\nFEATURE FLAG KEY:`');
 				hoverString.appendMarkdown(` ${flag.key}`);
-				hoverString.appendMarkdown(`\n\n**Dev**: `)
+				hoverString.appendMarkdown(`\n\n**${flag.dev ? envOnIcon: envOffIcon} Dev**: `);
 				hoverString.appendText(` ${flag.dev}\n\n`);
-				hoverString.appendMarkdown(`**Staging**: `)
+				hoverString.appendMarkdown(`**${flag.staging ? envOnIcon: envOffIcon} Staging**: `);
 				hoverString.appendText(` ${flag.staging}\n\n`);
-				hoverString.appendMarkdown(`**Prod**: `)
+				hoverString.appendMarkdown(`**${flag.prod ? envOnIcon: envOffIcon} Prod**: `);
 				hoverString.appendText(` ${flag.prod}`);
 
                 return new vscode.Hover(hoverString);
             }
 			else{
-				console.log('does not exist')
+				console.log('does not exist');
 				return null;
 			}
         }
