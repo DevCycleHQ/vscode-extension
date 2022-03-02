@@ -1,8 +1,9 @@
 {
-  "name": "devcycle-featureflags",
+	"name": "devcycle-featureflags",
 	"displayName": "DevCycle-FeatureFlags",
 	"description": "",
 	"version": "0.0.1",
+	"publisher": "DevCycle",
 	"engines": {
 		"vscode": "^1.63.0"
 	},
@@ -10,16 +11,27 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:devcycle-featureflags.helloDVC"
+		"onCommand:devcycle-featureflags.helloDVC",
+		"onView:devcycle-sidebar"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"capabilities": {
 			"hoverProvider": "true"
 		},
+		"views": {
+			"explorer": [
+				{
+					"type": "webview",
+					"id": "devcycle-sidebar",
+					"name": "DevCycle"
+				}
+			]
+		},
 		"commands": [
 			{
 				"command": "devcycle-featureflags.helloDVC",
+				"category": "DVC",
 				"title": "Hello DVC"
 			}
 		]
@@ -33,16 +45,15 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.64.0",
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^9.1.0",
 		"@types/node": "14.x",
+		"@types/vscode": "^1.64.0",
 		"@typescript-eslint/eslint-plugin": "^5.12.1",
 		"@typescript-eslint/parser": "^5.12.1",
 		"eslint": "^8.9.0",
 		"glob": "^7.2.0",
 		"mocha": "^9.2.1",
-		"typescript": "^4.5.5",
-		"@vscode/test-electron": "^2.1.2"
+		"typescript": "^4.5.5"
 	}
 }
