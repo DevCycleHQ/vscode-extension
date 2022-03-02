@@ -15,7 +15,7 @@ const featureFlagsCopy: FeatureFlagType[] =
 	{
 		key: "jiraIntegration",
 		dev: true,
-		staging: true,
+		staging: false,
 		prod: true,
 	},
 	{
@@ -77,9 +77,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 			let envOnIcon = '$(pass-filled)';
 			let envOffIcon = '$(pass)';
+			// let toggleOnIcon = 'icons/toggleon.svg';
+			let toggleOffIcon = '../icons/toggleoff.png';
 
             if (flag.key.length !== 0) {
 				hoverString.isTrusted = true;
+				hoverString.supportHtml = true;
 				hoverString.appendMarkdown('`\nFEATURE FLAG KEY:`');
 				hoverString.appendMarkdown(` ${flag.key}`);
 				hoverString.appendMarkdown(`\n\n**${flag.dev ? envOnIcon: envOffIcon} Dev**: `);
@@ -88,7 +91,8 @@ export function activate(context: vscode.ExtensionContext) {
 				hoverString.appendText(` ${flag.staging}\n\n`);
 				hoverString.appendMarkdown(`**${flag.prod ? envOnIcon: envOffIcon} Prod**: `);
 				hoverString.appendText(` ${flag.prod}`);
-
+				hoverString.appendText(`\n![](${toggleOffIcon})`);
+				//(`\n<img src=${toggleOffIcon}/>`);
                 return new vscode.Hover(hoverString);
             }
 			else{
