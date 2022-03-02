@@ -1,6 +1,6 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { SidebarProvider } from './SidebarProvider';
+
 
 interface featureFlagType {
 	key: string
@@ -35,8 +35,20 @@ const SCHEME_FILE = {
 // hoverIcon;
 
 export function activate(context: vscode.ExtensionContext) {
-	let disposable = vscode.commands.registerCommand('devcycle-featureflags.helloDVC', () => {
-		vscode.window.showInformationMessage('Hello from DevCycle-FeatureFlags!');
+	
+	console.log('Congratulations, your extension "devcycle-featureflags" is now active!');
+
+	const sidebarProvider = new SidebarProvider(context.extensionUri);
+
+	const item = vscode.window.createStatusBarItem(
+	  vscode.StatusBarAlignment.Right
+	);
+  
+	context.subscriptions.push(
+	  vscode.window.registerWebviewViewProvider("devcycle-sidebar", sidebarProvider)
+	);
+
+	let disposable = vscode.commands.registerCommand('devcycle-featureflags.helloDVC', async () => {
 	});
 
 	context.subscriptions.push(disposable);
@@ -88,5 +100,4 @@ export function activate(context: vscode.ExtensionContext) {
     });
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {}
