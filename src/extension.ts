@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { GlobalStateManager, KEYS } from './GlobalStateManager';
 import { SidebarProvider } from './SidebarProvider';
 
 
@@ -35,6 +36,16 @@ const SCHEME_FILE = {
 // hoverIcon;
 
 export function activate(context: vscode.ExtensionContext) {
+	GlobalStateManager.globalState = context.globalState;
+
+	let disposable = vscode.commands.registerCommand('devcycle-featureflags.helloDVC', async () => {
+		let testingState = GlobalStateManager.getState(KEYS.ACCESS_TOKEN);
+		let testingState2 = GlobalStateManager.getState(KEYS.PROJECT_ID);
+		console.log(testingState, testingState2);
+	});
+
+	context.subscriptions.push(disposable);
+
 	
 	console.log('Congratulations, your extension "devcycle-featureflags" is now active!');
 
@@ -47,11 +58,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 	  vscode.window.registerWebviewViewProvider("devcycle-sidebar", sidebarProvider)
 	);
-
-	let disposable = vscode.commands.registerCommand('devcycle-featureflags.helloDVC', async () => {
-	});
-
-	context.subscriptions.push(disposable);
 
 	vscode.languages.registerHoverProvider(SCHEME_FILE, {
         provideHover(document, position, token) {

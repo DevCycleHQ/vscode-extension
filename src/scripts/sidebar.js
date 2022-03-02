@@ -20,7 +20,7 @@
     loginBtn.addEventListener("click", () => {
       console.log("LOGIN");
       console.log(clientIdValue);
-      vscode.postMessage({ clientId: clientIdValue, secret: secretValue});
+      vscode.postMessage({ type:"login", clientId: clientIdValue, secret: secretValue});
     });
 
 
