@@ -80,6 +80,8 @@ export function activate(context: vscode.ExtensionContext) {
 			// let toggleOnIcon = 'icons/toggleon.svg';
 			let toggleOffIcon = '../icons/toggleoff.png';
 
+			const toggleOffIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleon.svg")
+
             if (flag.key.length !== 0) {
 				hoverString.isTrusted = true;
 				hoverString.supportHtml = true;
@@ -91,7 +93,8 @@ export function activate(context: vscode.ExtensionContext) {
 				hoverString.appendText(` ${flag.staging}\n\n`);
 				hoverString.appendMarkdown(`**${flag.prod ? envOnIcon: envOffIcon} Prod**: `);
 				hoverString.appendText(` ${flag.prod}`);
-				hoverString.appendText(`\n![](${toggleOffIcon})`);
+				hoverString.appendMarkdown(`\n![](${toggleOffIconPath})`);
+				hoverString.appendMarkdown(`<img src="${toggleOffIconPath}" alt="tooggle">`);
 				//(`\n<img src=${toggleOffIcon}/>`);
                 return new vscode.Hover(hoverString);
             }
