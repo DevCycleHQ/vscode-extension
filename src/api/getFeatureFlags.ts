@@ -3,7 +3,7 @@ import { GlobalStateManager } from "../GlobalStateManager";
 
 export const getFeatureFlags = async (
   PROJECT_KEY: string = "",
-  ACCESS_TOKEN: string = ""
+  ACCESS_TOKEN: any = ""
 ) => {
   try {
       console.log("getting feature flags")

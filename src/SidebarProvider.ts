@@ -27,7 +27,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (data) => {
       if (data.type === "login") {
         let res = await getToken(data.clientId, data.secret);
-        if (res.access_token) {
+        if (res && res.access_token) {
           GlobalStateManager.setState(KEYS.ACCESS_TOKEN, res.access_token);
         }
         webviewView.webview.html = this.getProjectIdWebview(webviewView.webview);

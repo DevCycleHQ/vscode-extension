@@ -29,7 +29,7 @@ export class GlobalStateManager {
     return this.globalState.get(key);
   }
 
-  static getStateAny(key: string): string[] {
+  static getStateAny(key: string): any {
     return this.globalState.get(key);
   }
 }
