@@ -5,6 +5,7 @@ import { SidebarProvider } from './SidebarProvider';
 
 interface FeatureFlagType {
 	key: string
+	dvcKey: string
 	dev: boolean
 	staging: boolean
 	prod: boolean
@@ -14,12 +15,14 @@ const featureFlagsCopy: FeatureFlagType[] =
 [
 	{
 		key: "jiraIntegration",
+		dvcKey: "jira-integration",
 		dev: true,
 		staging: false,
 		prod: true,
 	},
 	{
 		key: "githubIntegration",
+		dvcKey: "github-integration",
 		dev: false,
 		staging: false,
 		prod: false,
@@ -64,6 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			let flag: FeatureFlagType = {
 				key: '',
+				dvcKey: '',
 				dev: false,
 				staging: false,
 				prod: false
@@ -84,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
             if (flag.key.length !== 0) {
 				hoverString.isTrusted = true;
 				hoverString.supportHtml = true;
-				hoverString.appendMarkdown(`\nFEATURE FLAG KEY: \`${flag.key}\` \n\n`);
+				hoverString.appendMarkdown(`\nFEATURE FLAG KEY: \`${flag.dvcKey}\` \n\n`);
 				hoverString.appendMarkdown(`* **Dev**: ${flag.dev ? toggleOnIcon: toggleOffIcon} \n\n`);
 				hoverString.appendMarkdown(`* **Staging**: ${flag.staging ? toggleOnIcon: toggleOffIcon} \n\n`);
 				hoverString.appendMarkdown(`* **Prod**: ${flag.prod ? toggleOnIcon: toggleOffIcon} \n\n`);
