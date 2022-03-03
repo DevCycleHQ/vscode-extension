@@ -1,8 +1,11 @@
 import * as vscode from "vscode";
 import { getProject } from "./api/getProject";
+import { GlobalStateManager, KEYS } from "./GlobalStateManager";
+import { getFeatureFlags } from "./api/getFeatureFlags";
 import { getToken } from "./api/getToken";
 import { getNonce } from "./getNonce";
-import { GlobalStateManager, KEYS } from "./GlobalStateManager";
+
+const PROJECT_KEY = "jolis-tt";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -24,7 +27,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (data) => {
       if (data.type === "login") {
         let res = await getToken(data.clientId, data.secret);
-        if (res.access_token) {
+        if (res && res.access_token) {
           GlobalStateManager.setState(KEYS.ACCESS_TOKEN, res.access_token);
         }
         webviewView.webview.html = this.getProjectIdWebview(webviewView.webview);
@@ -32,6 +35,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         let res = await getProject(data.projectId);
         if (res._id) {
           GlobalStateManager.setState(KEYS.PROJECT_ID, data.projectId);
+          await getFeatureFlags(data.projectId, GlobalStateManager.getState(KEYS.ACCESS_TOKEN));
         }
       }
     });
@@ -54,8 +58,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     );
 
     const getTokenUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(this._extensionUri, "src", "api/getToken.ts")
-      );
+      vscode.Uri.joinPath(this._extensionUri, "src", "api/getToken.ts")
+    );
 
     const nonce = getNonce();
 
