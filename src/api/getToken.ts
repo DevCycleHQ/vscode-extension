@@ -1,8 +1,8 @@
 import axios from "axios";
 
-export const getToken = async (id: string = "", secret: string = "") => {
-    try {
-        const resp = await axios({
+export const getToken = async (id: string, secret: string) => {
+
+        return await axios({
             method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -14,9 +14,10 @@ export const getToken = async (id: string = "", secret: string = "") => {
 				"audience": "https://api.devcycle.com/",
 				"grant_type": "client_credentials"
             }
+        }).then((res)=> {
+            return res.data;
+        }).catch((error) => {
+            return error.response.status;
         });
-		return resp.data;
-    } catch (err) {
-        console.error(err);
-    }
+  
 };
