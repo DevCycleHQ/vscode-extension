@@ -36,7 +36,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       console.log("activated...");
     }
   );
-
+  vscode.commands.executeCommand('devcycle-featureflags.helloDVC')
   context.subscriptions.push(disposable);
 
   // On Hover
