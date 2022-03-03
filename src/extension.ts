@@ -3,10 +3,9 @@ import * as vscode from "vscode";
 import { SidebarProvider } from "./SidebarProvider";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
 import { getFeatureStatuses } from "./api/getFeatureStatuses";
+import { access } from "fs";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
-
-const axios = require("axios");
 
 const REGEX = /[A-Za-z0-9][.A-Za-z_\-0-9]*/;
 const SCHEME_FILE = {
@@ -48,15 +47,17 @@ export const activate = async (context: vscode.ExtensionContext) => {
       const PROJECT_KEY: any =
         GlobalStateManager.getState(KEYS.PROJECT_ID) || "";
       let featureFlags: any =
-        GlobalStateManager.getState(KEYS.FEATURE_FLAGS) || [];
+        (GlobalStateManager.getState(KEYS.FEATURE_FLAGS)) || [];
       const range = document.getWordRangeAtPosition(position, REGEX);
       const FEATURE_KEY = document.getText(range);
       const hoverString = new vscode.MarkdownString("");
 
       if (ACCESS_TOKEN.length === 0 || PROJECT_KEY.length === 0) return;
+      if(featureFlags.length !== 0)
+        featureFlags = JSON.parse(featureFlags)
 
       let valid = false;
-      featureFlags.map((flag) => {
+      featureFlags.map((flag: any) => {
         if (flag === FEATURE_KEY) {
           valid = true;
           console.log(flag, FEATURE_KEY);

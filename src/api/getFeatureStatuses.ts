@@ -3,7 +3,7 @@ import axios from "axios";
 export const getFeatureStatuses = async (
   PROJECT_KEY: string = "",
   FEATURE_KEY: string = "",
-  ACCESS_TOKEN: any = ""
+  ACCESS_TOKEN: string = ""
 ) => {
   return await axios({
     method: "GET",

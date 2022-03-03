@@ -21,7 +21,7 @@ export const getFeatureFlags = async (
     let featureFlags: string[] = [];
     data.map(({ key }: any) => featureFlags.push(key));
     console.log("feature flag response...")
-    GlobalStateManager.setState(KEYS.FEATURE_FLAGS, featureFlags)
+    GlobalStateManager.setState(KEYS.FEATURE_FLAGS, JSON.stringify(featureFlags))
   } catch (err) {
     console.error(err);
   }
