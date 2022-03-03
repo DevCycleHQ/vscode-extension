@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GlobalStateManager } from "../GlobalStateManager";
+import { GlobalStateManager, KEYS } from "../GlobalStateManager";
 
 export const getFeatureFlags = async (
   PROJECT_KEY: string = "",
@@ -21,7 +21,7 @@ export const getFeatureFlags = async (
     let featureFlags: string[] = [];
     data.map(({ key }: any) => featureFlags.push(key));
     console.log("feature flag response...")
-    GlobalStateManager.setStateAny("FEATURE_FLAGS", featureFlags)
+    GlobalStateManager.setState(KEYS.FEATURE_FLAGS, featureFlags)
   } catch (err) {
     console.error(err);
   }

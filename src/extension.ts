@@ -43,16 +43,18 @@ export const activate = async (context: vscode.ExtensionContext) => {
   // On Hover
   vscode.languages.registerHoverProvider(SCHEME_FILE, {
     async provideHover(document, position, token) {
-      const ACCESS_TOKEN: any = GlobalStateManager.getState(KEYS.ACCESS_TOKEN) || "";
-      const PROJECT_KEY: any = GlobalStateManager.getState(KEYS.PROJECT_ID) || "";
-      let featureFlags: string[] =
-        GlobalStateManager.getStateAny("FEATURE_FLAGS") || [];
+      const ACCESS_TOKEN: any =
+        GlobalStateManager.getState(KEYS.ACCESS_TOKEN) || "";
+      const PROJECT_KEY: any =
+        GlobalStateManager.getState(KEYS.PROJECT_ID) || "";
+      let featureFlags: any =
+        GlobalStateManager.getState(KEYS.FEATURE_FLAGS) || [];
       const range = document.getWordRangeAtPosition(position, REGEX);
       const FEATURE_KEY = document.getText(range);
       const hoverString = new vscode.MarkdownString("");
 
-      if(ACCESS_TOKEN.length === 0 || PROJECT_KEY.length === 0)return;
-      
+      if (ACCESS_TOKEN.length === 0 || PROJECT_KEY.length === 0) return;
+
       let valid = false;
       featureFlags.map((flag) => {
         if (flag === FEATURE_KEY) {
@@ -61,11 +63,18 @@ export const activate = async (context: vscode.ExtensionContext) => {
         }
       });
       console.log("valid: ", valid);
-      console.log("GET: ",  `https://api.devcycle.com/v1/projects/${PROJECT_KEY}/features/${FEATURE_KEY}/configurations`)
-      console.log("ACCESS_TOKEN: ", ACCESS_TOKEN)
+      console.log(
+        "GET: ",
+        `https://api.devcycle.com/v1/projects/${PROJECT_KEY}/features/${FEATURE_KEY}/configurations`
+      );
+      console.log("ACCESS_TOKEN: ", ACCESS_TOKEN);
 
       if (valid) {
-        const status = await getFeatureStatuses(PROJECT_KEY, FEATURE_KEY, ACCESS_TOKEN);
+        const status = await getFeatureStatuses(
+          PROJECT_KEY,
+          FEATURE_KEY,
+          ACCESS_TOKEN
+        );
         hoverString.isTrusted = true;
         hoverString.appendMarkdown("`\nFEATURE FLAG KEY:`");
         hoverString.appendMarkdown(` ${FEATURE_KEY}`);
