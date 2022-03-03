@@ -69,7 +69,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       script = "getProjectIdView.js"
     }
     return webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "src", "scripts/sidebar.js")
+      vscode.Uri.joinPath(this._extensionUri, "src", `scripts/${script}`)
     );
   }
 
