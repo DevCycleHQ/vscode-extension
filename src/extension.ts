@@ -75,27 +75,19 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			});
 
-			let envOnIcon = '$(pass-filled)';
-			let envOffIcon = '$(pass)';
-			// let toggleOnIcon = 'icons/toggleon.svg';
-			let toggleOffIcon = '../icons/toggleoff.png';
-
-			const toggleOffIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleon.svg")
+			const toggleOnIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleon.svg");
+			const toggleOffIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleoff.svg");
+			const toggleOnIcon = `<img src="${toggleOnIconPath}" alt="toggle">`;
+			const toggleOffIcon = `<img src="${toggleOffIconPath}" alt="toggle">`;
+			
 
             if (flag.key.length !== 0) {
 				hoverString.isTrusted = true;
 				hoverString.supportHtml = true;
-				hoverString.appendMarkdown('`\nFEATURE FLAG KEY:`');
-				hoverString.appendMarkdown(` ${flag.key}`);
-				hoverString.appendMarkdown(`\n\n**${flag.dev ? envOnIcon: envOffIcon} Dev**: `);
-				hoverString.appendText(` ${flag.dev}\n\n`);
-				hoverString.appendMarkdown(`**${flag.staging ? envOnIcon: envOffIcon} Staging**: `);
-				hoverString.appendText(` ${flag.staging}\n\n`);
-				hoverString.appendMarkdown(`**${flag.prod ? envOnIcon: envOffIcon} Prod**: `);
-				hoverString.appendText(` ${flag.prod}`);
-				hoverString.appendMarkdown(`\n![](${toggleOffIconPath})`);
-				hoverString.appendMarkdown(`<img src="${toggleOffIconPath}" alt="tooggle">`);
-				//(`\n<img src=${toggleOffIcon}/>`);
+				hoverString.appendMarkdown(`\nFEATURE FLAG KEY: \`${flag.key}\` \n\n`);
+				hoverString.appendMarkdown(`* **Dev**: ${flag.dev ? toggleOnIcon: toggleOffIcon} \n\n`);
+				hoverString.appendMarkdown(`* **Staging**: ${flag.staging ? toggleOnIcon: toggleOffIcon} \n\n`);
+				hoverString.appendMarkdown(`* **Prod**: ${flag.prod ? toggleOnIcon: toggleOffIcon} \n\n`);
                 return new vscode.Hover(hoverString);
             }
 			else{
