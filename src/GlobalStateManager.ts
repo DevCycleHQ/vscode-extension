@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 export const enum KEYS {
   ACCESS_TOKEN = "access_token",
   PROJECT_ID = "project_id",
+  PROJECT_NAME = "project_name",
   FEATURE_FLAGS = "feature_flags"
 };
 
