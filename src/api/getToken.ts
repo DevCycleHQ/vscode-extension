@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const getToken = async (id: string = "", secret: string = "") => {
+export const getToken = async (id: string, secret: string) => {
     try {
         const resp = await axios({
             method: 'POST',

@@ -11,6 +11,18 @@ const enum VIEWS {
   DEFAULT = "default",
   PROJECT_ID_VIEW = "projectIdView"
 }
+
+const enum ACTIONS {
+  LOGIN = "login",
+  SUBMIT_PROJECT_ID = "submitProjectId"
+}
+
+interface Data {
+  type: string,
+  clientId?: string,
+  secret?: string,
+  projectId?: string
+}
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
   _doc?: vscode.TextDocument;
@@ -28,14 +40,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-    webviewView.webview.onDidReceiveMessage(async (data) => {
-      if (data.type === "login") {
+    webviewView.webview.onDidReceiveMessage(async (data: Data) => {
+      if (data.type === ACTIONS.LOGIN && data.clientId && data.secret) {
         let res = await getToken(data.clientId, data.secret);
         if (res && res.access_token) {
           GlobalStateManager.setState(KEYS.ACCESS_TOKEN, res.access_token);
         }
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, VIEWS.PROJECT_ID_VIEW);
-      } else if (data.type === "submitProjectId") {
+      } else if (data.type === ACTIONS.SUBMIT_PROJECT_ID && data.projectId) {
         let res = await getProject(data.projectId);
         if (res._id) {
           GlobalStateManager.setState(KEYS.PROJECT_ID, data.projectId);
