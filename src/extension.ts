@@ -82,7 +82,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
         // console.log("return statuses: ", status)
         hoverString.isTrusted = true;
 		hoverString.supportHtml = true;
-        hoverString.appendMarkdown(`\nFEATURE FLAG KEY: \`${FEATURE_KEY}\` \n\n`);
+        hoverString.appendMarkdown(`\nFEATURE FLAG KEY: \`${selectedFlag}\` \n\n`);
         hoverString.appendMarkdown(`* **Dev**: `);
         hoverString.appendMarkdown(` ${status?.dev ? toggleOnIcon: toggleOffIcon}\n\n`);
         hoverString.appendMarkdown(`* **Staging**: `);
