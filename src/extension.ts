@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { SidebarProvider } from "./SidebarProvider";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
 import { getFeatureStatuses } from "./api/getFeatureStatuses";
+import { camelCase, snakeCase, capitalCase } from "change-case";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
@@ -14,7 +15,7 @@ const SCHEME_FILE = {
 
 export const activate = async (context: vscode.ExtensionContext) => {
   GlobalStateManager.globalState = context.globalState;
-  GlobalStateManager.clearState();
+  // GlobalStateManager.clearState();
   const sidebarProvider = new SidebarProvider(context.extensionUri);
 
   context.subscriptions.push(
@@ -51,10 +52,18 @@ export const activate = async (context: vscode.ExtensionContext) => {
       if(featureFlags.length !== 0)
         featureFlags = JSON.parse(featureFlags)
 
-      let valid = false;
+        "heyheyhey"
+
+      let selectedFlag = "";
       featureFlags.map((flag: any) => {
-        if (flag === FEATURE_KEY) {
-          valid = true;
+        const camel = camelCase(flag);
+        const snakeCapital = snakeCase(flag.toUpperCase())
+        const capitalSnake = snakeCase(flag).toUpperCase()
+        console.log("s: ", snakeCapital);
+        console.log("c: ", capitalSnake)
+        
+        if (flag === FEATURE_KEY || camel === FEATURE_KEY || capitalSnake === FEATURE_KEY) {
+          selectedFlag = flag;
           // console.log(flag, FEATURE_KEY);
         }
       });
@@ -65,12 +74,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
       // );
       // console.log("ACCESS_TOKEN: ", ACCESS_TOKEN);
 
-      if (valid) {
+      if (selectedFlag.length !== 0) {
         const status = await getFeatureStatuses(
           PROJECT_KEY,
-          FEATURE_KEY,
+          selectedFlag,
           ACCESS_TOKEN
         );
+        // console.log("return statuses: ", status)
         hoverString.isTrusted = true;
         hoverString.appendMarkdown("`\nFEATURE FLAG KEY:`");
         hoverString.appendMarkdown(` ${FEATURE_KEY}`);

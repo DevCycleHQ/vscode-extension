@@ -35,29 +35,29 @@
 				"title": "Hello DVC"
 			}
 		],
-    "languages": [
-      {
-       "id": "star-rod-script",
-       "extensions": [
-        ".bpat",
-        ".bscr",
-        ".mpat",
-        ".mscr"
-       ],
-       "aliases": [
-        "Star Rod Script",
-        "mscr"
-       ],
-       "configuration": "./language-configuration.json"
-      }
-     ],
-     "grammars": [
-      {
-       "language": "star-rod-script",
-       "scopeName": "source.mscr",
-       "path": "./syntaxes/mscr.tmLanguage.json"
-      }
-     ]
+		"languages": [
+			{
+				"id": "star-rod-script",
+				"extensions": [
+					".bpat",
+					".bscr",
+					".mpat",
+					".mscr"
+				],
+				"aliases": [
+					"Star Rod Script",
+					"mscr"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "star-rod-script",
+				"scopeName": "source.mscr",
+				"path": "./syntaxes/mscr.tmLanguage.json"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run compile",
@@ -74,13 +74,14 @@
 		"@types/vscode": "^1.64.0",
 		"@typescript-eslint/eslint-plugin": "^5.12.1",
 		"@typescript-eslint/parser": "^5.12.1",
-    "@vscode/test-electron": "^2.1.2",
+		"@vscode/test-electron": "^2.1.2",
 		"eslint": "^8.9.0",
 		"glob": "^7.2.0",
 		"mocha": "^9.2.1",
 		"typescript": "^4.5.5"
 	},
-  "dependencies": {
-    "axios": "^0.26.0"
-  }
+	"dependencies": {
+		"axios": "^0.26.0",
+		"change-case": "^4.1.2"
+	}
 }
