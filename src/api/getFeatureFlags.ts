@@ -6,7 +6,7 @@ export const getFeatureFlags = async (
   ACCESS_TOKEN: any = ""
 ) => {
   try {
-      console.log("getting feature flags")
+      // console.log("getting feature flags")
     // Get all DVC Feature Flags
     const resp = await axios({
       method: "GET",
@@ -20,7 +20,7 @@ export const getFeatureFlags = async (
     const { data } = resp;
     let featureFlags: string[] = [];
     data.map(({ key }: any) => featureFlags.push(key));
-    console.log("feature flag response...")
+    // console.log("feature flag response...")
     GlobalStateManager.setState(KEYS.FEATURE_FLAGS, JSON.stringify(featureFlags))
   } catch (err) {
     console.error(err);

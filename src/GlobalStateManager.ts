@@ -17,9 +17,8 @@ export class GlobalStateManager {
     this.globalState.update(KEYS.FEATURE_FLAGS, []);
   }
 
-  static setState(key: KEYS, token: string) {
-    console.log(key, token);
-    return this.globalState.update(key, token);
+  static setState(key: KEYS, value: string) {
+    return this.globalState.update(key, value);
   }
 
   static getState(key: KEYS) {

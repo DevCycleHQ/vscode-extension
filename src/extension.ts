@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { SidebarProvider } from "./SidebarProvider";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
 import { getFeatureStatuses } from "./api/getFeatureStatuses";
-import { access } from "fs";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 
@@ -17,10 +17,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   GlobalStateManager.clearState();
   const sidebarProvider = new SidebarProvider(context.extensionUri);
 
-  const item = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Right
-  );
-
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       "devcycle-sidebar",
@@ -29,15 +25,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
   );
 
   // Activate DVC-Extension
-  let disposable = vscode.commands.registerCommand(
+  context.subscriptions.push(vscode.commands.registerCommand(
     "devcycle-featureflags.helloDVC",
     async () => {
       vscode.window.showInformationMessage("Hello from DevCycle-FeatureFlags!");
       console.log("activated...");
     }
-  );
+  ));
   vscode.commands.executeCommand('devcycle-featureflags.helloDVC')
-  context.subscriptions.push(disposable);
 
   // On Hover
   vscode.languages.registerHoverProvider(SCHEME_FILE, {
@@ -60,15 +55,15 @@ export const activate = async (context: vscode.ExtensionContext) => {
       featureFlags.map((flag: any) => {
         if (flag === FEATURE_KEY) {
           valid = true;
-          console.log(flag, FEATURE_KEY);
+          // console.log(flag, FEATURE_KEY);
         }
       });
-      console.log("valid: ", valid);
-      console.log(
-        "GET: ",
-        `https://api.devcycle.com/v1/projects/${PROJECT_KEY}/features/${FEATURE_KEY}/configurations`
-      );
-      console.log("ACCESS_TOKEN: ", ACCESS_TOKEN);
+      // console.log("valid: ", valid);
+      // console.log(
+      //   "GET: ",
+      //   `https://api.devcycle.com/v1/projects/${PROJECT_KEY}/features/${FEATURE_KEY}/configurations`
+      // );
+      // console.log("ACCESS_TOKEN: ", ACCESS_TOKEN);
 
       if (valid) {
         const status = await getFeatureStatuses(
@@ -87,7 +82,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
         hoverString.appendText(` ${status?.prod}`);
         return new vscode.Hover(hoverString);
       } else {
-        console.log("does not exist");
+        // console.log("does not exist");
         return null;
       }
     },
