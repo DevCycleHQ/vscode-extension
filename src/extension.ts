@@ -15,7 +15,7 @@ const SCHEME_FILE = {
 
 export const activate = async (context: vscode.ExtensionContext) => {
   GlobalStateManager.globalState = context.globalState;
-  // GlobalStateManager.clearState();
+  GlobalStateManager.clearState();
   const sidebarProvider = new SidebarProvider(context.extensionUri);
 
   context.subscriptions.push(
@@ -51,17 +51,11 @@ export const activate = async (context: vscode.ExtensionContext) => {
       if (ACCESS_TOKEN.length === 0 || PROJECT_KEY.length === 0) return;
       if(featureFlags.length !== 0)
         featureFlags = JSON.parse(featureFlags)
-
-        "heyheyhey"
-
+        
       let selectedFlag = "";
       featureFlags.map((flag: any) => {
         const camel = camelCase(flag);
-        const snakeCapital = snakeCase(flag.toUpperCase())
         const capitalSnake = snakeCase(flag).toUpperCase()
-        console.log("s: ", snakeCapital);
-        console.log("c: ", capitalSnake)
-        
         if (flag === FEATURE_KEY || camel === FEATURE_KEY || capitalSnake === FEATURE_KEY) {
           selectedFlag = flag;
           // console.log(flag, FEATURE_KEY);
