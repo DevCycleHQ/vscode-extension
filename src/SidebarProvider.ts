@@ -66,7 +66,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, VIEWS.PROJECT_ID_VIEW, ERRORS.SUBMIT_PROJECT_ID);
         } else {
           let res = await getProject(data.projectId);
-          console.log(res,"project")
           if (res._id) {
             GlobalStateManager.setState(KEYS.PROJECT_ID, data.projectId);
             GlobalStateManager.setState(KEYS.PROJECT_NAME, res.name);
@@ -129,7 +128,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <button id="submitBtn">Submit</button>`
     } else if (view === VIEWS.SUCCESS) {
       let currentProjectName = GlobalStateManager.getState(KEYS.PROJECT_NAME);
-      body = `<br/><p>You are now in project: <b>${currentProjectName}</b> !</p>`
+      let featureFlags: [] = JSON.parse(GlobalStateManager.getState(KEYS.FEATURE_FLAGS) as string);
+      let flagsHtml = "";
+      featureFlags.sort().forEach((flag)=> {
+        flagsHtml += `<div style="cursor: pointer;">${flag}</div>`;
+      })
+
+      body = `<br/><p>You are now in project: <b>${currentProjectName}</b> !</p><br/><b>Feature Flags:</b>`
+      body += flagsHtml;
     }
     return body;
   }

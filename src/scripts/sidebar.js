@@ -8,18 +8,14 @@
     let secretValue;
     
     clientId.addEventListener("input", () => {
-      console.log("clientId", clientId.value);
       clientIdValue = clientId.value;
     });
 
     secret.addEventListener("input", () => {
-      console.log("secret", secret.value);
       secretValue = secret.value;
     });
 
     loginBtn.addEventListener("click", () => {
-      console.log("LOGIN");
-      console.log(clientIdValue);
       vscode.postMessage({ type:"login", clientId: clientIdValue, secret: secretValue});
     });
 
