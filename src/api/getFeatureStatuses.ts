@@ -14,8 +14,8 @@ export const getFeatureStatuses = async (
     url: `https://api.devcycle.com/v1/projects/${PROJECT_KEY}/features/${FEATURE_KEY}/configurations`,
   })
     .then(({ data }) => {
-      console.log("url: ", `https://api.devcycle.com/v1/projects/${PROJECT_KEY}/features/${FEATURE_KEY}/configurations`)
-      console.log("data: ", data)
+      // console.log("url: ", `https://api.devcycle.com/v1/projects/${PROJECT_KEY}/features/${FEATURE_KEY}/configurations`)
+      // console.log("data: ", data)
       return {
         dev: data[0].status === "active",
         staging: data[1].status === "active",
