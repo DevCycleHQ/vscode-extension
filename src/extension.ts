@@ -45,7 +45,12 @@ export const activate = async (context: vscode.ExtensionContext) => {
         (GlobalStateManager.getState(KEYS.FEATURE_FLAGS)) || [];
       const range = document.getWordRangeAtPosition(position, REGEX);
       const FEATURE_KEY = document.getText(range);
-      const hoverString = new vscode.MarkdownString("");
+      
+	  const hoverString = new vscode.MarkdownString("");
+	  const toggleOnIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleon.svg");
+	  const toggleOffIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleoff.svg");
+	  const toggleOnIcon = `<img src="${toggleOnIconPath}" alt="toggle">`;
+	  const toggleOffIcon = `<img src="${toggleOffIconPath}" alt="toggle">`;
 
       if (ACCESS_TOKEN.length === 0 || PROJECT_KEY.length === 0) return;
       if(featureFlags.length !== 0)
@@ -72,14 +77,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
           ACCESS_TOKEN
         );
         hoverString.isTrusted = true;
-        hoverString.appendMarkdown("`\nFEATURE FLAG KEY:`");
-        hoverString.appendMarkdown(` ${FEATURE_KEY}`);
-        hoverString.appendMarkdown(`\n\n**Dev**: `);
-        hoverString.appendText(` ${status?.dev}\n\n`);
-        hoverString.appendMarkdown(`**Staging**: `);
-        hoverString.appendText(` ${status?.staging}\n\n`);
-        hoverString.appendMarkdown(`**Prod**: `);
-        hoverString.appendText(` ${status?.prod}`);
+		hoverString.supportHtml = true;
+        hoverString.appendMarkdown(`\nFEATURE FLAG KEY: \`${FEATURE_KEY}\` \n\n`);
+        hoverString.appendMarkdown(`* **Dev**: `);
+        hoverString.appendMarkdown(` ${status?.dev ? toggleOnIcon: toggleOffIcon}\n\n`);
+        hoverString.appendMarkdown(`* **Staging**: `);
+        hoverString.appendMarkdown(` ${status?.staging ? toggleOnIcon: toggleOffIcon}\n\n`);
+        hoverString.appendMarkdown(`* **Prod**: `);
+        hoverString.appendMarkdown(` ${status?.prod ? toggleOnIcon: toggleOffIcon}`);
         return new vscode.Hover(hoverString);
       } else {
         // console.log("does not exist");
