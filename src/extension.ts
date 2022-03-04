@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { SidebarProvider } from "./SidebarProvider";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
 import { getFeatureStatuses } from "./api/getFeatureStatuses";
+import { camelCase, snakeCase, capitalCase } from "change-case";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
@@ -55,11 +56,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
       if (ACCESS_TOKEN.length === 0 || PROJECT_KEY.length === 0) return;
       if(featureFlags.length !== 0)
         featureFlags = JSON.parse(featureFlags)
-
-      let valid = false;
+        
+      let selectedFlag = "";
       featureFlags.map((flag: any) => {
-        if (flag === FEATURE_KEY) {
-          valid = true;
+        const camel = camelCase(flag);
+        const capitalSnake = snakeCase(flag).toUpperCase()
+        if (flag === FEATURE_KEY || camel === FEATURE_KEY || capitalSnake === FEATURE_KEY) {
+          selectedFlag = flag;
           // console.log(flag, FEATURE_KEY);
         }
       });
@@ -70,12 +73,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
       // );
       // console.log("ACCESS_TOKEN: ", ACCESS_TOKEN);
 
-      if (valid) {
+      if (selectedFlag.length !== 0) {
         const status = await getFeatureStatuses(
           PROJECT_KEY,
-          FEATURE_KEY,
+          selectedFlag,
           ACCESS_TOKEN
         );
+        // console.log("return statuses: ", status)
         hoverString.isTrusted = true;
 		hoverString.supportHtml = true;
         hoverString.appendMarkdown(`\nFEATURE FLAG KEY: \`${FEATURE_KEY}\` \n\n`);
