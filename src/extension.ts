@@ -42,7 +42,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   // Activate DVC-Extension
   context.subscriptions.push(vscode.commands.registerCommand(
-    "devcycle-featureflags.login",
+    'devcycle-featureflags.login',
     async() => {
       const workspace = getActiveWorkspace()
       if(!workspace) {
@@ -60,6 +60,21 @@ export const activate = async (context: vscode.ExtensionContext) => {
       const terminal = vscode.window.createTerminal(options);
 		  terminal.show();
       terminal.sendText('dvc login sso')
+    }
+  ))
+
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'devcycle-featureflags.logout',
+    async() => {
+      vscode.window.showInformationMessage('Logging out of DevCycle');
+
+      const options:vscode.TerminalOptions = {
+        name: "DevCycle CLI"
+      }
+
+      const terminal = vscode.window.createTerminal(options);
+		  terminal.show();
+      terminal.sendText('dvc logout')
     }
   ))
 

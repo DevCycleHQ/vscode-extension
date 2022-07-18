@@ -12,6 +12,7 @@
 	],
 	"activationEvents": [
 		"onCommand:devcycle-featureflags.login",
+		"onCommand:devcycle-featureflags.logout",
 		"onView:devcycle-sidebar"
 	],
 	"main": "./out/extension.js",
@@ -33,6 +34,11 @@
 				"command": "devcycle-featureflags.login",
 				"category": "DevCycle",
 				"title": "Log in to DevCycle"
+			},
+			{
+				"command": "devcycle-featureflags.logout",
+				"category": "DevCycle",
+				"title": "Log out of DevCycle"
 			}
 		],
 		"languages": [
