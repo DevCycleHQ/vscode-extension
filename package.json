@@ -11,7 +11,6 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:devcycle-featureflags.helloDVC",
 		"onCommand:devcycle-featureflags.login",
 		"onView:devcycle-sidebar"
 	],
@@ -30,11 +29,6 @@
 			]
 		},
 		"commands": [
-			{
-				"command": "devcycle-featureflags.helloDVC",
-				"category": "DevCycle",
-				"title": "Hello World"
-			},
 			{
 				"command": "devcycle-featureflags.login",
 				"category": "DevCycle",

@@ -42,13 +42,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   // Activate DVC-Extension
   context.subscriptions.push(vscode.commands.registerCommand(
-    "devcycle-featureflags.helloDVC",
-    async () => {
-      vscode.window.showInformationMessage("Hello from DevCycle-FeatureFlags!");
-      console.log("activated...");
-    }
-  ));
-  context.subscriptions.push(vscode.commands.registerCommand(
     "devcycle-featureflags.login",
     async() => {
       const workspace = getActiveWorkspace()
@@ -69,7 +62,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
       terminal.sendText('dvc login sso')
     }
   ))
-  vscode.commands.executeCommand('devcycle-featureflags.helloDVC')
 
   // On Hover
   vscode.languages.registerHoverProvider(SCHEME_FILE, {
