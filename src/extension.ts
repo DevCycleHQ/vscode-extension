@@ -4,6 +4,7 @@ import { SidebarProvider } from "./SidebarProvider";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
 import { getFeatureStatuses } from "./api/getFeatureStatuses";
 import { camelCase, snakeCase, capitalCase } from "change-case";
+import DevcycleCLIController from "./devcycleCliController";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
@@ -32,49 +33,46 @@ export const activate = async (context: vscode.ExtensionContext) => {
   GlobalStateManager.globalState = context.globalState;
   GlobalStateManager.clearState();
   const sidebarProvider = new SidebarProvider(context.extensionUri);
+  let workspace:vscode.WorkspaceFolder | undefined
+  if(vscode.workspace.workspaceFolders?.length == 1) {
+    workspace = vscode.workspace.workspaceFolders[0]
+  } else if(!vscode.window.activeTextEditor) {
+    vscode.window.showErrorMessage('Unable to identify workspace')
+    return
+  } else {
+    const editorPath = vscode.window.activeTextEditor.document.uri
+    const workspaceFromEditorPath = vscode.workspace.getWorkspaceFolder(editorPath)
+    if(workspaceFromEditorPath) {
+      workspace = workspaceFromEditorPath
+    }
+  }
+
+  if(!workspace) {
+    vscode.window.showErrorMessage('Unable to identify workspace')
+    return
+  }
+  
+  const cliController = new DevcycleCLIController(workspace)
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       "devcycle-sidebar",
       sidebarProvider
     )
-  );
+  )
 
   // Activate DVC-Extension
   context.subscriptions.push(vscode.commands.registerCommand(
     'devcycle-featureflags.login',
     async() => {
-      const workspace = getActiveWorkspace()
-      if(!workspace) {
-        vscode.window.showErrorMessage('No workspace found')
-        return
-      }
-
-      vscode.window.showInformationMessage('Logging in to DevCycle using SSO');
-
-      const options:vscode.TerminalOptions = {
-        name: "DevCycle CLI",
-        cwd: workspace.uri
-      }
-
-      const terminal = vscode.window.createTerminal(options);
-		  terminal.show();
-      terminal.sendText('dvc login sso')
+      await cliController.login()
     }
   ))
 
   context.subscriptions.push(vscode.commands.registerCommand(
     'devcycle-featureflags.logout',
     async() => {
-      vscode.window.showInformationMessage('Logging out of DevCycle');
-
-      const options:vscode.TerminalOptions = {
-        name: "DevCycle CLI"
-      }
-
-      const terminal = vscode.window.createTerminal(options);
-		  terminal.show();
-      terminal.sendText('dvc logout')
+      await cliController.logout()
     }
   ))
 
