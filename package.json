@@ -12,6 +12,7 @@
 	],
 	"activationEvents": [
 		"onCommand:devcycle-featureflags.helloDVC",
+		"onCommand:devcycle-featureflags.login",
 		"onView:devcycle-sidebar"
 	],
 	"main": "./out/extension.js",
@@ -31,8 +32,13 @@
 		"commands": [
 			{
 				"command": "devcycle-featureflags.helloDVC",
-				"category": "DVC",
-				"title": "Hello DVC"
+				"category": "DevCycle",
+				"title": "Hello World"
+			},
+			{
+				"command": "devcycle-featureflags.login",
+				"category": "DevCycle",
+				"title": "Log in to DevCycle"
 			}
 		],
 		"languages": [

@@ -13,6 +13,21 @@ const SCHEME_FILE = {
   scheme: "file",
 };
 
+const getActiveWorkspace = () => {
+  if(vscode.workspace.workspaceFolders?.length == 1) {
+    return vscode.workspace.workspaceFolders[0]
+  }
+  if(!vscode.window.activeTextEditor) {
+    return null
+  }
+  const editorPath = vscode.window.activeTextEditor.document.uri
+  const workspace = vscode.workspace.getWorkspaceFolder(editorPath)
+  if(!workspace) {
+    vscode.window.showErrorMessage('No workspace found')
+  }
+  return workspace
+}
+
 export const activate = async (context: vscode.ExtensionContext) => {
   GlobalStateManager.globalState = context.globalState;
   GlobalStateManager.clearState();
@@ -33,6 +48,27 @@ export const activate = async (context: vscode.ExtensionContext) => {
       console.log("activated...");
     }
   ));
+  context.subscriptions.push(vscode.commands.registerCommand(
+    "devcycle-featureflags.login",
+    async() => {
+      const workspace = getActiveWorkspace()
+      if(!workspace) {
+        vscode.window.showErrorMessage('No workspace found')
+        return
+      }
+
+      vscode.window.showInformationMessage('Logging in to DevCycle using SSO');
+
+      const options:vscode.TerminalOptions = {
+        name: "DevCycle CLI",
+        cwd: workspace.uri
+      }
+
+      const terminal = vscode.window.createTerminal(options);
+		  terminal.show();
+      terminal.sendText('dvc login sso')
+    }
+  ))
   vscode.commands.executeCommand('devcycle-featureflags.helloDVC')
 
   // On Hover
