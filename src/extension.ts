@@ -27,8 +27,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
       : undefined;
   vscode.window.registerTreeDataProvider(
     'devcycleCodeUsages',
-    new UsagesTreeProvider(rootPath, cliController)
-  );
+    new UsagesTreeProvider(rootPath, cliController, context)
+  )
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -37,7 +37,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
     )
   )
 
-  // Activate DVC-Extension
   context.subscriptions.push(vscode.commands.registerCommand(
     'devcycle-featureflags.login',
     async() => {
@@ -85,6 +84,18 @@ export const activate = async (context: vscode.ExtensionContext) => {
         modal: true
       }
       vscode.window.showInformationMessage(statusSummary, options)
+    }
+  ))
+
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'devcycle-featureflags.show-reference',
+    async(filePath:string, lineNumber:number) => {
+      const document = await vscode.workspace.openTextDocument(filePath)
+      await vscode.window.showTextDocument(document)
+      const editor = vscode.window.activeTextEditor
+      if(!editor) throw new Error('No active text editor')
+      editor.selection = new vscode.Selection(lineNumber-1, 0, lineNumber-1, 0)
+      editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenterIfOutsideViewport)
     }
   ))
 

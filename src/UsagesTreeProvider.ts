@@ -8,15 +8,9 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
 
     constructor(
         private workspaceRoot: string | undefined,
-        private devcycleCliController: DevcycleCLIController
-    ) {}
-
-    private handleClick(event:unknown) {
-        vscode.window.showInformationMessage('click', {
-            detail: JSON.stringify(event),
-            modal: true
-        })
-    }
+        private devcycleCliController: DevcycleCLIController,
+        private context:vscode.ExtensionContext
+    ) { }
 
     async refresh(): Promise<void> {
         const raw = await this.devcycleCliController.usages()
@@ -32,16 +26,17 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
         this._onDidChangeTreeData.fire();
     }
 
-    private usageLineToNode(line:string) {
-        const labelStart = line.indexOf('-') + 2
-        const label = line.slice(labelStart)
-        return new CodeUsageNode(label, vscode.TreeItemCollapsibleState.None)
+    private usageLineToNode(line: string) {
+        const fileNameStart = line.indexOf('-') + 2
+        const path = line.slice(fileNameStart)
+        const [fileName, lineNumber] = path.split(':L')
+        return CodeUsageNode.createUsage(fileName, lineNumber, this.workspaceRoot || '', this.context)
     }
 
-    private flagLineToNode(line:string) {
+    private flagLineToNode(line: string) {
         const labelStart = line.indexOf('.') + 2
         const label = line.slice(labelStart)
-        return new CodeUsageNode(label, vscode.TreeItemCollapsibleState.Collapsed)
+        return CodeUsageNode.createFlag(label, this.context)
     }
 
     getTreeItem(element: CodeUsageNode): vscode.TreeItem {
@@ -67,11 +62,38 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
 }
 
 export class CodeUsageNode extends vscode.TreeItem {
+    static createFlag = (line:string, context:vscode.ExtensionContext) => {
+
+        const instance = new CodeUsageNode(line, 'flag')
+        instance.iconPath = {
+            dark: vscode.Uri.joinPath(context.extensionUri, 'media', 'togglebot-white.svg'),
+            light: vscode.Uri.joinPath(context.extensionUri, 'media', 'togglebot.svg')
+        }
+        return instance
+    }
+
+    static createUsage = (filePath:string, lineNumber:string, workspaceRoot:string, context:vscode.ExtensionContext) => {
+        const instance = new CodeUsageNode(`${filePath}:${lineNumber}`, 'usage')
+        const file = vscode.Uri.file(`${workspaceRoot}/${filePath}`)
+        instance.command = {
+            title: "",
+            command: "devcycle-featureflags.show-reference",
+            arguments: [file, parseInt(lineNumber)]
+        }
+        return instance
+    }
+
+    public file:vscode.Uri | undefined
+
     constructor(
         public readonly label: string,
-        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        public type: 'flag' | 'usage',
         public readonly children: CodeUsageNode[] = []
     ) {
-        super(label, collapsibleState)
+        super(label, type === 'flag'
+            ? vscode.TreeItemCollapsibleState.Collapsed
+            : vscode.TreeItemCollapsibleState.None
+        )
+        this.contextValue = type
     }
 }

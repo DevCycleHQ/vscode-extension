@@ -51,32 +51,53 @@
 			{
 				"command": "devcycle-featureflags.login",
 				"category": "DevCycle",
-				"title": "Log in to DevCycle"
+				"title": "Log in to DevCycle",
+				"icon": {
+					"light": "media/togglebot.svg",
+					"dark": "media/togglebot-white.svg"
+				}
 			},
 			{
 				"command": "devcycle-featureflags.logout",
 				"category": "DevCycle",
-				"title": "Log out of DevCycle"
+				"title": "Log out of DevCycle",
+				"icon": {
+					"light": "media/togglebot.svg",
+					"dark": "media/togglebot-white.svg"
+				}
 			},
 			{
 				"command": "devcycle-featureflags.status",
 				"category": "DevCycle",
-				"title": "Check CLI Status"
+				"title": "Check CLI Status",
+				"icon": {
+					"light": "media/togglebot.svg",
+					"dark": "media/togglebot-white.svg"
+				}
 			},
 			{
 				"command": "devcycle-featureflags.select-project",
 				"category": "DevCycle",
-				"title": "Select DevCycle Project"
+				"title": "Select DevCycle Project",
+				"icon": {
+					"light": "media/togglebot.svg",
+					"dark": "media/togglebot-white.svg"
+				}
 			},
 			{
 				"command": "devcycle-featureflags.select-organization",
 				"category": "DevCycle",
-				"title": "Select DevCycle Organization"
+				"title": "Select DevCycle Organization",
+				"icon": {
+					"light": "media/togglebot.svg",
+					"dark": "media/togglebot-white.svg"
+				}
 			},
 			{
 				"command": "devcycleCodeUsages.refresh",
 				"category": "DevCycle",
-				"title": "Refresh Code Usages"
+				"title": "Refresh Code Usages",
+				"icon": "$(refresh)"
 			}
 		],
 		"languages": [
