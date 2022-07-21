@@ -13,7 +13,12 @@
 	"activationEvents": [
 		"onCommand:devcycle-featureflags.login",
 		"onCommand:devcycle-featureflags.logout",
-		"onView:devcycle-sidebar"
+		"onCommand:devcycle-featureflags.refresh-usages",
+		"onCommand:devcycle-featureflags.status",
+		"onCommand:devcycle-featureflags.select-project",
+		"onCommand:devcycle-featureflags.select-organization",
+		"onView:devcycle-sidebar",
+		"onView:devcycleCodeUsages"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -26,6 +31,19 @@
 					"type": "webview",
 					"id": "devcycle-sidebar",
 					"name": "DevCycle"
+				},
+				{
+					"id": "devcycleCodeUsages",
+					"name": "DevCycle Code Usages"
+				}
+			]
+		},
+		"menus": {
+			"view/title": [
+				{
+					"command": "devcycleCodeUsages.refresh",
+					"when": "view == devcycleCodeUsages",
+					"group": "navigation"
 				}
 			]
 		},
@@ -39,6 +57,26 @@
 				"command": "devcycle-featureflags.logout",
 				"category": "DevCycle",
 				"title": "Log out of DevCycle"
+			},
+			{
+				"command": "devcycle-featureflags.status",
+				"category": "DevCycle",
+				"title": "Check CLI Status"
+			},
+			{
+				"command": "devcycle-featureflags.select-project",
+				"category": "DevCycle",
+				"title": "Select DevCycle Project"
+			},
+			{
+				"command": "devcycle-featureflags.select-organization",
+				"category": "DevCycle",
+				"title": "Select DevCycle Organization"
+			},
+			{
+				"command": "devcycleCodeUsages.refresh",
+				"category": "DevCycle",
+				"title": "Refresh Code Usages"
 			}
 		],
 		"languages": [
