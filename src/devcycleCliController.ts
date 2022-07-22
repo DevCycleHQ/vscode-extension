@@ -16,13 +16,66 @@ type DevCycleStatus = {
   authConfigPath: string
   hasAccessToken: 'true' | 'false'
 }
+
+export type JSONMatch = {
+  key: string,
+  references: VariableReference[]
+}
+
+export type VariableReference = {  
+  codeSnippet: CodeSnippet,
+  lineNumbers: Range
+  fileName: string
+  language: string
+}
+
+export type CodeSnippet = {
+  lineNumbers: Range,
+  content: string
+}
+
+export type Range = {
+  start: number
+  end: number
+}
+
 export default class DevcycleCLIController {
   public async login() {
-    const { code, error } = await this.execDvc('login sso --headless')
+    const { code, error, output } = await this.execDvc('login sso --headless')
     if (code === 0) {
       vscode.window.showInformationMessage('Logged into DevCycle')
     } else {
-      vscode.window.showInformationMessage(`Logout failed ${error?.message}}`)
+      vscode.window.showInformationMessage(`Login failed ${error?.message}}`)
+    }
+    const organizations = JSON.parse(output) as string[]
+    return this.chooseOrganization(organizations)
+  }
+
+  public async chooseOrganization(organizations:string[]) {
+    const organization = await vscode.window.showQuickPick(organizations, {
+      ignoreFocusOut: true,
+      title: 'Select DevCycle Organization'
+    })
+    const { code, error, output } = await this.execDvc(`org --headless --org=${organization}`)
+    if (code === 0) {
+      vscode.window.showInformationMessage(`Logged into DevCycle organization ${organization}`)
+    } else {
+      vscode.window.showInformationMessage(`Organization login failed ${error?.message}}`)
+    }
+    const projects = JSON.parse(output) as string[]
+    return this.chooseProject(projects)
+  }
+
+  public async chooseProject(projects:string[]) {
+    const project = await vscode.window.showQuickPick(projects, {
+      ignoreFocusOut: true,
+      title: 'Select DevCycle Project'
+    })
+    const { code, error } = await this.execDvc(`projects select --headless --project=${project}`)
+    if (code === 0) {
+      vscode.window.showInformationMessage(`Now using project ${project}`)
+    } else {
+      vscode.window.showInformationMessage(`Choosing project failed ${error?.message}}`)
     }
   }
 
@@ -31,9 +84,9 @@ export default class DevcycleCLIController {
     return JSON.parse(output) as DevCycleStatus
   }
 
-  public async usages(): Promise<string> {
-    const { output } = await this.execDvc('usages')
-    return output
+  public async usages(): Promise<JSONMatch[]> {
+    const { output } = await this.execDvc('usages --format=json')
+    return JSON.parse(output) as JSONMatch[]
   }
 
   public async logout() {

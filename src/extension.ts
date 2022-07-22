@@ -10,11 +10,6 @@ import { UsagesTreeProvider } from "./UsagesTreeProvider";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 
-// const REGEX = /[A-Za-z0-9][.A-Za-z_\-0-9]*/;
-// const SCHEME_FILE = {
-//   scheme: "file",
-// };
-
 export const activate = async (context: vscode.ExtensionContext) => {
   GlobalStateManager.globalState = context.globalState;
   GlobalStateManager.clearState();
@@ -52,14 +47,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   ))
 
   context.subscriptions.push(vscode.commands.registerCommand(
-    'devcycle-featureflags.refresh-usages',
-    async() => {
-      const usages = await cliController.usages()
-      
-    }
-  ))
-
-  context.subscriptions.push(vscode.commands.registerCommand(
     'devcycle-featureflags.select-project',
     async() => {
       const projects = await cliController.listProjects()
@@ -89,12 +76,12 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   context.subscriptions.push(vscode.commands.registerCommand(
     'devcycle-featureflags.show-reference',
-    async(filePath:string, lineNumber:number) => {
+    async(filePath:string, start:number, end:number) => {
       const document = await vscode.workspace.openTextDocument(filePath)
       await vscode.window.showTextDocument(document)
       const editor = vscode.window.activeTextEditor
       if(!editor) throw new Error('No active text editor')
-      editor.selection = new vscode.Selection(lineNumber-1, 0, lineNumber-1, 0)
+      editor.selection = new vscode.Selection(start-1, 0, end, 0)
       editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenterIfOutsideViewport)
     }
   ))

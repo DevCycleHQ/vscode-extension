@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import DevcycleCLIController from "./devcycleCliController";
+import DevcycleCLIController, { JSONMatch, VariableReference } from "./devcycleCliController";
 
 export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode> {
     private _onDidChangeTreeData: vscode.EventEmitter<CodeUsageNode | undefined | void> = new vscode.EventEmitter<CodeUsageNode | undefined | void>();
@@ -9,34 +9,22 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
     constructor(
         private workspaceRoot: string | undefined,
         private devcycleCliController: DevcycleCLIController,
-        private context:vscode.ExtensionContext
+        private context: vscode.ExtensionContext
     ) { }
 
     async refresh(): Promise<void> {
-        const raw = await this.devcycleCliController.usages()
-        const lines = raw.split('\n').slice(3)
-        lines.forEach((line) => {
-            if (line.startsWith('\t')) {
-                const flag = this.flagsSeen[this.flagsSeen.length - 1]
-                flag.children.push(this.usageLineToNode(line))
-            } else {
-                this.flagsSeen.push(this.flagLineToNode(line))
-            }
-        })
+        this.flagsSeen = []
         this._onDidChangeTreeData.fire();
-    }
-
-    private usageLineToNode(line: string) {
-        const fileNameStart = line.indexOf('-') + 2
-        const path = line.slice(fileNameStart)
-        const [fileName, lineNumber] = path.split(':L')
-        return CodeUsageNode.createUsage(fileName, lineNumber, this.workspaceRoot || '', this.context)
-    }
-
-    private flagLineToNode(line: string) {
-        const labelStart = line.indexOf('.') + 2
-        const label = line.slice(labelStart)
-        return CodeUsageNode.createFlag(label, this.context)
+        const root = this.workspaceRoot
+        if (!root) {
+            throw (new Error('Must have a workspace to check for code usages'))
+        }
+        const matches = await this.devcycleCliController.usages()
+        matches.forEach(match => {
+            this.flagsSeen.push(CodeUsageNode.flagFrom(match, root, this.context))
+        })
+        this.flagsSeen.sort((a, b) => (a.key > b.key) ? 1 : -1)
+        this._onDidChangeTreeData.fire();
     }
 
     getTreeItem(element: CodeUsageNode): vscode.TreeItem {
@@ -62,30 +50,35 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
 }
 
 export class CodeUsageNode extends vscode.TreeItem {
-    static createFlag = (line:string, context:vscode.ExtensionContext) => {
-
-        const instance = new CodeUsageNode(line, 'flag')
+    static flagFrom(match: JSONMatch, workspaceRoot: string, context: vscode.ExtensionContext) {
+        const children = match.references.map(reference => this.usageFrom(match, reference, workspaceRoot, context))
+        const instance = new CodeUsageNode(match.key, match.key, 'flag', children)
+        instance.key = match.key
         instance.iconPath = {
-            dark: vscode.Uri.joinPath(context.extensionUri, 'media', 'togglebot-white.svg'),
-            light: vscode.Uri.joinPath(context.extensionUri, 'media', 'togglebot.svg')
+            dark: vscode.Uri.joinPath(context.extensionUri, 'media', 'flag-filled-white.svg'),
+            light: vscode.Uri.joinPath(context.extensionUri, 'media', 'flag-filled.svg')
         }
         return instance
     }
 
-    static createUsage = (filePath:string, lineNumber:string, workspaceRoot:string, context:vscode.ExtensionContext) => {
-        const instance = new CodeUsageNode(`${filePath}:${lineNumber}`, 'usage')
-        const file = vscode.Uri.file(`${workspaceRoot}/${filePath}`)
+    static usageFrom(match: JSONMatch, reference: VariableReference, workspaceRoot: string, context: vscode.ExtensionContext): CodeUsageNode {
+        const start = reference.lineNumbers.start
+        const end = reference.lineNumbers.end
+        const label = (start === end)
+            ? `${reference.fileName}:L${start}`
+            : `${reference.fileName}:L${start}-${end}`
+        const instance = new CodeUsageNode(match.key, label, 'usage')
+        const file = vscode.Uri.file(`${workspaceRoot}/${reference.fileName}`)
         instance.command = {
             title: "",
             command: "devcycle-featureflags.show-reference",
-            arguments: [file, parseInt(lineNumber)]
+            arguments: [file, start, end]
         }
         return instance
     }
 
-    public file:vscode.Uri | undefined
-
     constructor(
+        public key: string,
         public readonly label: string,
         public type: 'flag' | 'usage',
         public readonly children: CodeUsageNode[] = []
