@@ -14,7 +14,7 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
 
     async refresh(): Promise<void> {
         this.flagsSeen = []
-        this._onDidChangeTreeData.fire();
+        this._onDidChangeTreeData.fire(undefined);
         const root = this.workspaceRoot
         if (!root) {
             throw (new Error('Must have a workspace to check for code usages'))
@@ -35,10 +35,6 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
         if (!this.workspaceRoot) {
             vscode.window.showInformationMessage('No dependency in empty workspace');
             return []
-        }
-
-        if (this.flagsSeen.length == 0) {
-            await this.refresh()
         }
 
         if (element) {

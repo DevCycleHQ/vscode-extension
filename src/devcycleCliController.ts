@@ -15,6 +15,11 @@ type DevCycleStatus = {
   userConfigExists: 'true' | 'false'
   authConfigPath: string
   hasAccessToken: 'true' | 'false'
+  organization?: {
+    id: string,
+    name: string,
+    display_name: string
+  }
 }
 
 export type JSONMatch = {
@@ -39,16 +44,43 @@ export type Range = {
   end: number
 }
 
+const STATUS_BAR_ITEM:string = 'devcycle-featureflags'
+
 export default class DevcycleCLIController {
-  public async login() {
-    const { code, error, output } = await this.execDvc('login sso --headless')
+  private statusBarItem:vscode.StatusBarItem
+  private repoConfigured:boolean = false
+
+  constructor() {
+    this.statusBarItem = vscode.window.createStatusBarItem(STATUS_BAR_ITEM)
+    this.statusBarItem.name = "DevCycle Status"
+  }
+
+  public async init() {
+    this.showBusyMessage('Initializing DevCycle')
+    const { code, error, output } = await this.execDvc('repo init --headless')
     if (code === 0) {
-      vscode.window.showInformationMessage('Logged into DevCycle')
+      vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', true)
     } else {
-      vscode.window.showInformationMessage(`Login failed ${error?.message}}`)
+      vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
     }
+    this.hideStatus()
     const organizations = JSON.parse(output) as string[]
-    return this.chooseOrganization(organizations)
+    await this.chooseOrganization(organizations)
+    if(this.repoConfigured) {
+      vscode.window.showInformationMessage('DevCycle Configured')
+      vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
+    }
+  }
+
+  public async login() {
+    this.showBusyMessage('Logging into DevCycle')
+    const { code, error, output } = await this.execDvc('login again --headless')
+    if (code === 0) {
+      vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', true)
+    } else {
+      vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
+    }
+    this.hideStatus()
   }
 
   public async chooseOrganization(organizations:string[]) {
@@ -56,12 +88,12 @@ export default class DevcycleCLIController {
       ignoreFocusOut: true,
       title: 'Select DevCycle Organization'
     })
+    this.showBusyMessage('Logging into DevCycle organization')
     const { code, error, output } = await this.execDvc(`org --headless --org=${organization}`)
-    if (code === 0) {
-      vscode.window.showInformationMessage(`Logged into DevCycle organization ${organization}`)
-    } else {
-      vscode.window.showInformationMessage(`Organization login failed ${error?.message}}`)
+    if (code !== 0) {
+      vscode.window.showErrorMessage(`Organization login failed ${error?.message}}`)
     }
+    this.hideStatus()
     const projects = JSON.parse(output) as string[]
     return this.chooseProject(projects)
   }
@@ -73,9 +105,10 @@ export default class DevcycleCLIController {
     })
     const { code, error } = await this.execDvc(`projects select --headless --project=${project}`)
     if (code === 0) {
-      vscode.window.showInformationMessage(`Now using project ${project}`)
+      vscode.commands.executeCommand('setContext', 'devcycle-featureflags.repoConfigured', true)
+      this.repoConfigured = true
     } else {
-      vscode.window.showInformationMessage(`Choosing project failed ${error?.message}}`)
+      vscode.window.showErrorMessage(`Choosing project failed ${error?.message}}`)
     }
   }
 
@@ -85,8 +118,11 @@ export default class DevcycleCLIController {
   }
 
   public async usages(): Promise<JSONMatch[]> {
+    this.showBusyMessage('Finding Devcycle code usages')
     const { output } = await this.execDvc('usages --format=json')
-    return JSON.parse(output) as JSONMatch[]
+    const matches = JSON.parse(output) as JSONMatch[]
+    this.hideStatus()
+    return matches
   }
 
   public async logout() {
@@ -129,6 +165,16 @@ export default class DevcycleCLIController {
   private execDvc(cmd: string) {
     // return this.execShell(`dvc ${cmd}`)
     return this.execShell(`~/repos/cli/bin/dev ${cmd}`)
+  }
+
+  private showBusyMessage(message:string) {
+    this.statusBarItem.text = `$(loading~spin) ${message}...`
+    this.statusBarItem.tooltip = `${message}...`
+    this.statusBarItem.show()
+  }
+
+  private hideStatus() {
+    this.statusBarItem.hide()
   }
 
   private execShell(cmd: string) {

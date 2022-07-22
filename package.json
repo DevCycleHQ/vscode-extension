@@ -11,14 +11,15 @@
 		"Other"
 	],
 	"activationEvents": [
+		"onCommand:devcycle-featureflags.init",
 		"onCommand:devcycle-featureflags.login",
 		"onCommand:devcycle-featureflags.logout",
-		"onCommand:devcycle-featureflags.refresh-usages",
 		"onCommand:devcycle-featureflags.status",
 		"onCommand:devcycle-featureflags.select-project",
 		"onCommand:devcycle-featureflags.select-organization",
-		"onView:devcycle-sidebar",
-		"onView:devcycleCodeUsages"
+		"onCommand:devcycle-featureflags.refresh-usages",
+		"onView:devcycleCodeUsages",
+		"workspaceContains:.devcycle/config.yml"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -28,26 +29,58 @@
 		"views": {
 			"explorer": [
 				{
-					"type": "webview",
-					"id": "devcycle-sidebar",
-					"name": "DevCycle"
-				},
-				{
 					"id": "devcycleCodeUsages",
-					"name": "DevCycle Code Usages"
+					"name": "DevCycle Code Usages",
+					"when": "devcycle-featureflags.repoConfigured == true"
 				}
 			]
 		},
 		"menus": {
 			"view/title": [
 				{
-					"command": "devcycleCodeUsages.refresh",
+					"command": "devcycle-featureflags.refresh-usages",
 					"when": "view == devcycleCodeUsages",
 					"group": "navigation"
+				}
+			],
+			"commandPalette": [
+				{
+					"command": "devcycle-featureflags.init",
+					"when": "devcycle-featureflags.repoConfigured == false"
+				},
+				{
+					"command": "devcycle-featureflags.logout",
+					"when": "devcycle-featureflags.loggedIn == true"
+				},
+				{
+					"command": "devcycle-featureflags.login",
+					"when": "devcycle-featureflags.loggedIn == false"
+				},
+				{
+					"command": "devcycle-featureflags.select-project",
+					"when": "devcycle-featureflags.loggedIn == true && devcycle-featureflags.repoConfigured == false"
+				},
+				{
+					"command": "devcycle-featureflags.select-organization",
+					"when": "devcycle-featureflags.loggedIn == true && devcycle-featureflags.repoConfigured == false"
+				},
+				{
+					"command": "devcycle-featureflags.refresh-usages",
+					"when": "devcycle-featureflags.repoConfigured == true"
 				}
 			]
 		},
 		"commands": [
+			{
+				"command": "devcycle-featureflags.init",
+				"category": "DevCycle",
+				"title": "Initialize Repo",
+				"icon": {
+					"light": "media/togglebot.svg",
+					"dark": "media/togglebot-white.svg"
+				},
+				"when": "devcycle-featureflags.repoConfigured == false"
+			},
 			{
 				"command": "devcycle-featureflags.login",
 				"category": "DevCycle",
@@ -55,7 +88,8 @@
 				"icon": {
 					"light": "media/togglebot.svg",
 					"dark": "media/togglebot-white.svg"
-				}
+				},
+				"when": "devcycle-featureflags.repoConfigured == true && devcycle-featureflags.loggedIn == false"
 			},
 			{
 				"command": "devcycle-featureflags.logout",
@@ -64,7 +98,8 @@
 				"icon": {
 					"light": "media/togglebot.svg",
 					"dark": "media/togglebot-white.svg"
-				}
+				},
+				"when": "devcycle-featureflags.loggedIn == true"
 			},
 			{
 				"command": "devcycle-featureflags.status",
@@ -94,33 +129,27 @@
 				}
 			},
 			{
-				"command": "devcycleCodeUsages.refresh",
+				"command": "devcycle-featureflags.refresh-usages",
 				"category": "DevCycle",
 				"title": "Refresh Code Usages",
 				"icon": "$(refresh)"
 			}
 		],
-		"languages": [
+		"configuration":[
 			{
-				"id": "star-rod-script",
-				"extensions": [
-					".bpat",
-					".bscr",
-					".mpat",
-					".mscr"
-				],
-				"aliases": [
-					"Star Rod Script",
-					"mscr"
-				],
-				"configuration": "./language-configuration.json"
-			}
-		],
-		"grammars": [
-			{
-				"language": "star-rod-script",
-				"scopeName": "source.mscr",
-				"path": "./syntaxes/mscr.tmLanguage.json"
+				"title": "DevCycle",
+				"properties": {
+					"devcycle-featureflags.loginOnWorkspaceOpen": {
+						"type": "boolean",
+						"default": false,
+						"description": "Automatically log in to DevCycle when a configured workspace is opened."
+					},
+					"devcycle-featureflags.usagesOnWorkspaceOpen": {
+						"type": "boolean",
+						"default": true,
+						"description": "Automatically check for code usages when a configured workspace is opened."
+					}
+				}
 			}
 		]
 	},
