@@ -1,9 +1,6 @@
 ("use strict");
 import * as vscode from "vscode";
-import { SidebarProvider } from "./SidebarProvider";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
-import { getFeatureStatuses } from "./api/getFeatureStatuses";
-import { camelCase, snakeCase, capitalCase } from "change-case";
 import DevcycleCLIController from "./devcycleCliController";
 import { UsagesTreeProvider } from "./UsagesTreeProvider";
 
@@ -94,10 +91,46 @@ export const activate = async (context: vscode.ExtensionContext) => {
     }
   ))
 
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'devcycle-featureflags.add-alias',
+    async () => {
+      const editor = vscode.window.activeTextEditor
+      let alias = editor?.document.getText(editor.selection) || ''
+      let variableKey = ''
+      if(cliController.loggedIn) {
+        const variables = await cliController.listVariables()
+        variableKey = await vscode.window.showQuickPick(variables, {
+          title: `Which variable to alias as ${alias}`
+        }) || ''
+      } else {
+        variableKey = await vscode.window.showInputBox({
+          title: 'Enter the variable key to alias'
+        }) || ''
+      }
+
+      vscode.window.showInformationMessage(JSON.stringify({
+        alias, variableKey
+      }))
+
+      if(alias === '') {
+        vscode.window.showErrorMessage('Must enter a valid alias')
+        return
+      }
+
+      if(variableKey === '') {
+        vscode.window.showErrorMessage('Must choose a variable key to alias')
+        return
+      }
+
+      await cliController.addAlias(alias, variableKey)
+    }
+  ))
+
   const status = await cliController.status()
   if(status.organization) {
     await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.repoConfigured', status.repoConfigExists)
     if(status.hasAccessToken) {
+      cliController.loggedIn = true
       await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', status.hasAccessToken)
     }
   }
@@ -107,6 +140,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
     }
     await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
   }
-};
+}
 
 export function deactivate() { }

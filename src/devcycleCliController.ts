@@ -48,7 +48,9 @@ const STATUS_BAR_ITEM:string = 'devcycle-featureflags'
 
 export default class DevcycleCLIController {
   private statusBarItem:vscode.StatusBarItem
-  private repoConfigured:boolean = false
+  public repoConfigured:boolean = false
+  public loggedIn:boolean = false
+  public debug:boolean = true
 
   constructor() {
     this.statusBarItem = vscode.window.createStatusBarItem(STATUS_BAR_ITEM)
@@ -57,9 +59,10 @@ export default class DevcycleCLIController {
 
   public async init() {
     this.showBusyMessage('Initializing DevCycle')
-    const { code, error, output } = await this.execDvc('repo init --headless')
+    const { code, error, output } = await this.execDvc('repo init')
     if (code === 0) {
-      vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', true)
+      this.loggedIn = true
+      await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', true)
     } else {
       vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
     }
@@ -67,16 +70,18 @@ export default class DevcycleCLIController {
     const organizations = JSON.parse(output) as string[]
     await this.chooseOrganization(organizations)
     if(this.repoConfigured) {
+      await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
       vscode.window.showInformationMessage('DevCycle Configured')
-      vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
     }
   }
 
   public async login() {
     this.showBusyMessage('Logging into DevCycle')
-    const { code, error, output } = await this.execDvc('login again --headless')
+    const { code, error } = await this.execDvc('login again')
     if (code === 0) {
-      vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', true)
+      this.loggedIn = true
+      await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', true)
+      vscode.window.showInformationMessage('Logged in to DevCycle')
     } else {
       vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
     }
@@ -89,7 +94,7 @@ export default class DevcycleCLIController {
       title: 'Select DevCycle Organization'
     })
     this.showBusyMessage('Logging into DevCycle organization')
-    const { code, error, output } = await this.execDvc(`org --headless --org=${organization}`)
+    const { code, error, output } = await this.execDvc(`org --org=${organization}`)
     if (code !== 0) {
       vscode.window.showErrorMessage(`Organization login failed ${error?.message}}`)
     }
@@ -103,17 +108,17 @@ export default class DevcycleCLIController {
       ignoreFocusOut: true,
       title: 'Select DevCycle Project'
     })
-    const { code, error } = await this.execDvc(`projects select --headless --project=${project}`)
+    const { code, error } = await this.execDvc(`projects select --project=${project}`)
     if (code === 0) {
-      vscode.commands.executeCommand('setContext', 'devcycle-featureflags.repoConfigured', true)
       this.repoConfigured = true
+      await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.repoConfigured', true)
     } else {
       vscode.window.showErrorMessage(`Choosing project failed ${error?.message}}`)
     }
   }
 
   public async status(): Promise<DevCycleStatus> {
-    const { output } = await this.execDvc('status --headless')
+    const { output } = await this.execDvc('status')
     return JSON.parse(output) as DevCycleStatus
   }
 
@@ -126,8 +131,10 @@ export default class DevcycleCLIController {
   }
 
   public async logout() {
-    const { code, error } = await this.execDvc('logout --headless')
+    const { code, error } = await this.execDvc('logout')
     if (code === 0) {
+      this.loggedIn = false
+      await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', false)
       vscode.window.showInformationMessage('Logged out of DevCycle')
     } else {
       vscode.window.showInformationMessage(`Logout failed ${error?.message}}`)
@@ -135,11 +142,11 @@ export default class DevcycleCLIController {
   }
 
   public async selectOrganization() {
-    const { code, error } = await this.execDvc('org --headless')
+    const { code, error } = await this.execDvc('org')
     if (code === 0) {
       vscode.window.showInformationMessage(`Repo configured to use org`)
     } else {
-      vscode.window.showInformationMessage(`Organization selection failed: ${error?.message}}`)
+      vscode.window.showErrorMessage(`Organization selection failed: ${error?.message}}`)
     }
   }
 
@@ -148,7 +155,7 @@ export default class DevcycleCLIController {
     if (code === 0) {
       vscode.window.showInformationMessage(`Repo configured to use project`)
     } else {
-      vscode.window.showInformationMessage(`Project selection failed: ${error?.message}}`)
+      vscode.window.showErrorMessage(`Project selection failed: ${error?.message}}`)
     }
     return JSON.parse(output) as string[]
   }
@@ -158,13 +165,33 @@ export default class DevcycleCLIController {
     if (code === 0) {
       vscode.window.showInformationMessage(`Repo configured to use project`)
     } else {
-      vscode.window.showInformationMessage(`Project selection failed: ${error?.message}}`)
+      vscode.window.showErrorMessage(`Project selection failed: ${error?.message}}`)
+    }
+  }
+
+  public async listVariables() {
+    const { code, error, output } = await this.execDvc('variables list')
+    if (code !== 0) {
+      vscode.window.showErrorMessage(`Retrieving variables failed: ${error?.message}}`)
+      return []
+    } else {
+      return JSON.parse(output) as string[]
+    }
+  }
+
+  public async addAlias(alias:string, variableKey:string) {
+    const { code, error } = await this.execDvc(`alias add --alias=${alias} --variable=${variableKey}`)
+    if (code !== 0) {
+      vscode.window.showErrorMessage(`Adding alias failed: ${error?.message}}`)
     }
   }
 
   private execDvc(cmd: string) {
-    // return this.execShell(`dvc ${cmd}`)
-    return this.execShell(`~/repos/cli/bin/dev ${cmd}`)
+    const shellCommand = `~/repos/cli/bin/dev ${cmd} --headless`
+    if(this.debug) {
+      vscode.window.showInformationMessage(shellCommand)
+    }
+    return this.execShell(shellCommand)
   }
 
   private showBusyMessage(message:string) {
@@ -189,17 +216,18 @@ export default class DevcycleCLIController {
       }
       cp.exec(cmd, cpOptions, (err, out) => {
         if (err) {
-          return reject({
+          resolve({
             output: out,
             error: err,
-            code: err.code
+            code: err.code || 0
           })
         }
-        return resolve({
+        resolve({
           output: out,
           error: null,
           code: 0
         })
+        return
       })
     })
   }
@@ -213,5 +241,11 @@ export default class DevcycleCLIController {
     return activeDocument
       ? vscode.workspace.getWorkspaceFolder(activeDocument.uri)
       : workspaces[0]
+  }
+
+  private showDebugOutput(object:object) {
+    vscode.window.showInformationMessage(JSON.stringify(object), {
+      modal: true
+    })
   }
 }

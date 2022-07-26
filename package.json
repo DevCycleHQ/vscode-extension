@@ -12,13 +12,7 @@
 	],
 	"activationEvents": [
 		"onCommand:devcycle-featureflags.init",
-		"onCommand:devcycle-featureflags.login",
-		"onCommand:devcycle-featureflags.logout",
 		"onCommand:devcycle-featureflags.status",
-		"onCommand:devcycle-featureflags.select-project",
-		"onCommand:devcycle-featureflags.select-organization",
-		"onCommand:devcycle-featureflags.refresh-usages",
-		"onView:devcycleCodeUsages",
 		"workspaceContains:.devcycle/config.yml"
 	],
 	"main": "./out/extension.js",
@@ -36,37 +30,23 @@
 			]
 		},
 		"menus": {
+			"editor/context": [
+				{
+					"command": "devcycle-featureflags.add-alias",
+					"when": "editorHasSelection",
+					"group": "devcycle-featureflags"
+				}
+			],
 			"view/title": [
 				{
 					"command": "devcycle-featureflags.refresh-usages",
 					"when": "view == devcycleCodeUsages",
 					"group": "navigation"
-				}
-			],
-			"commandPalette": [
-				{
-					"command": "devcycle-featureflags.init",
-					"when": "devcycle-featureflags.repoConfigured == false"
 				},
 				{
-					"command": "devcycle-featureflags.logout",
-					"when": "devcycle-featureflags.loggedIn == true"
-				},
-				{
-					"command": "devcycle-featureflags.login",
-					"when": "devcycle-featureflags.loggedIn == false"
-				},
-				{
-					"command": "devcycle-featureflags.select-project",
-					"when": "devcycle-featureflags.loggedIn == true && devcycle-featureflags.repoConfigured == false"
-				},
-				{
-					"command": "devcycle-featureflags.select-organization",
-					"when": "devcycle-featureflags.loggedIn == true && devcycle-featureflags.repoConfigured == false"
-				},
-				{
-					"command": "devcycle-featureflags.refresh-usages",
-					"when": "devcycle-featureflags.repoConfigured == true"
+					"command": "devcycle-featureflags.add-alias",
+					"when": "view == devcycleCodeUsages",
+					"group": "navigation"
 				}
 			]
 		},
@@ -79,7 +59,7 @@
 					"light": "media/togglebot.svg",
 					"dark": "media/togglebot-white.svg"
 				},
-				"when": "devcycle-featureflags.repoConfigured == false"
+				"enablement": "devcycle-featureflags.repoConfigured == false"
 			},
 			{
 				"command": "devcycle-featureflags.login",
@@ -89,7 +69,7 @@
 					"light": "media/togglebot.svg",
 					"dark": "media/togglebot-white.svg"
 				},
-				"when": "devcycle-featureflags.repoConfigured == true && devcycle-featureflags.loggedIn == false"
+				"enablement": "devcycle-featureflags.repoConfigured == true && devcycle-featureflags.loggedIn == false"
 			},
 			{
 				"command": "devcycle-featureflags.logout",
@@ -99,7 +79,7 @@
 					"light": "media/togglebot.svg",
 					"dark": "media/togglebot-white.svg"
 				},
-				"when": "devcycle-featureflags.loggedIn == true"
+				"enablement": "devcycle-featureflags.loggedIn == true"
 			},
 			{
 				"command": "devcycle-featureflags.status",
@@ -117,7 +97,8 @@
 				"icon": {
 					"light": "media/togglebot.svg",
 					"dark": "media/togglebot-white.svg"
-				}
+				},
+				"enablement": "devcycle-featureflags.loggedIn == true"
 			},
 			{
 				"command": "devcycle-featureflags.select-organization",
@@ -126,13 +107,29 @@
 				"icon": {
 					"light": "media/togglebot.svg",
 					"dark": "media/togglebot-white.svg"
-				}
+				},
+				"enablement": "devcycle-featureflags.loggedIn == true"
 			},
 			{
 				"command": "devcycle-featureflags.refresh-usages",
 				"category": "DevCycle",
 				"title": "Refresh Code Usages",
-				"icon": "$(refresh)"
+				"icon": "$(refresh)",
+				"enablement": "devcycle-featureflags.repoConfigured == true"
+			},
+			{
+				"command": "devcycle-featureflags.add-alias",
+				"category": "DevCycle",
+				"title": "Add a variable alias",
+				"icon": "$(add)",
+				"enablement": "devcycle-featureflags.repoConfigured == true"
+			},
+			{
+				"command": "devcycle-featureflags.remove-alias",
+				"category": "DevCycle",
+				"title": "Remove a variable alias",
+				"icon": "$(remove)",
+				"enablement": "devcycle-featureflags.repoConfigured == true"
 			}
 		],
 		"configuration":[
