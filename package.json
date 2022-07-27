@@ -145,6 +145,16 @@
 						"type": "boolean",
 						"default": true,
 						"description": "Automatically check for code usages when a configured workspace is opened."
+					},
+					"devcycle-featureflags.debug": {
+						"type": "boolean",
+						"default": false,
+						"description": "Displays debug output for the extension, including what CLI commands are being executed."
+					},
+					"devcycle-featureflags.cli": {
+						"type": "string",
+						"default": "dvc",
+						"description": "How the CLI will be invoked"
 					}
 				}
 			}

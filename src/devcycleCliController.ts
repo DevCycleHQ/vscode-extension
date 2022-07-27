@@ -44,13 +44,18 @@ export type Range = {
   end: number
 }
 
+type ListVariablesCache = {
+  time: Date,
+  value: string[]
+}
+
 const STATUS_BAR_ITEM:string = 'devcycle-featureflags'
+const CACHE_TIME = 15000
 
 export default class DevcycleCLIController {
   private statusBarItem:vscode.StatusBarItem
   public repoConfigured:boolean = false
   public loggedIn:boolean = false
-  public debug:boolean = true
 
   constructor() {
     this.statusBarItem = vscode.window.createStatusBarItem(STATUS_BAR_ITEM)
@@ -170,12 +175,21 @@ export default class DevcycleCLIController {
   }
 
   public async listVariables() {
+    if(this.listVariablesCache && this.isRecent(this.listVariablesCache.time))
+    {
+      this.showDebugOutput(`Used cached variable list from ${this.listVariablesCache.time.toTimeString()}`)
+      return this.listVariablesCache.value
+    }
     const { code, error, output } = await this.execDvc('variables list')
     if (code !== 0) {
       vscode.window.showErrorMessage(`Retrieving variables failed: ${error?.message}}`)
       return []
     } else {
-      return JSON.parse(output) as string[]
+      this.listVariablesCache = {
+        time: new Date(),
+        value: JSON.parse(output) as string[]
+      }
+      return this.listVariablesCache.value
     }
   }
 
@@ -184,14 +198,6 @@ export default class DevcycleCLIController {
     if (code !== 0) {
       vscode.window.showErrorMessage(`Adding alias failed: ${error?.message}}`)
     }
-  }
-
-  private execDvc(cmd: string) {
-    const shellCommand = `~/repos/cli/bin/dev ${cmd} --headless`
-    if(this.debug) {
-      vscode.window.showInformationMessage(shellCommand)
-    }
-    return this.execShell(shellCommand)
   }
 
   private showBusyMessage(message:string) {
@@ -204,7 +210,14 @@ export default class DevcycleCLIController {
     this.statusBarItem.hide()
   }
 
+  private execDvc(cmd: string) {
+    const cli = vscode.workspace.getConfiguration('devcycle-featureflags').get('cli') || 'dvc'
+    const shellCommand = `${cli} ${cmd} --headless`
+    return this.execShell(shellCommand)
+  }
+
   private execShell(cmd: string) {
+    this.showDebugOutput(`Executing shell command ${cmd}`)
     return new Promise<CommandResponse>((resolve, reject) => {
       const workspace = this.getWorkspace()
       if (!workspace) {
@@ -243,9 +256,27 @@ export default class DevcycleCLIController {
       : workspaces[0]
   }
 
-  private showDebugOutput(object:object) {
-    vscode.window.showInformationMessage(JSON.stringify(object), {
-      modal: true
-    })
+  private showDebugObject(object:object) {
+    const debug = vscode.workspace.getConfiguration('devcycle-featureflags').get('debug')
+
+    if(debug) {
+      vscode.window.showInformationMessage(JSON.stringify(object), {
+        modal: true
+      })
+    }
   }
+
+  private showDebugOutput(message:string) {
+    const debug = vscode.workspace.getConfiguration('devcycle-featureflags').get('debug')
+    if(debug) {
+      vscode.window.showInformationMessage(message)
+    }
+  }
+
+  private isRecent(date:Date) {
+    const diff = Date.now() - date.getTime()
+    return (diff < CACHE_TIME)
+  }
+
+  private listVariablesCache:ListVariablesCache | undefined
 }
