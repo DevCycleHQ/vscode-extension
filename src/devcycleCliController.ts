@@ -146,34 +146,6 @@ export default class DevcycleCLIController {
     }
   }
 
-  public async selectOrganization() {
-    const { code, error } = await this.execDvc('org')
-    if (code === 0) {
-      vscode.window.showInformationMessage(`Repo configured to use org`)
-    } else {
-      vscode.window.showErrorMessage(`Organization selection failed: ${error?.message}}`)
-    }
-  }
-
-  public async listProjects() {
-    const { code, error, output } = await this.execDvc('projects list')
-    if (code === 0) {
-      vscode.window.showInformationMessage(`Repo configured to use project`)
-    } else {
-      vscode.window.showErrorMessage(`Project selection failed: ${error?.message}}`)
-    }
-    return JSON.parse(output) as string[]
-  }
-
-  public async selectProject() {
-    const { code, error } = await this.execDvc('projects select')
-    if (code === 0) {
-      vscode.window.showInformationMessage(`Repo configured to use project`)
-    } else {
-      vscode.window.showErrorMessage(`Project selection failed: ${error?.message}}`)
-    }
-  }
-
   public async listVariables() {
     if(this.listVariablesCache && this.isRecent(this.listVariablesCache.time))
     {
@@ -254,16 +226,6 @@ export default class DevcycleCLIController {
     return activeDocument
       ? vscode.workspace.getWorkspaceFolder(activeDocument.uri)
       : workspaces[0]
-  }
-
-  private showDebugObject(object:object) {
-    const debug = vscode.workspace.getConfiguration('devcycle-featureflags').get('debug')
-
-    if(debug) {
-      vscode.window.showInformationMessage(JSON.stringify(object), {
-        modal: true
-      })
-    }
   }
 
   private showDebugOutput(message:string) {

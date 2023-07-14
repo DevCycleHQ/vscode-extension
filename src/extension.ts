@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
 import DevcycleCLIController from "./devcycleCliController";
 import { UsagesTreeProvider } from "./UsagesTreeProvider";
+import { SidebarProvider } from "./SidebarProvider";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
@@ -12,12 +13,19 @@ export const activate = async (context: vscode.ExtensionContext) => {
   GlobalStateManager.clearState();
   const autoLogin = vscode.workspace.getConfiguration('devcycle-featureflags').get('loginOnWorkspaceOpen')
   const cliController = new DevcycleCLIController()
+  const sidebarProvider = new SidebarProvider(context.extensionUri);
 
   const rootPath =
     vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
       ? vscode.workspace.workspaceFolders[0].uri.fsPath
       : undefined;
   const usagesDataProvider = new UsagesTreeProvider(rootPath, cliController, context)
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      "devcycle-sidebar",
+      sidebarProvider
+    )
+  );
   vscode.window.registerTreeDataProvider(
     'devcycleCodeUsages',
     usagesDataProvider
@@ -52,34 +60,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   ))
 
   context.subscriptions.push(vscode.commands.registerCommand(
-    'devcycle-featureflags.select-project',
-    async () => {
-      const projects = await cliController.listProjects()
-      await cliController.selectProject()
-    }
-  ))
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-    'devcycle-featureflags.select-organization',
-    async () => {
-      await cliController.selectOrganization()
-    }
-  ))
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-    'devcycle-featureflags.status',
-    async () => {
-      const status = await cliController.status()
-      const statusSummary = status.hasAccessToken ? 'Logged in to DevCycle' : 'Not logged in to DevCycle'
-      const options: vscode.MessageOptions = {
-        detail: JSON.stringify(status, null, 2),
-        modal: true
-      }
-      vscode.window.showInformationMessage(statusSummary, options)
-    }
-  ))
-
-  context.subscriptions.push(vscode.commands.registerCommand(
     'devcycle-featureflags.show-reference',
     async (filePath: string, start: number, end: number) => {
       const document = await vscode.workspace.openTextDocument(filePath)
@@ -88,41 +68,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
       if (!editor) throw new Error('No active text editor')
       editor.selection = new vscode.Selection(start - 1, 0, end, 0)
       editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenterIfOutsideViewport)
-    }
-  ))
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-    'devcycle-featureflags.add-alias',
-    async () => {
-      const editor = vscode.window.activeTextEditor
-      let alias = editor?.document.getText(editor.selection) || ''
-      let variableKey = ''
-      if(cliController.loggedIn) {
-        const variables = await cliController.listVariables()
-        variableKey = await vscode.window.showQuickPick(variables, {
-          title: `Which variable to alias as ${alias}`
-        }) || ''
-      } else {
-        variableKey = await vscode.window.showInputBox({
-          title: 'Enter the variable key to alias'
-        }) || ''
-      }
-
-      vscode.window.showInformationMessage(JSON.stringify({
-        alias, variableKey
-      }))
-
-      if(alias === '') {
-        vscode.window.showErrorMessage('Must enter a valid alias')
-        return
-      }
-
-      if(variableKey === '') {
-        vscode.window.showErrorMessage('Must choose a variable key to alias')
-        return
-      }
-
-      await cliController.addAlias(alias, variableKey)
     }
   ))
 

@@ -23,28 +23,17 @@
 		"views": {
 			"explorer": [
 				{
-					"id": "devcycleCodeUsages",
-					"name": "DevCycle Code Usages",
-					"when": "devcycle-featureflags.repoConfigured == true"
+					"type": "webview",
+					"id": "devcycle-sidebar",
+					"name": "DevCycle"
 				}
 			]
 		},
 		"menus": {
-			"editor/context": [
-				{
-					"command": "devcycle-featureflags.add-alias",
-					"when": "editorHasSelection",
-					"group": "devcycle-featureflags"
-				}
-			],
+			"editor/context": [],
 			"view/title": [
 				{
 					"command": "devcycle-featureflags.refresh-usages",
-					"when": "view == devcycleCodeUsages",
-					"group": "navigation"
-				},
-				{
-					"command": "devcycle-featureflags.add-alias",
 					"when": "view == devcycleCodeUsages",
 					"group": "navigation"
 				}
@@ -82,53 +71,10 @@
 				"enablement": "devcycle-featureflags.loggedIn == true"
 			},
 			{
-				"command": "devcycle-featureflags.status",
-				"category": "DevCycle",
-				"title": "Check CLI Status",
-				"icon": {
-					"light": "media/togglebot.svg",
-					"dark": "media/togglebot-white.svg"
-				}
-			},
-			{
-				"command": "devcycle-featureflags.select-project",
-				"category": "DevCycle",
-				"title": "Select DevCycle Project",
-				"icon": {
-					"light": "media/togglebot.svg",
-					"dark": "media/togglebot-white.svg"
-				},
-				"enablement": "devcycle-featureflags.loggedIn == true"
-			},
-			{
-				"command": "devcycle-featureflags.select-organization",
-				"category": "DevCycle",
-				"title": "Select DevCycle Organization",
-				"icon": {
-					"light": "media/togglebot.svg",
-					"dark": "media/togglebot-white.svg"
-				},
-				"enablement": "devcycle-featureflags.loggedIn == true"
-			},
-			{
 				"command": "devcycle-featureflags.refresh-usages",
 				"category": "DevCycle",
 				"title": "Refresh Code Usages",
 				"icon": "$(refresh)",
-				"enablement": "devcycle-featureflags.repoConfigured == true"
-			},
-			{
-				"command": "devcycle-featureflags.add-alias",
-				"category": "DevCycle",
-				"title": "Add a variable alias",
-				"icon": "$(add)",
-				"enablement": "devcycle-featureflags.repoConfigured == true"
-			},
-			{
-				"command": "devcycle-featureflags.remove-alias",
-				"category": "DevCycle",
-				"title": "Remove a variable alias",
-				"icon": "$(remove)",
 				"enablement": "devcycle-featureflags.repoConfigured == true"
 			}
 		],
