@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { getProject } from "./api/getProject";
-import { GlobalStateManager, KEYS } from "./GlobalStateManager";
+import { StateManager, KEYS } from "./StateManager";
 import { getFeatureFlags } from "./api/getFeatureFlags";
 import { getToken } from "./api/getToken";
 import { getNonce } from "./getNonce";
@@ -55,7 +55,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         } else {
           let res = await getToken(data.clientId, data.secret);
           if (res && res.access_token) {
-            GlobalStateManager.setState(KEYS.ACCESS_TOKEN, res.access_token);
+            StateManager.setState(KEYS.ACCESS_TOKEN, res.access_token);
             webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, VIEWS.PROJECT_ID_VIEW);
           } else if (res === 401) {
             webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, undefined, ERRORS.LOGIN_UNAUTHORIZED);
@@ -67,9 +67,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         } else {
           let res = await getProject(data.projectId);
           if (res._id) {
-            GlobalStateManager.setState(KEYS.PROJECT_ID, data.projectId);
-            GlobalStateManager.setState(KEYS.PROJECT_NAME, res.name);
-            await getFeatureFlags(data.projectId, GlobalStateManager.getState(KEYS.ACCESS_TOKEN));
+            StateManager.setState(KEYS.PROJECT_ID, data.projectId);
+            StateManager.setState(KEYS.PROJECT_NAME, res.name);
+            await getFeatureFlags(data.projectId, StateManager.getState(KEYS.ACCESS_TOKEN));
             webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, VIEWS.SUCCESS);
           } else if (res === 404) {
             webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, VIEWS.PROJECT_ID_VIEW, ERRORS.PROJECT_UNDEFINED);
@@ -127,8 +127,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <input id="projectId" value="" type="text"></input>
         <button id="submitBtn">Submit</button>`
     } else if (view === VIEWS.SUCCESS) {
-      let currentProjectName = GlobalStateManager.getState(KEYS.PROJECT_NAME);
-      let featureFlags: [] = JSON.parse(GlobalStateManager.getState(KEYS.FEATURE_FLAGS) as string);
+      let currentProjectName = StateManager.getState(KEYS.PROJECT_NAME);
+      let featureFlags: [] = JSON.parse(StateManager.getState(KEYS.FEATURE_FLAGS) as string);
       let flagsHtml = "";
       featureFlags.sort().forEach((flag)=> {
         flagsHtml += `<div style="cursor: pointer;">${flag}</div>`;
