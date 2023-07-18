@@ -2,8 +2,10 @@
 import * as vscode from "vscode";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
 import DevcycleCLIController from "./devcycleCliController";
-import { UsagesTreeProvider } from "./UsagesTreeProvider";
+import { SecretStateManager } from "./SecretStateManager";
 import { SidebarProvider } from "./SidebarProvider";
+
+import { UsagesTreeProvider } from "./UsagesTreeProvider";
 import { getFeatureStatuses } from "./api/getFeatureStatuses";
 import { camelCase, snakeCase } from "change-case";
 
@@ -16,6 +18,7 @@ const SCHEME_FILE = {
 };
 
 export const activate = async (context: vscode.ExtensionContext) => {
+  SecretStateManager.init(context)
   GlobalStateManager.globalState = context.globalState;
   GlobalStateManager.clearState();
   const autoLogin = vscode.workspace.getConfiguration('devcycle-featureflags').get('loginOnWorkspaceOpen')

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { getProject } from "./api/getProject";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
+import { SecretStateManager, CLIENT_KEYS } from "./SecretStateManager";
 import { getFeatureFlags } from "./api/getFeatureFlags";
 import { getToken } from "./api/getToken";
 import { getNonce } from "./getNonce";
@@ -34,8 +35,7 @@ interface Data {
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
   _doc?: vscode.TextDocument;
-
-  constructor(private readonly _extensionUri: vscode.Uri) { }
+  constructor(private readonly _extensionUri: vscode.Uri ) { }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     this._view = webviewView;
@@ -53,6 +53,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         if (!data.clientId || !data.secret) {
           webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, undefined, ERRORS.LOGIN);
         } else {
+          // TODO remove this once we start using the secrets manager
           let res = await getToken(data.clientId, data.secret);
           if (res && res.access_token) {
             GlobalStateManager.setState(KEYS.ACCESS_TOKEN, res.access_token);
@@ -60,6 +61,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           } else if (res === 401) {
             webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, undefined, ERRORS.LOGIN_UNAUTHORIZED);
           }
+          // Remove up to here
+          const secrets = SecretStateManager.instance
+          await secrets.setSecret(CLIENT_KEYS.CLIENT_ID, data.clientId);
+          await secrets.setSecret(CLIENT_KEYS.CLIENT_SECRET, data.secret);
         }
       } else if (data.type === ACTIONS.SUBMIT_PROJECT_ID) {
         if (!data.projectId) {
