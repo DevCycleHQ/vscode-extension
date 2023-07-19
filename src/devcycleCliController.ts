@@ -249,20 +249,20 @@ export default class DevcycleCLIController {
     }
     const { code, error, output } = await this.execDvc('variables get')
     if (code !== 0) {
-      vscode.window.showErrorMessage(`Retrieving variables failed: ${error?.message}}`)
-      return []
+      vscode.window.showErrorMessage(`Retrieving feature ${featureId} failed: ${error?.message}}`)
+      return
     } else {
-      const variables = JSON.parse(output) as Variable[]
-      const variableMap = variables.reduce((result, currentVariable) => {
-        result[currentVariable.key] = currentVariable
-        return result
-      }, {} as Record<string, Variable>);
-
-      StateManager.setState(KEYS.VARIABLES, variableMap)
-      return variableMap
+      // add the missing feature to the state
+      const featuresResult = JSON.parse(output)
+      if (!featuresResult || !featuresResult.length) {
+        return
+      }
+      const feature = featuresResult[0]
+      features.push(feature)
+      StateManager.setState(KEYS.FEATURES, features)
+      return feature
     }
   }
-
 
   public async getFeature(featureId: string) {
     const features = StateManager.getState(KEYS.FEATURES) as Record<string, Feature> || {}
