@@ -1,9 +1,11 @@
 ("use strict");
 import * as vscode from "vscode";
-import { SidebarProvider } from "./SidebarProvider";
 import { GlobalStateManager, KEYS } from "./GlobalStateManager";
+import DevcycleCLIController from "./devcycleCliController";
+import { UsagesTreeProvider } from "./UsagesTreeProvider";
+import { SidebarProvider } from "./SidebarProvider";
 import { getFeatureStatuses } from "./api/getFeatureStatuses";
-import { camelCase, snakeCase, capitalCase } from "change-case";
+import { camelCase, snakeCase } from "change-case";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
@@ -16,24 +18,80 @@ const SCHEME_FILE = {
 export const activate = async (context: vscode.ExtensionContext) => {
   GlobalStateManager.globalState = context.globalState;
   GlobalStateManager.clearState();
+  const autoLogin = vscode.workspace.getConfiguration('devcycle-featureflags').get('loginOnWorkspaceOpen')
+  const cliController = new DevcycleCLIController()
   const sidebarProvider = new SidebarProvider(context.extensionUri);
 
+  const rootPath =
+    vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : undefined;
+  const usagesDataProvider = new UsagesTreeProvider(rootPath, cliController, context)
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       "devcycle-sidebar",
       sidebarProvider
     )
   );
+  vscode.window.registerTreeDataProvider(
+    'devcycleCodeUsages',
+    usagesDataProvider
+  )
 
-  // Activate DVC-Extension
   context.subscriptions.push(vscode.commands.registerCommand(
-    "devcycle-featureflags.helloDVC",
+    'devcycle-featureflags.init',
     async () => {
-      vscode.window.showInformationMessage("Hello from DevCycle-FeatureFlags!");
-      console.log("activated...");
+      await cliController.init()
     }
-  ));
-  vscode.commands.executeCommand('devcycle-featureflags.helloDVC')
+  ))
+
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'devcycle-featureflags.login',
+    async () => {
+      await cliController.login()
+    }
+  ))
+
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'devcycle-featureflags.logout',
+    async () => {
+      await cliController.logout()
+    }
+  ))
+
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'devcycle-featureflags.refresh-usages',
+    async () => {
+      await usagesDataProvider.refresh()
+    }
+  ))
+
+  context.subscriptions.push(vscode.commands.registerCommand(
+    'devcycle-featureflags.show-reference',
+    async (filePath: string, start: number, end: number) => {
+      const document = await vscode.workspace.openTextDocument(filePath)
+      await vscode.window.showTextDocument(document)
+      const editor = vscode.window.activeTextEditor
+      if (!editor) throw new Error('No active text editor')
+      editor.selection = new vscode.Selection(start - 1, 0, end, 0)
+      editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenterIfOutsideViewport)
+    }
+  ))
+
+  const status = await cliController.status()
+  if(status.organization) {
+    await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.repoConfigured', status.repoConfigExists)
+    if(status.hasAccessToken) {
+      cliController.loggedIn = true
+      await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', status.hasAccessToken)
+    }
+  }
+  if(status.repoConfigExists) {
+    if(!status.hasAccessToken && autoLogin) {
+      await cliController.login()
+    }
+    await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
+  }
 
   // On Hover
   vscode.languages.registerHoverProvider(SCHEME_FILE, {
@@ -47,12 +105,11 @@ export const activate = async (context: vscode.ExtensionContext) => {
       const range = document.getWordRangeAtPosition(position, REGEX);
       const FEATURE_KEY = document.getText(range);
       
-	  const hoverString = new vscode.MarkdownString("");
-	  const toggleOnIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleon.svg");
-	  const toggleOffIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleoff.svg");
-	  const toggleOnIcon = `<img src="${toggleOnIconPath}" alt="toggle">`;
-	  const toggleOffIcon = `<img src="${toggleOffIconPath}" alt="toggle">`;
-
+    const hoverString = new vscode.MarkdownString("");
+    const toggleOnIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleon.svg");
+    const toggleOffIconPath = vscode.Uri.joinPath(context.extensionUri, "icons", "toggleoff.svg");
+    const toggleOnIcon = `<img src="${toggleOnIconPath}" alt="toggle">`;
+    const toggleOffIcon = `<img src="${toggleOffIconPath}" alt="toggle">`;
       if (ACCESS_TOKEN.length === 0 || PROJECT_KEY.length === 0) return;
       if(featureFlags.length !== 0)
         featureFlags = JSON.parse(featureFlags)
@@ -72,7 +129,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
       //   `https://api.devcycle.com/v1/projects/${PROJECT_KEY}/features/${FEATURE_KEY}/configurations`
       // );
       // console.log("ACCESS_TOKEN: ", ACCESS_TOKEN);
-
       if (selectedFlag.length !== 0) {
         const status = await getFeatureStatuses(
           PROJECT_KEY,
@@ -81,7 +137,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
         );
         // console.log("return statuses: ", status)
         hoverString.isTrusted = true;
-		hoverString.supportHtml = true;
+    hoverString.supportHtml = true;
         hoverString.appendMarkdown(`\nFEATURE FLAG KEY: \`${selectedFlag}\` \n\n`);
         hoverString.appendMarkdown(`* **Dev**: `);
         hoverString.appendMarkdown(` ${status?.dev ? toggleOnIcon: toggleOffIcon}\n\n`);
@@ -95,7 +151,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
         return null;
       }
     },
-  });
-};
+  })
+}
 
-export function deactivate() {}
+export function deactivate() { }

@@ -11,8 +11,9 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:devcycle-featureflags.helloDVC",
-		"onView:devcycle-sidebar"
+		"onCommand:devcycle-featureflags.init",
+		"onCommand:devcycle-featureflags.status",
+		"workspaceContains:.devcycle/config.yml"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -28,34 +29,80 @@
 				}
 			]
 		},
+		"menus": {
+			"editor/context": [],
+			"view/title": [
+				{
+					"command": "devcycle-featureflags.refresh-usages",
+					"when": "view == devcycleCodeUsages",
+					"group": "navigation"
+				}
+			]
+		},
 		"commands": [
 			{
-				"command": "devcycle-featureflags.helloDVC",
-				"category": "DVC",
-				"title": "Hello DVC"
+				"command": "devcycle-featureflags.init",
+				"category": "DevCycle",
+				"title": "Initialize Repo",
+				"icon": {
+					"light": "media/togglebot.svg",
+					"dark": "media/togglebot-white.svg"
+				},
+				"enablement": "devcycle-featureflags.repoConfigured == false"
+			},
+			{
+				"command": "devcycle-featureflags.login",
+				"category": "DevCycle",
+				"title": "Log in to DevCycle",
+				"icon": {
+					"light": "media/togglebot.svg",
+					"dark": "media/togglebot-white.svg"
+				},
+				"enablement": "devcycle-featureflags.repoConfigured == true && devcycle-featureflags.loggedIn == false"
+			},
+			{
+				"command": "devcycle-featureflags.logout",
+				"category": "DevCycle",
+				"title": "Log out of DevCycle",
+				"icon": {
+					"light": "media/togglebot.svg",
+					"dark": "media/togglebot-white.svg"
+				},
+				"enablement": "devcycle-featureflags.loggedIn == true"
+			},
+			{
+				"command": "devcycle-featureflags.refresh-usages",
+				"category": "DevCycle",
+				"title": "Refresh Code Usages",
+				"icon": "$(refresh)",
+				"enablement": "devcycle-featureflags.repoConfigured == true"
 			}
 		],
-		"languages": [
+		"configuration":[
 			{
-				"id": "star-rod-script",
-				"extensions": [
-					".bpat",
-					".bscr",
-					".mpat",
-					".mscr"
-				],
-				"aliases": [
-					"Star Rod Script",
-					"mscr"
-				],
-				"configuration": "./language-configuration.json"
-			}
-		],
-		"grammars": [
-			{
-				"language": "star-rod-script",
-				"scopeName": "source.mscr",
-				"path": "./syntaxes/mscr.tmLanguage.json"
+				"title": "DevCycle",
+				"properties": {
+					"devcycle-featureflags.loginOnWorkspaceOpen": {
+						"type": "boolean",
+						"default": false,
+						"description": "Automatically log in to DevCycle when a configured workspace is opened."
+					},
+					"devcycle-featureflags.usagesOnWorkspaceOpen": {
+						"type": "boolean",
+						"default": true,
+						"description": "Automatically check for code usages when a configured workspace is opened."
+					},
+					"devcycle-featureflags.debug": {
+						"type": "boolean",
+						"default": false,
+						"description": "Displays debug output for the extension, including what CLI commands are being executed."
+					},
+					"devcycle-featureflags.cli": {
+						"type": "string",
+						"default": "dvc",
+						"description": "How the CLI will be invoked"
+					}
+				}
 			}
 		]
 	},
