@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import DevcycleCLIController, { JSONMatch, VariableReference } from "./devcycleCliController";
+import DevcycleCLIController, { JSONMatch, VariableReference } from "./cli/baseCLIController";
 
 export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode> {
     private _onDidChangeTreeData: vscode.EventEmitter<CodeUsageNode | undefined | void> = new vscode.EventEmitter<CodeUsageNode | undefined | void>();
@@ -8,7 +8,6 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
 
     constructor(
         private workspaceRoot: string | undefined,
-        private devcycleCliController: DevcycleCLIController,
         private context: vscode.ExtensionContext
     ) { }
 
@@ -19,7 +18,7 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
         if (!root) {
             throw (new Error('Must have a workspace to check for code usages'))
         }
-        const matches = await this.devcycleCliController.usages()
+        const matches = await DevcycleCLIController.usages()
         matches.forEach(match => {
             this.flagsSeen.push(CodeUsageNode.flagFrom(match, root, this.context))
         })

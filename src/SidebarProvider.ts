@@ -4,7 +4,7 @@ import { StateManager, KEYS } from "./StateManager";
 import { SecretStateManager, CLIENT_KEYS } from "./SecretStateManager";
 import { getToken } from "./api/getToken";
 import { getNonce } from "./getNonce";
-import DevcycleCLIController, { Feature } from "./devcycleCliController";
+import FeaturesCLIController, { Feature } from "./cli/featuresCLIController";
 
 const enum VIEWS {
   DEFAULT = "default",
@@ -71,7 +71,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (res._id) {
             StateManager.setState(KEYS.PROJECT_ID, data.projectId);
             StateManager.setState(KEYS.PROJECT_NAME, res.name);
-            (new DevcycleCLIController).getAllFeatures()
+            FeaturesCLIController.getAllFeatures()
             webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, VIEWS.SUCCESS);
           } else if (res === 404) {
             webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, VIEWS.PROJECT_ID_VIEW, ERRORS.PROJECT_UNDEFINED);
@@ -130,11 +130,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <button id="submitBtn">Submit</button>`
     } else if (view === VIEWS.SUCCESS) {
       let currentProjectName = StateManager.getState(KEYS.PROJECT_NAME);
-      let featureFlags = StateManager.getState(KEYS.FEATURES) || {} as Record<string, Feature>;
-      const featureArray = Object.values(featureFlags);
+      let featureFlags = (StateManager.getState(KEYS.FEATURES) || {}) as Record<string, Feature>;
+      const featureArray = Object.values(featureFlags).map((feature) => feature.name);
       let flagsHtml = "";
       featureArray.sort().forEach((flag)=> {
-        flagsHtml += `<div style="cursor: pointer;">${flag.name}</div>`;
+        flagsHtml += `<div style="cursor: pointer;">${flag}</div>`;
       })
 
       body = `<br/><p>You are now in project: <b>${currentProjectName}</b> !</p><br/><b>Feature Flags:</b>`

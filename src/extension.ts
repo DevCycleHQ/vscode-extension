@@ -1,12 +1,15 @@
 ("use strict");
 import * as vscode from "vscode";
 import { StateManager } from "./StateManager";
-import DevcycleCLIController from "./devcycleCliController";
+import DevcycleCLIController from "./cli/baseCLIController";
 import { SecretStateManager } from "./SecretStateManager";
 import { SidebarProvider } from "./SidebarProvider";
 
 import { UsagesTreeProvider } from "./UsagesTreeProvider";
 import { getHoverString } from "./hoverCard";
+import VariablesCLIController from "./cli/variablesCLIController";
+import FeaturesCLIController from "./cli/featuresCLIController";
+import EnvironmentsCLIController from "./cli/environmentsCLIController";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
@@ -22,20 +25,20 @@ export const activate = async (context: vscode.ExtensionContext) => {
   StateManager.workspaceState = context.workspaceState;
   StateManager.clearState();
   const autoLogin = vscode.workspace.getConfiguration('devcycle-featureflags').get('loginOnWorkspaceOpen')
-  const cliController = new DevcycleCLIController()
   const sidebarProvider = new SidebarProvider(context.extensionUri);
+  DevcycleCLIController.statusBarItem.name = 'DevCycle Status'
 
   await Promise.all([
-    cliController.getAllVariables(),
-    cliController.getAllFeatures(),
-    cliController.getAllEnvironments()
+    VariablesCLIController.getAllVariables(),
+    FeaturesCLIController.getAllFeatures(),
+    EnvironmentsCLIController.getAllEnvironments()
   ])
 
   const rootPath =
     vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
       ? vscode.workspace.workspaceFolders[0].uri.fsPath
       : undefined;
-  const usagesDataProvider = new UsagesTreeProvider(rootPath, cliController, context)
+  const usagesDataProvider = new UsagesTreeProvider(rootPath, context)
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       "devcycle-sidebar",
@@ -50,21 +53,21 @@ export const activate = async (context: vscode.ExtensionContext) => {
   context.subscriptions.push(vscode.commands.registerCommand(
     'devcycle-featureflags.init',
     async () => {
-      await cliController.init()
+      await DevcycleCLIController.init()
     }
   ))
 
   context.subscriptions.push(vscode.commands.registerCommand(
     'devcycle-featureflags.login',
     async () => {
-      await cliController.login()
+      await DevcycleCLIController.login()
     }
   ))
 
   context.subscriptions.push(vscode.commands.registerCommand(
     'devcycle-featureflags.logout',
     async () => {
-      await cliController.logout()
+      await DevcycleCLIController.logout()
     }
   ))
 
@@ -87,17 +90,17 @@ export const activate = async (context: vscode.ExtensionContext) => {
     }
   ))
 
-  const status = await cliController.status()
+  const status = await DevcycleCLIController.status()
   if(status.organization) {
     await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.repoConfigured', status.repoConfigExists)
     if(status.hasAccessToken) {
-      cliController.loggedIn = true
+      DevcycleCLIController.loggedIn = true
       await vscode.commands.executeCommand('setContext', 'devcycle-featureflags.loggedIn', status.hasAccessToken)
     }
   }
   if(status.repoConfigExists) {
     if(!status.hasAccessToken && autoLogin) {
-      await cliController.login()
+      await DevcycleCLIController.login()
     }
     await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
   }

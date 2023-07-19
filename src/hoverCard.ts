@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
-import DevcycleCLIController, { Feature, FeatureConfiguration, Variable } from "./devcycleCliController.js";
+import VariablesCLIController, { Variable } from "./cli/variablesCLIController.js";
+import FeaturesCLIController, { Feature, FeatureConfiguration } from "./cli/featuresCLIController.js";
+import EnvironmentsCLIController from "./cli/environmentsCLIController.js";
 
 type FeatureConfigurationWithEnvNames = FeatureConfiguration & {envName: string}
 
@@ -10,21 +12,19 @@ type VariableHoverData = {
 }
 
 const getVariableData = async (variableKey: string) => {
-  const cliController = new DevcycleCLIController()
-
   // find variable
-  const variable = await cliController.getVariable(variableKey)
+  const variable = await VariablesCLIController.getVariable(variableKey)
 
   // find feature and configurations
   let feature: Feature | undefined
   let featureConfigsWithEnvNames: FeatureConfigurationWithEnvNames[] = []
   
   if (variable?._feature) {
-    const featurePromise = cliController.getFeature(variable._feature).then((featureResponse) => feature = featureResponse)
+    const featurePromise = FeaturesCLIController.getFeature(variable._feature).then((featureResponse) => feature = featureResponse)
 
-    const featureConfigsPromise = cliController.getFeatureConfigurations(variable._feature).then(async (featureConfigurations: FeatureConfiguration[]) => 
+    const featureConfigsPromise = FeaturesCLIController.getFeatureConfigurations(variable._feature).then(async (featureConfigurations: FeatureConfiguration[]) => 
       await Promise.all(featureConfigurations?.map(async (config) => {
-        const environment = await cliController.getEnvironment(config._environment)
+        const environment = await EnvironmentsCLIController.getEnvironment(config._environment)
         featureConfigsWithEnvNames.push({...config, envName: environment?.name || ''})
         return environment
       }))
