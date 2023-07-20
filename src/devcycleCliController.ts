@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as cp from 'child_process'
+import { KEYS, StateManager } from './StateManager'
 
 type CommandResponse = {
   output: string,
@@ -44,10 +45,33 @@ export type Range = {
   end: number
 }
 
-type ListVariablesCache = {
-  time: Date,
-  value: string[]
+export type Environment = {
+  name: string;
+  _id: string;
 }
+
+export type Variable = {
+  key: string;
+  _feature: string;
+  name: string;
+  description?: string;
+  status: 'active' | 'archived';
+}
+
+export type Feature = {
+  key: string;
+  _id: string;
+  name: string;
+}
+
+export type FeatureConfiguration = {
+  key: string;
+  _id: string;
+  status: string;
+  _environment: string;
+}
+
+export type FeatureConfigurationsByFeatureId = Record<string, FeatureConfiguration[]>
 
 const STATUS_BAR_ITEM:string = 'devcycle-featureflags'
 const CACHE_TIME = 15000
@@ -146,22 +170,161 @@ export default class DevcycleCLIController {
     }
   }
 
-  public async listVariables() {
-    if(this.listVariablesCache && this.isRecent(this.listVariablesCache.time))
-    {
-      this.showDebugOutput(`Used cached variable list from ${this.listVariablesCache.time.toTimeString()}`)
-      return this.listVariablesCache.value
+  public async getEnvironment(environmentId: string) {
+    const environments = (StateManager.getState(KEYS.ENVIRONMENTS) || {}) as Record<string, Environment>
+    const environment = environments[environmentId]
+    if (environment) {
+      return environment
     }
-    const { code, error, output } = await this.execDvc('variables list')
+
+    const { code, error, output } = await this.execDvc(`environments get --keys='${environmentId}'`)
+    if (code !== 0) {
+      vscode.window.showErrorMessage(`Retrieving environment ${environmentId} failed: ${error?.message}}`)
+      return
+    } else {
+      // add the missing variable to the state
+      const environmentsResult = JSON.parse(output)
+      if (!environmentsResult || !environmentsResult.length) {
+        return
+      }
+      const environment = environmentsResult[0]
+
+      environments[environmentId] = environment
+      StateManager.setState(KEYS.ENVIRONMENTS, environments)
+      return environment
+    }
+  }
+
+  public async getAllEnvironments() {
+    const environments = StateManager.getState(KEYS.ENVIRONMENTS) as Record<string, Environment>
+    if (environments) {
+      return environments
+    }
+    const { code, error, output } = await this.execDvc('environments get')
+    if (code !== 0) {
+      vscode.window.showErrorMessage(`Retrieving environments failed: ${error?.message}}`)
+      return []
+    } else {
+      const environments = JSON.parse(output) as Environment[]
+      const environmentMap = environments.reduce((result, currentEnvironment) => {
+        result[currentEnvironment._id] = currentEnvironment
+        return result
+      }, {} as Record<string, Environment>);
+
+      StateManager.setState(KEYS.ENVIRONMENTS, environmentMap)
+      return environmentMap
+    }
+  }
+
+
+  public async getVariable(variableKey: string) {
+    const variables = StateManager.getState(KEYS.VARIABLES) as Record<string, Variable> || {}
+    const variable = variables[variableKey]
+    if (variable) {
+      return variable
+    }
+
+    const { code, error, output } = await this.execDvc(`variables get --keys='${variableKey}'`)
+    if (code !== 0) {
+      vscode.window.showErrorMessage(`Retrieving feature ${variableKey} failed: ${error?.message}}`)
+      return
+    } else {
+      // add the missing variable to the state
+      const variablesResult = JSON.parse(output)
+      if (!variablesResult || !variablesResult.length) {
+        return
+      }
+      const variable = variablesResult[0]
+      variables[variableKey] = variable
+      StateManager.setState(KEYS.VARIABLES, variables)
+      return variable
+    }
+  }
+
+  public async getAllVariables() {
+    const variables = StateManager.getState(KEYS.VARIABLES) as Record<string, Variable>
+    if (variables) {
+      return variables
+    }
+    const { code, error, output } = await this.execDvc('variables get')
     if (code !== 0) {
       vscode.window.showErrorMessage(`Retrieving variables failed: ${error?.message}}`)
       return []
     } else {
-      this.listVariablesCache = {
-        time: new Date(),
-        value: JSON.parse(output) as string[]
+      const variables = JSON.parse(output) as Variable[]
+      const variableMap = variables.reduce((result, currentVariable) => {
+        result[currentVariable.key] = currentVariable
+        return result
+      }, {} as Record<string, Variable>);
+
+      StateManager.setState(KEYS.VARIABLES, variableMap)
+      return variableMap
+    }
+  }
+
+
+  public async getFeature(featureId: string) {
+    const features = StateManager.getState(KEYS.FEATURES) as Record<string, Feature> || {}
+    const feature = features[featureId]
+    if (feature) {
+      return feature
+    }
+    const { code, error, output } = await this.execDvc(`features get --keys='${featureId}'`)
+    if (code !== 0) {
+      vscode.window.showErrorMessage(`Retrieving feature ${featureId} failed: ${error?.message}}`)
+      return
+    } else {
+      // add the missing feature to the state
+      const featuresResult = JSON.parse(output)
+      if (!featuresResult || !featuresResult.length) {
+        return
       }
-      return this.listVariablesCache.value
+      const feature = featuresResult[0]
+      features[featureId] = feature
+      StateManager.setState(KEYS.FEATURES, features)
+      return feature
+    }
+  }
+
+  public async getAllFeatures() {
+    const features = StateManager.getState(KEYS.FEATURES) as Record<string, Feature>
+    if (features) {
+      return features
+    }
+    const { code, error, output } = await this.execDvc('features get')
+    if (code !== 0) {
+      vscode.window.showErrorMessage(`Retrieving features failed: ${error?.message}}`)
+      return []
+    } else {
+      const features = JSON.parse(output) as Feature[]
+      const featureMap = features.reduce((result, currentFeature) => {
+        result[currentFeature._id] = currentFeature
+        return result
+      }, {} as Record<string, Feature>);
+
+      StateManager.setState(KEYS.FEATURES, featureMap)
+      return featureMap
+    }
+  }
+
+
+  public async getFeatureConfigurations(featureId: string) {
+    const featureConfigsMap = StateManager.getState(KEYS.FEATURE_CONFIGURATIONS) as FeatureConfigurationsByFeatureId || {}
+    const featureConfigs = featureConfigsMap[featureId]
+    if (featureConfigs) {
+      return featureConfigs
+    }
+
+    const { code, error, output } = await this.execDvc(`targeting get ${featureId}`)
+    if (code !== 0) {
+      vscode.window.showErrorMessage(`Retrieving feature configurations for ${featureId} failed: ${error?.message}}`)
+      return []
+    } else {
+      // add the missing feature configs to the state
+      const featureConfigs = JSON.parse(output)
+      featureConfigsMap[featureId] = featureConfigs
+      StateManager.setState(KEYS.FEATURE_CONFIGURATIONS, featureConfigsMap)
+      return featureConfigs
     }
   }
 
@@ -240,5 +403,4 @@ export default class DevcycleCLIController {
     return (diff < CACHE_TIME)
   }
 
-  private listVariablesCache:ListVariablesCache | undefined
 }
