@@ -1,43 +1,61 @@
 import * as vscode from "vscode";
-import DevcycleCLIController, { Feature, FeatureConfiguration, Variable } from "./devcycleCliController.js";
+import {
+  Variable,
+  Feature,
+  FeatureConfiguration,
+  getVariable,
+  getFeature,
+  getEnvironment,
+  getFeatureConfigurations,
+} from "./cli";
 
-type FeatureConfigurationWithEnvNames = FeatureConfiguration & {envName: string}
+type FeatureConfigurationWithEnvNames = FeatureConfiguration & {
+  envName: string;
+};
 
 type VariableHoverData = {
-  variable: Variable,
-  feature?: Feature,
-  configurations?: FeatureConfigurationWithEnvNames[]
-}
+  variable: Variable;
+  feature?: Feature;
+  configurations?: FeatureConfigurationWithEnvNames[];
+};
 
 const getVariableData = async (variableKey: string) => {
-  const cliController = new DevcycleCLIController()
-
   // find variable
-  const variable = await cliController.getVariable(variableKey)
+  const variable = await getVariable(variableKey);
 
   // find feature and configurations
-  let feature: Feature | undefined
-  let featureConfigsWithEnvNames: FeatureConfigurationWithEnvNames[] = []
-  
-  if (variable?._feature) {
-    const featurePromise = cliController.getFeature(variable._feature).then((featureResponse) => feature = featureResponse)
+  let feature: Feature | undefined;
+  let featureConfigsWithEnvNames: FeatureConfigurationWithEnvNames[] = [];
 
-    const featureConfigsPromise = cliController.getFeatureConfigurations(variable._feature).then(async (featureConfigurations: FeatureConfiguration[]) => 
-      await Promise.all(featureConfigurations?.map(async (config) => {
-        const environment = await cliController.getEnvironment(config._environment)
-        featureConfigsWithEnvNames.push({...config, envName: environment?.name || ''})
-        return environment
-      }))
-    )
-    await Promise.all([featurePromise, featureConfigsPromise])
+  if (variable?._feature) {
+    const featurePromise = getFeature(variable._feature).then(
+      (featureResponse) => (feature = featureResponse)
+    );
+
+    const featureConfigsPromise = getFeatureConfigurations(
+      variable._feature
+    ).then(
+      async (featureConfigurations: FeatureConfiguration[]) =>
+        await Promise.all(
+          featureConfigurations?.map(async (config) => {
+            const environment = await getEnvironment(config._environment);
+            featureConfigsWithEnvNames.push({
+              ...config,
+              envName: environment?.name || "",
+            });
+            return environment;
+          })
+        )
+    );
+    await Promise.all([featurePromise, featureConfigsPromise]);
   }
 
   return {
     variable,
     feature,
-    configurations: featureConfigsWithEnvNames
-  }
-}
+    configurations: featureConfigsWithEnvNames,
+  };
+};
 
 export const getHoverString = async (
   variableKey: string,
