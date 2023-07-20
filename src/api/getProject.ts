@@ -1,8 +1,8 @@
 import axios from "axios";
-import { GlobalStateManager, KEYS } from "../GlobalStateManager";
+import { StateManager, KEYS } from "../StateManager";
 
 export const getProject = async (id: string) => {
-    let accessToken = await GlobalStateManager.getState(KEYS.ACCESS_TOKEN) || "";
+    let accessToken = await StateManager.getState(KEYS.ACCESS_TOKEN) || "";
 
         return await axios({
             method: 'GET',
