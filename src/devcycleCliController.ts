@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as cp from 'child_process'
+import { SecretStateManager, CLIENT_KEYS } from './SecretStateManager'
 import { KEYS, StateManager } from './StateManager'
 
 type CommandResponse = {
@@ -345,9 +346,13 @@ export default class DevcycleCLIController {
     this.statusBarItem.hide()
   }
 
-  private execDvc(cmd: string) {
+  private async execDvc(cmd: string) {
     const cli = vscode.workspace.getConfiguration('devcycle-featureflags').get('cli') || 'dvc'
-    const shellCommand = `${cli} ${cmd} --headless`
+    const secrets = SecretStateManager.instance
+    const client_id = await secrets.getSecret(CLIENT_KEYS.CLIENT_ID)
+    const client_secret = await secrets.getSecret(CLIENT_KEYS.CLIENT_SECRET)
+
+    const shellCommand = `${cli} ${cmd} --headless --client-id ${client_id} --client-secret ${client_secret}`
     return this.execShell(shellCommand)
   }
 
