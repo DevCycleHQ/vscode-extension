@@ -4,12 +4,11 @@ import { StateManager, KEYS } from "./StateManager";
 import { SecretStateManager, CLIENT_KEYS } from "./SecretStateManager";
 import { getToken } from "./api/getToken";
 import { getNonce } from "./getNonce";
-import { getAllFeatures, Feature } from "./cli/featuresCLIController";
+import { initStorage } from "./cli";
 
 const enum VIEWS {
   DEFAULT = "default",
-  PROJECT_ID_VIEW = "projectIdView",
-  SUCCESS = "success",
+  PROJECT_ID_VIEW = "projectIdView"
 }
 
 const enum ACTIONS {
@@ -86,11 +85,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (res._id) {
             StateManager.setState(KEYS.PROJECT_ID, data.projectId);
             StateManager.setState(KEYS.PROJECT_NAME, res.name);
-            getAllFeatures();
-            webviewView.webview.html = this._getHtmlForWebview(
-              webviewView.webview,
-              VIEWS.SUCCESS
+            await vscode.commands.executeCommand(
+              "setContext",
+              "devcycle-featureflags.hasCredentialsAndProject",
+              true
             );
+            await initStorage()
           } else if (res === 404) {
             webviewView.webview.html = this._getHtmlForWebview(
               webviewView.webview,
@@ -150,23 +150,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <label>Project Id:</label>
         <input id="projectId" value="" type="text"></input>
         <button id="submitBtn">Submit</button>`;
-    } else if (view === VIEWS.SUCCESS) {
-      let currentProjectName = StateManager.getState(KEYS.PROJECT_NAME);
-      let featureFlags = (StateManager.getState(KEYS.FEATURES) || {}) as Record<
-        string,
-        Feature
-      >;
-      const featureArray = Object.values(featureFlags).map(
-        (feature) => feature.name
-      );
-      let flagsHtml = "";
-      featureArray.sort().forEach((flag) => {
-        flagsHtml += `<div style="cursor: pointer;">${flag}</div>`;
-      });
-
-      body = `<br/><p>You are now in project: <b>${currentProjectName}</b> !</p><br/><b>Feature Flags:</b>`;
-      body += flagsHtml;
-    }
+    } 
     return body;
   }
 

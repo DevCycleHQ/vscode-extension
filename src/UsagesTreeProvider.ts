@@ -1,5 +1,17 @@
 import * as vscode from "vscode"
-import { usages, JSONMatch, VariableReference } from "./cli";
+import { usages, JSONMatch, VariableReference, getAllVariables, Variable } from "./cli";
+
+type VariableCodeReference = 
+    Variable & { references?: VariableReference[] } 
+    | JSONMatch
+
+
+const collapsedMap = {
+    flag: vscode.TreeItemCollapsibleState.Collapsed,
+    usage: vscode.TreeItemCollapsibleState.None,
+    detail: vscode.TreeItemCollapsibleState.None,
+    header: vscode.TreeItemCollapsibleState.Expanded,
+}
 
 export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode> {
     private _onDidChangeTreeData: vscode.EventEmitter<CodeUsageNode | undefined | void> = new vscode.EventEmitter<CodeUsageNode | undefined | void>();
@@ -18,8 +30,19 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
         if (!root) {
             throw (new Error('Must have a workspace to check for code usages'))
         }
+        const apiVariables = await getAllVariables();
         const matches = await usages(); 
-        matches.forEach(match => {
+        const mergedVariables = {...apiVariables} as Record<string, VariableCodeReference>;
+
+        matches.forEach((usage) => {
+          if (mergedVariables[usage.key]) {
+            mergedVariables[usage.key].references  = usage.references;
+          } else {
+            mergedVariables[usage.key] = usage;
+          }
+        });
+  
+        Object.values(mergedVariables).forEach(match => {
             this.flagsSeen.push(CodeUsageNode.flagFrom(match, root, this.context))
         })
         this.flagsSeen.sort((a, b) => (a.key > b.key) ? 1 : -1)
@@ -45,8 +68,31 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
 }
 
 export class CodeUsageNode extends vscode.TreeItem {
-    static flagFrom(match: JSONMatch, workspaceRoot: string, context: vscode.ExtensionContext) {
-        const children = match.references.map(reference => this.usageFrom(match, reference, workspaceRoot, context))
+    static flagFrom(match: VariableCodeReference, workspaceRoot: string, context: vscode.ExtensionContext) {
+        const children = []
+        if ('_id' in match) {
+            const detailsChildNodes = [
+                new CodeUsageNode(match.key+':status', `Status`, 'detail', [], match.status),
+                new CodeUsageNode(match.key+':id', `ID`, 'detail', [], match._id),
+            ]
+            
+            if (match.description?.length) { 
+                detailsChildNodes.unshift(new CodeUsageNode(match.key+':description', `Description`, 'detail', [], match.description))
+            }
+            if (match.name?.length) { 
+                detailsChildNodes.unshift(new CodeUsageNode(match.key+':name', `Name`, 'detail', [], match.name))
+            }
+
+            const variableDetailsRoot = new CodeUsageNode(match.key, 'Details', 'header', detailsChildNodes)
+            children.push(variableDetailsRoot)
+        }
+
+        if (match.references) {
+            const usagesChildNodes = match.references?.map(reference => this.usageFrom(match, reference, workspaceRoot))
+            const usagesRoot = new CodeUsageNode(match.key, 'Usages', 'header', usagesChildNodes)
+            children.push(usagesRoot)
+        }
+
         const instance = new CodeUsageNode(match.key, match.key, 'flag', children)
         instance.key = match.key
         instance.iconPath = {
@@ -56,7 +102,7 @@ export class CodeUsageNode extends vscode.TreeItem {
         return instance
     }
 
-    static usageFrom(match: JSONMatch, reference: VariableReference, workspaceRoot: string, context: vscode.ExtensionContext): CodeUsageNode {
+    static usageFrom(match: VariableCodeReference, reference: VariableReference, workspaceRoot: string): CodeUsageNode {
         const start = reference.lineNumbers.start
         const end = reference.lineNumbers.end
         const label = (start === end)
@@ -75,13 +121,11 @@ export class CodeUsageNode extends vscode.TreeItem {
     constructor(
         public key: string,
         public readonly label: string,
-        public type: 'flag' | 'usage',
-        public readonly children: CodeUsageNode[] = []
+        public type: 'flag' | 'usage' | 'header' | 'detail',
+        public readonly children: CodeUsageNode[] = [],
+        public description?: string,
     ) {
-        super(label, type === 'flag'
-            ? vscode.TreeItemCollapsibleState.Collapsed
-            : vscode.TreeItemCollapsibleState.None
-        )
+        super(label, collapsedMap[type])
         this.contextValue = type
     }
 }

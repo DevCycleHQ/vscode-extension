@@ -1,16 +1,14 @@
 ("use strict");
 import * as vscode from "vscode";
-import { StateManager } from "./StateManager";
+import { KEYS, StateManager } from "./StateManager";
 import {
   init,
   login,
   logout,
   status as cliStatus,
-  getAllVariables,
-  getAllFeatures,
-  getAllEnvironments,
+  initStorage,
 } from "./cli";
-import { SecretStateManager } from "./SecretStateManager";
+import { CLIENT_KEYS, SecretStateManager } from "./SecretStateManager";
 import { SidebarProvider } from "./SidebarProvider";
 
 import { UsagesTreeProvider } from "./UsagesTreeProvider";
@@ -24,6 +22,21 @@ const SCHEME_FILE = {
   scheme: "file",
 };
 
+const autoLoginIfHaveCredentials = async () => {
+  const clientId = await  SecretStateManager.instance.getSecret(CLIENT_KEYS.CLIENT_ID)
+  const clientSecret = await  SecretStateManager.instance.getSecret(CLIENT_KEYS.CLIENT_SECRET)
+  const projectId = await StateManager.getState(KEYS.PROJECT_ID)
+  const hasAllCredentials = !!clientId && !!clientSecret && !!projectId
+
+  await vscode.commands.executeCommand(
+    "setContext",
+    "devcycle-featureflags.hasCredentialsAndProject",
+    hasAllCredentials
+  );
+
+  return hasAllCredentials
+}
+
 export const activate = async (context: vscode.ExtensionContext) => {
   SecretStateManager.init(context);
   StateManager.globalState = context.globalState;
@@ -32,13 +45,15 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const autoLogin = vscode.workspace
     .getConfiguration("devcycle-featureflags")
     .get("loginOnWorkspaceOpen");
-  const sidebarProvider = new SidebarProvider(context.extensionUri);
-
-  await Promise.all([
-    getAllVariables(),
-    getAllFeatures(),
-    getAllEnvironments(),
-  ]);
+  
+    if (autoLogin) {
+      const isLoggedIn = await autoLoginIfHaveCredentials()
+      if (isLoggedIn) {
+        await initStorage()
+      }
+    }
+  
+    const sidebarProvider = new SidebarProvider(context.extensionUri);
 
   const rootPath =
     vscode.workspace.workspaceFolders &&
@@ -73,6 +88,16 @@ export const activate = async (context: vscode.ExtensionContext) => {
     vscode.commands.registerCommand(
       "devcycle-featureflags.logout",
       async () => {
+        await Promise.all([
+          SecretStateManager.instance.clearSecrets(),
+          StateManager.clearState(),
+          vscode.commands.executeCommand(
+            "setContext",
+            "devcycle-featureflags.hasCredentialsAndProject",
+            false
+          )
+        ])
+        // TODO we can probably remove logout() since we aren't logging into the CLI anymore
         await logout();
       }
     )

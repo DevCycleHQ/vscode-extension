@@ -25,7 +25,14 @@
 				{
 					"type": "webview",
 					"id": "devcycle-sidebar",
-					"name": "DevCycle"
+					"name": "DevCycle",
+					"when": "devcycle-featureflags.hasCredentialsAndProject == false"
+				}, 
+				{
+					"type": "tree",
+					"id": "devcycleCodeUsages",
+					"name": "DevCycle Variables",
+					"when": "devcycle-featureflags.hasCredentialsAndProject == true"
 				}
 			]
 		},
@@ -68,7 +75,7 @@
 					"light": "media/togglebot.svg",
 					"dark": "media/togglebot-white.svg"
 				},
-				"enablement": "devcycle-featureflags.loggedIn == true"
+				"enablement": "devcycle-featureflags.loggedIn == true || devcycle-featureflags.hasCredentialsAndProject == true"
 			},
 			{
 				"command": "devcycle-featureflags.refresh-usages",
