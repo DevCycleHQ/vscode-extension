@@ -10,7 +10,7 @@ import {
   getAllFeatures,
   getAllEnvironments,
 } from "./cli";
-import { SecretStateManager } from "./SecretStateManager";
+import { SecretStateManager, CLIENT_KEYS } from "./SecretStateManager";
 import { SidebarProvider } from "./SidebarProvider";
 
 import { UsagesTreeProvider } from "./UsagesTreeProvider";
@@ -33,13 +33,17 @@ export const activate = async (context: vscode.ExtensionContext) => {
     .getConfiguration("devcycle-featureflags")
     .get("loginOnWorkspaceOpen");
   const sidebarProvider = new SidebarProvider(context.extensionUri);
-
-  await Promise.all([
-    getAllVariables(),
-    getAllFeatures(),
-    getAllEnvironments(),
-  ]);
-
+  const secrets = SecretStateManager.instance
+  const client_id = await secrets.getSecret(CLIENT_KEYS.CLIENT_ID)
+  const client_secret = await secrets.getSecret(CLIENT_KEYS.CLIENT_SECRET)
+  if (client_id && client_secret) {
+    await Promise.all([
+      getAllVariables(),
+      getAllFeatures(),
+      getAllEnvironments(),
+    ]);
+  }
+  
   const rootPath =
     vscode.workspace.workspaceFolders &&
     vscode.workspace.workspaceFolders.length > 0
