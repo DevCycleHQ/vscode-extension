@@ -54,14 +54,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             ERRORS.LOGIN
           );
         } else {
-          // TODO remove this once we start using the secrets manager
           let res = await getToken(data.clientId, data.secret);
           if (res && res.access_token) {
-            StateManager.setState(KEYS.ACCESS_TOKEN, res.access_token);
             webviewView.webview.html = this._getHtmlForWebview(
               webviewView.webview,
               VIEWS.PROJECT_ID_VIEW
             );
+            const secrets = SecretStateManager.instance;
+            await secrets.setSecret(CLIENT_KEYS.CLIENT_ID, data.clientId);
+            await secrets.setSecret(CLIENT_KEYS.CLIENT_SECRET, data.secret);
           } else if (res === 401) {
             webviewView.webview.html = this._getHtmlForWebview(
               webviewView.webview,
@@ -69,10 +70,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
               ERRORS.LOGIN_UNAUTHORIZED
             );
           }
-          // Remove up to here
-          const secrets = SecretStateManager.instance;
-          await secrets.setSecret(CLIENT_KEYS.CLIENT_ID, data.clientId);
-          await secrets.setSecret(CLIENT_KEYS.CLIENT_SECRET, data.secret);
         }
       } else if (data.type === ACTIONS.SUBMIT_PROJECT_ID) {
         if (!data.projectId) {
