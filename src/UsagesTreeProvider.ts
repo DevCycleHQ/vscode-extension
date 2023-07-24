@@ -1,8 +1,17 @@
 import * as vscode from "vscode"
-import { usages, JSONMatch, VariableReference, getAllVariables, Variable } from "./cli";
+import { 
+    usages, 
+    JSONMatch, 
+    VariableReference, 
+    getAllVariables, 
+    getCombinedVariableDetails,
+    CombinedVariableData
+} from "./cli";
 
 type VariableCodeReference = 
-    Variable & { references?: VariableReference[] } 
+    CombinedVariableData & { 
+        references?: VariableReference[], 
+    }
     | JSONMatch
 
 
@@ -23,6 +32,18 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
         private context: vscode.ExtensionContext
     ) { }
 
+    private async getCombinedAPIData() {
+        const variables = await getAllVariables();
+        const result = {} as Record<string, VariableCodeReference>;
+        await Promise.all(
+            Object.entries(variables).map(async ([key, variable]) => {
+                const data = await getCombinedVariableDetails(variable);
+                result[key] = data;
+            })
+        )
+        return result
+    }
+
     async refresh(): Promise<void> {
         this.flagsSeen = []
         this._onDidChangeTreeData.fire(undefined);
@@ -30,19 +51,19 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
         if (!root) {
             throw (new Error('Must have a workspace to check for code usages'))
         }
-        const apiVariables = await getAllVariables();
+        const variables = await this.getCombinedAPIData();
+
         const matches = await usages(); 
-        const mergedVariables = {...apiVariables} as Record<string, VariableCodeReference>;
 
         matches.forEach((usage) => {
-          if (mergedVariables[usage.key]) {
-            mergedVariables[usage.key].references  = usage.references;
+          if (variables[usage.key]) {
+            variables[usage.key].references  = usage.references;
           } else {
-            mergedVariables[usage.key] = usage;
+            variables[usage.key] = usage;
           }
         });
   
-        Object.values(mergedVariables).forEach(match => {
+        Object.values(variables).forEach(match => {
             this.flagsSeen.push(CodeUsageNode.flagFrom(match, root, this.context))
         })
         this.flagsSeen.sort((a, b) => (a.key > b.key) ? 1 : -1)
@@ -70,31 +91,53 @@ export class UsagesTreeProvider implements vscode.TreeDataProvider<CodeUsageNode
 export class CodeUsageNode extends vscode.TreeItem {
     static flagFrom(match: VariableCodeReference, workspaceRoot: string, context: vscode.ExtensionContext) {
         const children = []
-        if ('_id' in match) {
+        let references: VariableReference[] | undefined = match.references;
+        const key = 'key' in match ? match.key : match.variable.key
+
+        if ('variable' in match) {
+            const { variable, feature, configurations, references: variableReferences } = match;
+            references = references || variableReferences;
+
             const detailsChildNodes = [
-                new CodeUsageNode(match.key+':status', `Status`, 'detail', [], match.status),
-                new CodeUsageNode(match.key+':id', `ID`, 'detail', [], match._id),
+                new CodeUsageNode(key+':status', `Status`, 'detail', [], variable.status),
+                new CodeUsageNode(key+':id', `ID`, 'detail', [], variable._id),
+                new CodeUsageNode(key+':feature', `Feature`, 'detail', [], feature?.name || feature?.key || 'Unassociated'),
             ]
-            
-            if (match.description?.length) { 
-                detailsChildNodes.unshift(new CodeUsageNode(match.key+':description', `Description`, 'detail', [], match.description))
+
+            if (variable.description?.length) { 
+                detailsChildNodes.unshift(new CodeUsageNode(key+':description', `Description`, 'detail', [], variable.description))
             }
-            if (match.name?.length) { 
-                detailsChildNodes.unshift(new CodeUsageNode(match.key+':name', `Name`, 'detail', [], match.name))
+            if (variable.name?.length) { 
+                detailsChildNodes.unshift(new CodeUsageNode(key+':name', `Name`, 'detail', [], variable.name))
+            }
+            if (configurations?.length) {
+                const activeEnvironments = configurations
+                .filter((config) => config.status === 'active')
+                .map((config) => config.envName)
+
+                detailsChildNodes.push(
+                    new CodeUsageNode(
+                        key+':targeting', 
+                        `Active Environments`, 
+                        'detail', 
+                        [], 
+                        activeEnvironments.length ? activeEnvironments.join(', ') : 'None'
+                    )
+                )
             }
 
-            const variableDetailsRoot = new CodeUsageNode(match.key, 'Details', 'header', detailsChildNodes)
+            const variableDetailsRoot = new CodeUsageNode(key, 'Details', 'header', detailsChildNodes)
             children.push(variableDetailsRoot)
         }
 
-        if (match.references) {
-            const usagesChildNodes = match.references?.map(reference => this.usageFrom(match, reference, workspaceRoot))
-            const usagesRoot = new CodeUsageNode(match.key, 'Usages', 'header', usagesChildNodes)
+        if (references) {
+            const usagesChildNodes = references?.map(reference => this.usageFrom(match, reference, workspaceRoot))
+            const usagesRoot = new CodeUsageNode(key, 'Usages', 'header', usagesChildNodes)
             children.push(usagesRoot)
         }
 
-        const instance = new CodeUsageNode(match.key, match.key, 'flag', children)
-        instance.key = match.key
+        const instance = new CodeUsageNode(key, key, 'flag', children)
+        instance.key = key
         instance.iconPath = {
             dark: vscode.Uri.joinPath(context.extensionUri, 'media', 'flag-filled-white.svg'),
             light: vscode.Uri.joinPath(context.extensionUri, 'media', 'flag-filled.svg')
@@ -103,12 +146,13 @@ export class CodeUsageNode extends vscode.TreeItem {
     }
 
     static usageFrom(match: VariableCodeReference, reference: VariableReference, workspaceRoot: string): CodeUsageNode {
+        const key = 'key' in match ? match.key : match.variable.key
         const start = reference.lineNumbers.start
         const end = reference.lineNumbers.end
         const label = (start === end)
             ? `${reference.fileName}:L${start}`
             : `${reference.fileName}:L${start}-${end}`
-        const instance = new CodeUsageNode(match.key, label, 'usage')
+        const instance = new CodeUsageNode(key, label, 'usage')
         const file = vscode.Uri.file(`${workspaceRoot}/${reference.fileName}`)
         instance.command = {
             title: "",

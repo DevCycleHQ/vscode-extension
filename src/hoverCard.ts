@@ -1,68 +1,16 @@
 import * as vscode from "vscode";
 import {
-  Variable,
-  Feature,
-  FeatureConfiguration,
-  getVariable,
-  getFeature,
-  getEnvironment,
-  getFeatureConfigurations,
+  CombinedVariableData,
+  getCombinedVariableDetails
 } from "./cli";
 
-type FeatureConfigurationWithEnvNames = FeatureConfiguration & {
-  envName: string;
-};
-
-type VariableHoverData = {
-  variable: Variable;
-  feature?: Feature;
-  configurations?: FeatureConfigurationWithEnvNames[];
-};
-
-const getVariableData = async (variableKey: string) => {
-  // find variable
-  const variable = await getVariable(variableKey);
-
-  // find feature and configurations
-  let feature: Feature | undefined;
-  let featureConfigsWithEnvNames: FeatureConfigurationWithEnvNames[] = [];
-
-  if (variable?._feature) {
-    const featurePromise = getFeature(variable._feature).then(
-      (featureResponse) => (feature = featureResponse)
-    );
-
-    const featureConfigsPromise = getFeatureConfigurations(
-      variable._feature
-    ).then(
-      async (featureConfigurations: FeatureConfiguration[]) =>
-        await Promise.all(
-          featureConfigurations?.map(async (config) => {
-            const environment = await getEnvironment(config._environment);
-            featureConfigsWithEnvNames.push({
-              ...config,
-              envName: environment?.name || "",
-            });
-            return environment;
-          })
-        )
-    );
-    await Promise.all([featurePromise, featureConfigsPromise]);
-  }
-
-  return {
-    variable,
-    feature,
-    configurations: featureConfigsWithEnvNames,
-  };
-};
 
 export const getHoverString = async (
   variableKey: string,
   extensionUri: string
 ) => {
 
-  const variableData = await getVariableData(variableKey)
+  const variableData = await getCombinedVariableDetails(variableKey)
 
   const hoverString = new vscode.MarkdownString("")
   hoverString.isTrusted = true
@@ -74,7 +22,7 @@ export const getHoverString = async (
   return hoverString;
 };
 
-const getHTML = (variableData: VariableHoverData, extensionUri: string) => {
+const getHTML = (variableData: CombinedVariableData, extensionUri: string) => {
   const toggleOnIcon = `<img src="${extensionUri}/icons/toggleon.svg" alt="toggle">`
   const toggleOffIcon = `<img src="${extensionUri}/icons/toggleoff.svg" alt="toggle">`
 
