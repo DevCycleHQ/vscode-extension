@@ -3,7 +3,7 @@ import { getProject } from './api/getProject'
 import { StateManager, KEYS } from './StateManager'
 import { SecretStateManager, CLIENT_KEYS } from './SecretStateManager'
 import { getToken } from './api/getToken'
-import { getNonce } from './getNonce'
+import { getNonce } from './utils/getNonce'
 import { initStorage } from './cli'
 
 const enum VIEWS {
