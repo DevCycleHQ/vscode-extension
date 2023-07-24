@@ -5,6 +5,7 @@ import { execDvc } from "./baseCLIController";
 export type Variable = {
   key: string;
   _feature: string;
+  _id: string;
   name: string;
   description?: string;
   status: "active" | "archived";

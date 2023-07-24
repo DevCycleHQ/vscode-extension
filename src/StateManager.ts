@@ -17,7 +17,9 @@ export class StateManager {
 
   static clearState(){
     this.workspaceState.keys().forEach((key) => {
-      this.workspaceState.update(key, undefined)
+      if (key !== KEYS.PROJECT_ID && key !== KEYS.PROJECT_NAME) {
+        this.workspaceState.update(key, undefined)
+      }
     })
   }
 
