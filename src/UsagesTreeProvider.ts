@@ -125,6 +125,20 @@ export class CodeUsageNode extends vscode.TreeItem {
                     )
                 )
             }
+            const link = `https://app.devcycle.com/r/variables/${variable._id}`
+            const linkNode = new CodeUsageNode(
+                key+':link', 
+                `Open In Dashboard ↗`, 
+                'detail', 
+                [], 
+            )
+            linkNode.command = {
+                title: "",
+                command: "devcycle-featureflags.openLink",
+                arguments: [link]
+            }
+            linkNode.tooltip = link
+            detailsChildNodes.push(linkNode)
 
             const variableDetailsRoot = new CodeUsageNode(key, 'Details', 'header', detailsChildNodes)
             children.push(variableDetailsRoot)

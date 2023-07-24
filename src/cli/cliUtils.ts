@@ -34,26 +34,28 @@ export const getCombinedVariableDetails = async (variable: string | Variable) =>
     let featureConfigsWithEnvNames: FeatureConfigurationWithEnvNames[] = [];
   
     if (featureId) {
-      const featurePromise = getFeature(featureId).then(
-        (featureResponse) => (feature = featureResponse)
-      );
-  
-      const featureConfigsPromise = getFeatureConfigurations(
-        featureId
-      ).then(
-        async (featureConfigurations: FeatureConfiguration[]) =>
-          await Promise.all(
-            featureConfigurations?.map(async (config) => {
-              const environment = await getEnvironment(config._environment);
-              featureConfigsWithEnvNames.push({
-                ...config,
-                envName: environment?.name || "",
-              });
-              return environment;
-            })
-          )
-      );
-      await Promise.all([featurePromise, featureConfigsPromise]);
+      const setFeature = async () => {
+        feature = await getFeature(featureId);
+      }
+
+      const setFeatureConfigsWithEnvNames = async () => {
+        const featureConfigurations = await getFeatureConfigurations(featureId);
+        await Promise.all(
+          featureConfigurations?.map(async (config) => {
+            const environment = await getEnvironment(config._environment);
+            featureConfigsWithEnvNames.push({
+              ...config,
+              envName: environment?.name || "",
+            });
+            return environment;
+          })
+        )
+      }
+
+      await Promise.all([
+        setFeature(),
+        setFeatureConfigsWithEnvNames()
+      ]);
     }
   
     return {
