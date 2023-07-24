@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import * as cp from 'child_process'
 import { CLIENT_KEYS, SecretStateManager } from '../SecretStateManager'
+import { KEYS, StateManager } from '../StateManager'
 
 type CommandResponse = {
   output: string,
@@ -173,8 +174,9 @@ export async function execDvc(cmd: string) {
   const secrets = SecretStateManager.instance
   const client_id = await secrets.getSecret(CLIENT_KEYS.CLIENT_ID)
   const client_secret = await secrets.getSecret(CLIENT_KEYS.CLIENT_SECRET)
+  const project_id = await StateManager.getState(KEYS.PROJECT_ID)
 
-  const shellCommand = `${cli} ${cmd} --headless --client-id ${client_id} --client-secret ${client_secret}`
+  const shellCommand = `${cli} ${cmd} --headless --client-id ${client_id} --client-secret ${client_secret} --project ${project_id}`
   return execShell(shellCommand)
 }
 
