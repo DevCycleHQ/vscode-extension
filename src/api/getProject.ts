@@ -9,11 +9,11 @@ export const getProject = async (id: string) => {
     if (!client_id || !client_secret) {
         throw new Error('Missing client_id or secret to get auth token')
     }
-    let accessToken = await getToken(client_id, client_secret)
+    let { access_token } = await getToken(client_id, client_secret)
     return await axios({
         method: 'GET',
         headers: {
-            Authorization: `${accessToken}`,
+            Authorization: `${access_token}`,
         },
         url: `https://api.devcycle.com/v1/projects/${id}`,
         
