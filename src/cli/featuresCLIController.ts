@@ -95,6 +95,6 @@ export async function getFeatureConfigurations(featureId: string) {
     const featureConfigs = JSON.parse(output);
     featureConfigsMap[featureId] = featureConfigs;
     StateManager.setState(KEYS.FEATURE_CONFIGURATIONS, featureConfigsMap);
-    return featureConfigs;
+    return featureConfigs as FeatureConfiguration[];
   }
 }

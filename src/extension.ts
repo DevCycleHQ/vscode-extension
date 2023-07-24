@@ -85,6 +85,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand("devcycle-featureflags.openLink", async (link: string) => {
+      vscode.env.openExternal(vscode.Uri.parse(link));
+    })
+  );
+
+
+  context.subscriptions.push(
     vscode.commands.registerCommand(
       "devcycle-featureflags.logout",
       async () => {
