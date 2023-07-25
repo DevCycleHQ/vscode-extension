@@ -1,10 +1,11 @@
-import * as vscode from 'vscode'
-import { getProject } from './api/getProject'
-import { StateManager, KEYS } from './StateManager'
-import { SecretStateManager, CLIENT_KEYS } from './SecretStateManager'
-import { getToken } from './api/getToken'
-import { getNonce } from './utils/getNonce'
-import { initStorage } from './cli'
+import * as vscode from "vscode";
+import { getProject } from "./api/getProject";
+import { StateManager, KEYS } from "./StateManager";
+import { SecretStateManager, CLIENT_KEYS } from "./SecretStateManager";
+import { getToken } from "./api/getToken";
+import { getNonce } from "./utils/getNonce";
+import { initStorage } from "./cli";
+import { setClientIdAndSecret } from "./utils/credentials";
 
 const enum VIEWS {
   DEFAULT = 'default',
@@ -57,11 +58,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (res && res.access_token) {
             webviewView.webview.html = this._getHtmlForWebview(
               webviewView.webview,
-              VIEWS.PROJECT_ID_VIEW,
-            )
-            const secrets = SecretStateManager.instance
-            await secrets.setSecret(CLIENT_KEYS.CLIENT_ID, data.clientId)
-            await secrets.setSecret(CLIENT_KEYS.CLIENT_SECRET, data.secret)
+              VIEWS.PROJECT_ID_VIEW
+            );
+            await setClientIdAndSecret(data.clientId, data.secret)
           } else if (res === 401) {
             webviewView.webview.html = this._getHtmlForWebview(
               webviewView.webview,

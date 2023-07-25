@@ -1,39 +1,67 @@
 import * as fs from 'fs'
-import * as yaml from 'js-yaml'
+import * as jsYaml from 'js-yaml'
 import * as os from 'os'
 import { CLIENT_KEYS, SecretStateManager } from "../SecretStateManager";
 import { KEYS, StateManager } from "../StateManager";
+import * as vscode from 'vscode'
 
-
-function loadConfig() {
-    const repoConfigPath = './.devcycle/config.yml';
-    const globalConfigPath = `${os.homedir()}/.config/devcycle/config.yml`;
-
-    // check for repo level config
-    if (fs.existsSync(repoConfigPath)) {
-        const repoFile = fs.readFileSync(repoConfigPath, 'utf8');
-        return yaml.safeLoad(repoFile);
+type Auth = {
+    clientCredentials: {
+        client_id: string
+        client_secret: string
     }
-    
-    // check for global level config
-    if (fs.existsSync(globalConfigPath)) {
-        const globalFile = fs.readFileSync(globalConfigPath, 'utf8');
-        return yaml.safeLoad(globalFile);
-    }
-
-    // return default config if no file exists
-    return {
-        client_id: '',
-        client_secret: '',
-    };
 }
 
-const autoLoginIfHaveCredentials = async () => {
-    const clientId = await  SecretStateManager.instance.getSecret(CLIENT_KEYS.CLIENT_ID)
-    const clientSecret = await  SecretStateManager.instance.getSecret(CLIENT_KEYS.CLIENT_SECRET)
-    const projectId = await StateManager.getState(KEYS.PROJECT_ID)
-    const hasAllCredentials = !!clientId && !!clientSecret && !!projectId
-  
+type User = {
+    project: string
+}
+
+type Config = {
+    project?: string,
+    client_id?: string,
+    client_secret?: string
+}
+export function loadConfig() {
+    const repoConfigPath = './.devcycle/config.yml';
+    const globalAuthPath = `${os.homedir()}/.config/devcycle/auth.yml`;
+    const globalUserPath = `${os.homedir()}/.config/devcycle/user.yml`;
+
+    let config: Config = {}
+    
+    if (fs.existsSync(globalAuthPath)) {
+        const globalAuthFile = fs.readFileSync(globalAuthPath, 'utf8');
+        const auth = jsYaml.load(globalAuthFile) as Auth
+        if (auth.clientCredentials) {
+            config.client_id = auth.clientCredentials.client_id
+            config.client_secret = auth.clientCredentials.client_secret
+        }
+        
+        if (fs.existsSync(repoConfigPath)) {
+            const repoUserFile = fs.readFileSync(repoConfigPath, 'utf8');
+            const user = jsYaml.load(repoUserFile) as User
+            if (user.project) {
+                config.project = user.project
+            }
+        } else if (fs.existsSync(globalUserPath)) {
+            const globalUserFile = fs.readFileSync(globalUserPath, 'utf8');
+            const user = jsYaml.load(globalUserFile) as User
+            if (user.project) {
+                config.project = user.project
+            }
+        }
+    }
+
+    return config
+}
+
+export async function autoLoginIfHaveCredentials () {
+    const { client_id: config_client, client_secret: config_secret, project: config_project } = loadConfig()
+    const { client_id: state_client, client_secret: state_secret, projectId: state_project } = await getCredentials()
+    const client_id = config_client || state_client
+    const client_secret = config_secret || state_secret
+    const project_id = config_project || state_project
+    
+    const hasAllCredentials = client_id && client_secret && project_id
     await vscode.commands.executeCommand(
       "setContext",
       "devcycle-featureflags.hasCredentialsAndProject",
@@ -42,12 +70,17 @@ const autoLoginIfHaveCredentials = async () => {
   
     return hasAllCredentials
 }
-const config = loadConfig();
-console.log(config);
 
-export async function getClientIdAndSecret() {
+export async function setClientIdAndSecret(client_id: string, client_secret: string) {
+    const secrets = SecretStateManager.instance
+    await secrets.setSecret(CLIENT_KEYS.CLIENT_ID, client_id)
+    await secrets.setSecret(CLIENT_KEYS.CLIENT_SECRET, client_secret)
+}
+
+export async function getCredentials() {
     const secrets = SecretStateManager.instance
     const client_id = await secrets.getSecret(CLIENT_KEYS.CLIENT_ID)
     const client_secret = await secrets.getSecret(CLIENT_KEYS.CLIENT_SECRET)
-    return { client_id, client_secret }
+    const projectId = await StateManager.getState(KEYS.PROJECT_ID)
+    return { client_id, client_secret, projectId }
 }
