@@ -1,146 +1,147 @@
 {
-	"name": "devcycle-featureflags",
-	"displayName": "DevCycle-FeatureFlags",
-	"description": "",
-	"version": "0.0.1",
-	"publisher": "DevCycle",
-	"engines": {
-		"vscode": "^1.63.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onCommand:devcycle-featureflags.init",
-		"onCommand:devcycle-featureflags.status",
-		"workspaceContains:.devcycle/config.yml"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"capabilities": {
-			"hoverProvider": "true"
-		},
-		"views": {
-			"explorer": [
-				{
-					"type": "webview",
-					"id": "devcycle-sidebar",
-					"name": "DevCycle",
-					"when": "devcycle-featureflags.hasCredentialsAndProject == false"
-				}, 
-				{
-					"type": "tree",
-					"id": "devcycleCodeUsages",
-					"name": "DevCycle Variables",
-					"when": "devcycle-featureflags.hasCredentialsAndProject == true"
-				}
-			]
-		},
-		"menus": {
-			"editor/context": [],
-			"view/title": [
-				{
-					"command": "devcycle-featureflags.refresh-usages",
-					"when": "view == devcycleCodeUsages",
-					"group": "navigation"
-				}
-			]
-		},
-		"commands": [
-			{
-				"command": "devcycle-featureflags.init",
-				"category": "DevCycle",
-				"title": "Initialize Repo",
-				"icon": {
-					"light": "media/togglebot.svg",
-					"dark": "media/togglebot-white.svg"
-				},
-				"enablement": "devcycle-featureflags.repoConfigured == false"
-			},
-			{
-				"command": "devcycle-featureflags.login",
-				"category": "DevCycle",
-				"title": "Log in to DevCycle",
-				"icon": {
-					"light": "media/togglebot.svg",
-					"dark": "media/togglebot-white.svg"
-				},
-				"enablement": "devcycle-featureflags.repoConfigured == true && devcycle-featureflags.loggedIn == false"
-			},
-			{
-				"command": "devcycle-featureflags.logout",
-				"category": "DevCycle",
-				"title": "Log out of DevCycle",
-				"icon": {
-					"light": "media/togglebot.svg",
-					"dark": "media/togglebot-white.svg"
-				},
-				"enablement": "devcycle-featureflags.loggedIn == true || devcycle-featureflags.hasCredentialsAndProject == true"
-			},
-			{
-				"command": "devcycle-featureflags.refresh-usages",
-				"category": "DevCycle",
-				"title": "Refresh Code Usages",
-				"icon": "$(refresh)",
-				"enablement": "devcycle-featureflags.repoConfigured == true"
-			}
-		],
-		"configuration":[
-			{
-				"title": "DevCycle",
-				"properties": {
-					"devcycle-featureflags.loginOnWorkspaceOpen": {
-						"type": "boolean",
-						"default": false,
-						"description": "Automatically log in to DevCycle when a configured workspace is opened."
-					},
-					"devcycle-featureflags.usagesOnWorkspaceOpen": {
-						"type": "boolean",
-						"default": true,
-						"description": "Automatically check for code usages when a configured workspace is opened."
-					},
-					"devcycle-featureflags.debug": {
-						"type": "boolean",
-						"default": false,
-						"description": "Displays debug output for the extension, including what CLI commands are being executed."
-					},
-					"devcycle-featureflags.cli": {
-						"type": "string",
-						"default": "dvc",
-						"description": "How the CLI will be invoked"
-					},
-					"devcycle-featureflags.sendMetrics": {
-						"type": "boolean",
-						"default": true,
-						"description": "Allow DevCycle to send usage metrics."      
-					  }
-				}
-			}
-		]
-	},
-	"scripts": {
-		"vscode:prepublish": "yarn run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "yarn run compile && yarn run lint",
-		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
-	},
-	"devDependencies": {
-		"@types/glob": "^7.2.0",
-		"@types/mocha": "^9.1.0",
-		"@types/node": "14.x",
-		"@types/vscode": "^1.64.0",
-		"@typescript-eslint/eslint-plugin": "^5.12.1",
-		"@typescript-eslint/parser": "^5.12.1",
-		"@vscode/test-electron": "^2.1.2",
-		"eslint": "^8.9.0",
-		"glob": "^7.2.0",
-		"mocha": "^9.2.1",
-		"typescript": "^4.5.5"
-	},
-	"dependencies": {
-		"axios": "^0.26.0",
-		"change-case": "^4.1.2"
-	}
+  "name": "devcycle-featureflags",
+  "displayName": "DevCycle-FeatureFlags",
+  "description": "",
+  "version": "0.0.1",
+  "publisher": "DevCycle",
+  "engines": {
+    "vscode": "^1.63.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:devcycle-featureflags.init",
+    "onCommand:devcycle-featureflags.status",
+    "workspaceContains:.devcycle/config.yml"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "capabilities": {
+      "hoverProvider": "true"
+    },
+    "views": {
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "devcycle-sidebar",
+          "name": "DevCycle",
+          "when": "devcycle-featureflags.hasCredentialsAndProject == false"
+        },
+        {
+          "type": "tree",
+          "id": "devcycleCodeUsages",
+          "name": "DevCycle Variables",
+          "when": "devcycle-featureflags.hasCredentialsAndProject == true"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [],
+      "view/title": [
+        {
+          "command": "devcycle-featureflags.refresh-usages",
+          "when": "view == devcycleCodeUsages",
+          "group": "navigation"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "devcycle-featureflags.init",
+        "category": "DevCycle",
+        "title": "Initialize Repo",
+        "icon": {
+          "light": "media/togglebot.svg",
+          "dark": "media/togglebot-white.svg"
+        },
+        "enablement": "devcycle-featureflags.repoConfigured == false"
+      },
+      {
+        "command": "devcycle-featureflags.login",
+        "category": "DevCycle",
+        "title": "Log in to DevCycle",
+        "icon": {
+          "light": "media/togglebot.svg",
+          "dark": "media/togglebot-white.svg"
+        },
+        "enablement": "devcycle-featureflags.repoConfigured == true && devcycle-featureflags.loggedIn == false"
+      },
+      {
+        "command": "devcycle-featureflags.logout",
+        "category": "DevCycle",
+        "title": "Log out of DevCycle",
+        "icon": {
+          "light": "media/togglebot.svg",
+          "dark": "media/togglebot-white.svg"
+        },
+        "enablement": "devcycle-featureflags.loggedIn == true || devcycle-featureflags.hasCredentialsAndProject == true"
+      },
+      {
+        "command": "devcycle-featureflags.refresh-usages",
+        "category": "DevCycle",
+        "title": "Refresh Code Usages",
+        "icon": "$(refresh)",
+        "enablement": "devcycle-featureflags.repoConfigured == true"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "DevCycle",
+        "properties": {
+          "devcycle-featureflags.loginOnWorkspaceOpen": {
+            "type": "boolean",
+            "default": false,
+            "description": "Automatically log in to DevCycle when a configured workspace is opened."
+          },
+          "devcycle-featureflags.usagesOnWorkspaceOpen": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically check for code usages when a configured workspace is opened."
+          },
+          "devcycle-featureflags.debug": {
+            "type": "boolean",
+            "default": false,
+            "description": "Displays debug output for the extension, including what CLI commands are being executed."
+          },
+          "devcycle-featureflags.cli": {
+            "type": "string",
+            "default": "dvc",
+            "description": "How the CLI will be invoked"
+          },
+          "devcycle-featureflags.sendMetrics": {
+            "type": "boolean",
+            "default": true,
+            "description": "Allow DevCycle to send usage metrics."
+          }
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.64.0",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
+    "@vscode/test-electron": "^2.1.2",
+    "eslint": "^8.9.0",
+    "glob": "^7.2.0",
+    "mocha": "^9.2.1",
+    "prettier": "3.0.0",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "axios": "^0.26.0",
+    "change-case": "^4.1.2"
+  }
 }

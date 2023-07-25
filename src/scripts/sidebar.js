@@ -1,24 +1,24 @@
-(function () {
-  
-    const vscode = acquireVsCodeApi();
-    const clientId = document.querySelector("#clientId");
-    const secret = document.querySelector("#clientSecret");
-    const loginBtn = document.querySelector("#loginBtn");
-    let clientIdValue;
-    let secretValue;
-    
-    clientId.addEventListener("input", () => {
-      clientIdValue = clientId.value;
-    });
+;(function () {
+  const vscode = acquireVsCodeApi()
+  const clientId = document.querySelector('#clientId')
+  const secret = document.querySelector('#clientSecret')
+  const loginBtn = document.querySelector('#loginBtn')
+  let clientIdValue
+  let secretValue
 
-    secret.addEventListener("input", () => {
-      secretValue = secret.value;
-    });
+  clientId.addEventListener('input', () => {
+    clientIdValue = clientId.value
+  })
 
-    loginBtn.addEventListener("click", () => {
-      vscode.postMessage({ type:"login", clientId: clientIdValue, secret: secretValue});
-    });
+  secret.addEventListener('input', () => {
+    secretValue = secret.value
+  })
 
-
-  })();
-  
+  loginBtn.addEventListener('click', () => {
+    vscode.postMessage({
+      type: 'login',
+      clientId: clientIdValue,
+      secret: secretValue,
+    })
+  })
+})()
