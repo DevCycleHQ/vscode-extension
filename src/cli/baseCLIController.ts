@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import * as cp from 'child_process'
 import { getCredentials } from '../utils/credentials'
+import { StateManager, KEYS } from '../StateManager'
 
 type CommandResponse = {
   output: string
@@ -169,7 +170,7 @@ function hideStatus() {
 export async function execDvc(cmd: string) {
   const cli = vscode.workspace.getConfiguration('devcycle-featureflags').get('cli') || 'dvc'
   const { client_id, client_secret } = await getCredentials()
-
+  const project_id = StateManager.getState(KEYS.PROJECT_ID)
   const shellCommand = `${cli} ${cmd} --headless --client-id ${client_id} --client-secret ${client_secret} --project ${project_id}`
   return execShell(shellCommand)
 }
