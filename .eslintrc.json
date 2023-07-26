@@ -15,6 +15,5 @@
     "semi": "off",
     "indent": "off"
   },
-  "ignorePatterns": ["out", "dist", "**/*.d.ts"],
-  "extends": ["prettier"]
+  "ignorePatterns": ["out", "dist", "**/*.d.ts"]
 }
