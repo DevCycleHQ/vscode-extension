@@ -53,13 +53,10 @@ export async function getAllEnvironments() {
     return []
   } else {
     const environments = JSON.parse(output) as Environment[]
-    const environmentMap = environments.reduce(
-      (result, currentEnvironment) => {
-        result[currentEnvironment._id] = currentEnvironment
-        return result
-      },
-      {} as Record<string, Environment>,
-    )
+    const environmentMap = environments.reduce((result, currentEnvironment) => {
+      result[currentEnvironment._id] = currentEnvironment
+      return result
+    }, {} as Record<string, Environment>)
 
     StateManager.setState(KEYS.ENVIRONMENTS, environmentMap)
     return environmentMap

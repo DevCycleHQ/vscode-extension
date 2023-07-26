@@ -168,7 +168,9 @@ function hideStatus() {
 }
 
 export async function execDvc(cmd: string) {
-  const cli = vscode.workspace.getConfiguration('devcycle-featureflags').get('cli') || 'dvc'
+  const cli =
+    vscode.workspace.getConfiguration('devcycle-featureflags').get('cli') ||
+    'dvc'
   const { client_id, client_secret } = await getCredentials()
   const project_id = StateManager.getState(KEYS.PROJECT_ID)
   const shellCommand = `${cli} ${cmd} --headless --client-id ${client_id} --client-secret ${client_secret} --project ${project_id}`
