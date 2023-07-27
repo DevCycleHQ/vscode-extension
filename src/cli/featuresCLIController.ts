@@ -64,13 +64,10 @@ export async function getAllFeatures() {
     return []
   } else {
     const features = JSON.parse(output) as Feature[]
-    const featureMap = features.reduce(
-      (result, currentFeature) => {
-        result[currentFeature._id] = currentFeature
-        return result
-      },
-      {} as Record<string, Feature>,
-    )
+    const featureMap = features.reduce((result, currentFeature) => {
+      result[currentFeature._id] = currentFeature
+      return result
+    }, {} as Record<string, Feature>)
 
     StateManager.setState(KEYS.FEATURES, featureMap)
     return featureMap

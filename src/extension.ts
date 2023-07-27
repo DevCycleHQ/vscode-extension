@@ -3,6 +3,7 @@ import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
 import { init, login, logout, status as cliStatus, initStorage } from './cli'
 import { CLIENT_KEYS, SecretStateManager } from './SecretStateManager'
+import { loadConfig, autoLoginIfHaveCredentials } from './utils/credentials'
 import { SidebarProvider } from './SidebarProvider'
 
 import { UsagesTreeProvider } from './UsagesTreeProvider'
@@ -14,25 +15,6 @@ exports.deactivate = exports.activate = void 0
 const REGEX = /[A-Za-z0-9][.A-Za-z_\-0-9]*/
 const SCHEME_FILE = {
   scheme: 'file',
-}
-
-const autoLoginIfHaveCredentials = async () => {
-  const clientId = await SecretStateManager.instance.getSecret(
-    CLIENT_KEYS.CLIENT_ID,
-  )
-  const clientSecret = await SecretStateManager.instance.getSecret(
-    CLIENT_KEYS.CLIENT_SECRET,
-  )
-  const projectId = await StateManager.getState(KEYS.PROJECT_ID)
-  const hasAllCredentials = !!clientId && !!clientSecret && !!projectId
-
-  await vscode.commands.executeCommand(
-    'setContext',
-    'devcycle-featureflags.hasCredentialsAndProject',
-    hasAllCredentials,
-  )
-
-  return hasAllCredentials
 }
 
 export const activate = async (context: vscode.ExtensionContext) => {

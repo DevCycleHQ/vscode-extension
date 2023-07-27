@@ -56,13 +56,10 @@ export async function getAllVariables() {
     return []
   } else {
     const variables = JSON.parse(output) as Variable[]
-    const variableMap = variables.reduce(
-      (result, currentVariable) => {
-        result[currentVariable.key] = currentVariable
-        return result
-      },
-      {} as Record<string, Variable>,
-    )
+    const variableMap = variables.reduce((result, currentVariable) => {
+      result[currentVariable.key] = currentVariable
+      return result
+    }, {} as Record<string, Variable>)
 
     StateManager.setState(KEYS.VARIABLES, variableMap)
     return variableMap
