@@ -30,6 +30,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
     const isLoggedIn = await autoLoginIfHaveCredentials()
     if (isLoggedIn) {
       await initStorage()
+      await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
     }
   }
 
@@ -55,12 +56,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     vscode.commands.registerCommand('devcycle-featureflags.init', async () => {
       await init()
-    }),
-  )
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('devcycle-featureflags.login', async () => {
-      await login()
     }),
   )
 
@@ -96,6 +91,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
     vscode.commands.registerCommand(
       'devcycle-featureflags.refresh-usages',
       async () => {
+        StateManager.clearState()
         await usagesDataProvider.refresh()
       },
     ),
@@ -133,12 +129,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       )
     }
   }
-  if (status.repoConfigExists) {
-    if (!status.hasAccessToken && autoLogin) {
-      await login()
-    }
-    await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
-  }
+
   // On Hover
   vscode.languages.registerHoverProvider(SCHEME_FILE, {
     async provideHover(document, position) {
