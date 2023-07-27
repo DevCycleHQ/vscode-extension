@@ -30,6 +30,7 @@ export class UsagesTreeProvider
   readonly onDidChangeTreeData: vscode.Event<CodeUsageNode | undefined | void> =
     this._onDidChangeTreeData.event
   private flagsSeen: CodeUsageNode[] = []
+  private isRefreshing = false
 
   constructor(
     private workspaceRoot: string | undefined,
@@ -49,6 +50,10 @@ export class UsagesTreeProvider
   }
 
   async refresh(): Promise<void> {
+    if (this.isRefreshing) {
+      return
+    }
+    this.isRefreshing = true
     this.flagsSeen = []
     this._onDidChangeTreeData.fire(undefined)
     const root = this.workspaceRoot
@@ -56,9 +61,7 @@ export class UsagesTreeProvider
       throw new Error('Must have a workspace to check for code usages')
     }
     const variables = await this.getCombinedAPIData()
-
     const matches = await usages()
-
     matches.forEach((usage) => {
       if (variables[usage.key]) {
         variables[usage.key].references = usage.references
@@ -66,12 +69,12 @@ export class UsagesTreeProvider
         variables[usage.key] = usage
       }
     })
-
     Object.values(variables).forEach((match) => {
       this.flagsSeen.push(CodeUsageNode.flagFrom(match, root, this.context))
     })
     this.flagsSeen.sort((a, b) => (a.key > b.key ? 1 : -1))
     this._onDidChangeTreeData.fire()
+    this.isRefreshing = false
   }
 
   getTreeItem(element: CodeUsageNode): vscode.TreeItem {
@@ -83,11 +86,11 @@ export class UsagesTreeProvider
       vscode.window.showInformationMessage('No dependency in empty workspace')
       return []
     }
-
+    
     if (element) {
       return element.children
     }
-
+    
     return this.flagsSeen
   }
 }

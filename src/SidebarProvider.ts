@@ -88,6 +88,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
               true,
             )
             await initStorage()
+            await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
           } else if (res === 404) {
             webviewView.webview.html = this._getHtmlForWebview(
               webviewView.webview,

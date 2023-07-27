@@ -58,16 +58,6 @@
         "enablement": "devcycle-featureflags.repoConfigured == false"
       },
       {
-        "command": "devcycle-featureflags.login",
-        "category": "DevCycle",
-        "title": "Log in to DevCycle",
-        "icon": {
-          "light": "media/togglebot.svg",
-          "dark": "media/togglebot-white.svg"
-        },
-        "enablement": "devcycle-featureflags.repoConfigured == true && devcycle-featureflags.loggedIn == false"
-      },
-      {
         "command": "devcycle-featureflags.logout",
         "category": "DevCycle",
         "title": "Log out of DevCycle",
@@ -75,7 +65,7 @@
           "light": "media/togglebot.svg",
           "dark": "media/togglebot-white.svg"
         },
-        "enablement": "devcycle-featureflags.loggedIn == true || devcycle-featureflags.hasCredentialsAndProject == true"
+        "enablement": "devcycle-featureflags.hasCredentialsAndProject == true"
       },
       {
         "command": "devcycle-featureflags.refresh-usages",
