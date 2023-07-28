@@ -1,3 +1,6 @@
+import { KEYS, StateManager } from '../StateManager'
+import { getToken } from '../api/getToken'
+import { getCredentials } from '../utils/credentials'
 import { getAllEnvironments, getEnvironment } from './environmentsCLIController'
 import {
   Feature,
@@ -68,4 +71,20 @@ export const getCombinedVariableDetails = async (
     feature,
     configurations: featureConfigsWithEnvNames,
   }
+}
+
+export const getOrganizationId = async () => {
+  const cachedOrganizationId = StateManager.getState(KEYS.ORGANIZATION_ID)
+  if (cachedOrganizationId) {
+    return cachedOrganizationId
+  }
+  const { client_id, client_secret } = await getCredentials()
+  if (!client_id || !client_secret) {
+    return 
+  }
+  const token = await getToken(client_id, client_secret)
+  const jsonToken = JSON.parse(Buffer.from(token.access_token.split('.')[1], 'base64').toString())
+  const orgId =  jsonToken['https://devcycle.com/org_id']
+  StateManager.setState(KEYS.ORGANIZATION_ID, orgId)
+  return orgId
 }
