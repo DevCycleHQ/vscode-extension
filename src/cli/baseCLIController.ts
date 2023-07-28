@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import * as cp from 'child_process'
 import { getCredentials } from '../utils/credentials'
 import { StateManager, KEYS } from '../StateManager'
-
+import { showBusyMessage, hideBusyMessage } from '../components/statusBarItem'
 type CommandResponse = {
   output: string
   error: Error | null
@@ -46,11 +46,9 @@ export type Range = {
   end: number
 }
 
-const STATUS_BAR_ITEM: string = 'devcycle-featureflags'
 const CACHE_TIME = 15000
 
-export const statusBarItem = vscode.window.createStatusBarItem(STATUS_BAR_ITEM)
-statusBarItem.name = 'DevCycle Status'
+
 
 export async function init() {
   showBusyMessage('Initializing DevCycle')
@@ -64,7 +62,7 @@ export async function init() {
   } else {
     vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
   }
-  hideStatus()
+  hideBusyMessage()
   const organizations = JSON.parse(output) as string[]
   await chooseOrganization(organizations)
   await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
@@ -84,7 +82,7 @@ export async function login() {
   } else {
     vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
   }
-  hideStatus()
+  hideBusyMessage()
 }
 
 export async function chooseOrganization(organizations: string[]) {
@@ -99,7 +97,7 @@ export async function chooseOrganization(organizations: string[]) {
       `Organization login failed ${error?.message}}`,
     )
   }
-  hideStatus()
+  hideBusyMessage()
   const projects = JSON.parse(output) as string[]
   return chooseProject(projects)
 }
@@ -130,7 +128,7 @@ export async function usages(): Promise<JSONMatch[]> {
   showBusyMessage('Finding Devcycle code usages')
   const { output } = await execDvc('usages --format=json')
   const matches = JSON.parse(output) as JSONMatch[]
-  hideStatus()
+  hideBusyMessage()
   return matches
 }
 
@@ -155,16 +153,6 @@ export async function addAlias(alias: string, variableKey: string) {
   if (code !== 0) {
     vscode.window.showErrorMessage(`Adding alias failed: ${error?.message}}`)
   }
-}
-
-function showBusyMessage(message: string) {
-  statusBarItem.text = `$(loading~spin) ${message}...`
-  statusBarItem.tooltip = `${message}...`
-  statusBarItem.show()
-}
-
-function hideStatus() {
-  statusBarItem.hide()
 }
 
 export async function execDvc(cmd: string) {

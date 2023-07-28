@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { CombinedVariableData, getCombinedVariableDetails } from './cli'
+import { CombinedVariableData, getCombinedVariableDetails } from '../cli'
 
 export const getHoverString = async (
   variableKey: string,

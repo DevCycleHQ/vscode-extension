@@ -1,11 +1,9 @@
 import * as vscode from 'vscode'
-import { getProject } from './api/getProject'
-import { StateManager, KEYS } from './StateManager'
-import { SecretStateManager, CLIENT_KEYS } from './SecretStateManager'
-import { getToken } from './api/getToken'
-import { getNonce } from './utils/getNonce'
-import { initStorage } from './cli'
-import { setClientIdAndSecret } from './utils/credentials'
+import { getProject } from '../api/getProject'
+import { StateManager, KEYS } from '../StateManager'
+import { getToken } from '../api/getToken'
+import { getNonce } from '../utils/getNonce'
+import { setClientIdAndSecret } from '../utils/credentials'
 
 const enum VIEWS {
   DEFAULT = 'default',
@@ -86,7 +84,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
               'devcycle-featureflags.hasCredentialsAndProject',
               true,
             )
-            await initStorage()
             await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
           } else if (res === 404) {
             webviewView.webview.html = this._getHtmlForWebview(
