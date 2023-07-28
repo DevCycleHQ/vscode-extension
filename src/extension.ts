@@ -4,10 +4,10 @@ import { KEYS, StateManager } from './StateManager'
 import { init, login, logout, status as cliStatus, initStorage } from './cli'
 import { CLIENT_KEYS, SecretStateManager } from './SecretStateManager'
 import { loadConfig, autoLoginIfHaveCredentials } from './utils/credentials'
-import { SidebarProvider } from './SidebarProvider'
+import { SidebarProvider } from './components/SidebarProvider'
 
-import { UsagesTreeProvider } from './UsagesTreeProvider'
-import { getHoverString } from './hoverCard'
+import { UsagesTreeProvider } from './components/UsagesTreeProvider'
+import { getHoverString } from './components/hoverCard'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -25,14 +25,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const autoLogin = vscode.workspace
     .getConfiguration('devcycle-featureflags')
     .get('loginOnWorkspaceOpen')
-
-  if (autoLogin) {
-    const isLoggedIn = await autoLoginIfHaveCredentials()
-    if (isLoggedIn) {
-      await initStorage()
-      await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
-    }
-  }
 
   const sidebarProvider = new SidebarProvider(context.extensionUri)
 
@@ -113,6 +105,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
       },
     ),
   )
+
+  if (autoLogin) {
+    const isLoggedIn = await autoLoginIfHaveCredentials()
+    if (isLoggedIn) {
+      await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
+    }
+  }
 
   const status = await cliStatus()
   if (status.organization) {

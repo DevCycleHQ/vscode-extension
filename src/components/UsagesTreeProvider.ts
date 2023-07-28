@@ -6,7 +6,10 @@ import {
   getAllVariables,
   getCombinedVariableDetails,
   CombinedVariableData,
-} from './cli'
+} from '../cli'
+
+import { showBusyMessage, hideBusyMessage } from './statusBarItem'
+
 
 type VariableCodeReference =
   | (CombinedVariableData & {
@@ -38,6 +41,7 @@ export class UsagesTreeProvider
   ) {}
 
   private async getCombinedAPIData() {
+    showBusyMessage('Fetching devcycle data')
     const variables = await getAllVariables()
     const result = {} as Record<string, VariableCodeReference>
     await Promise.all(
@@ -46,6 +50,7 @@ export class UsagesTreeProvider
         result[key] = data
       }),
     )
+    hideBusyMessage()
     return result
   }
 
