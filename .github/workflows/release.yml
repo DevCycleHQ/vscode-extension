@@ -1,0 +1,36 @@
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: "Prerelease"
+        required: true
+        default: false
+        type: boolean
+      draft:
+        description: "Draft"
+        required: true
+        default: false
+        type: boolean
+      version-increment-type:
+        description: 'Which part of the version to increment:'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+        default: 'patch'
+
+name: Release VSCode Extension
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            node-version: [18.x]
+    steps:
+      - name: Packge VSCode Extension
+        run: yarn package
+      - name: Publish VSCode Extension
+        run: |
+          yarn publish ${{ github.event.inputs.version-increment-type }} -p ${{ secrets.VS_MARKETPLACE_TOKEN }}
