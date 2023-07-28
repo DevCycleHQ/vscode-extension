@@ -30,7 +30,7 @@ jobs:
             node-version: [18.x]
     steps:
       - name: Packge VSCode Extension
-        run: yarn package
+        run: yarn run package
       - name: Publish VSCode Extension
         run: |
-          yarn publish ${{ github.event.inputs.version-increment-type }} -p ${{ secrets.VS_MARKETPLACE_TOKEN }}
+          yarn run publish ${{ github.event.inputs.version-increment-type }} -p ${{ secrets.VS_MARKETPLACE_TOKEN }}
