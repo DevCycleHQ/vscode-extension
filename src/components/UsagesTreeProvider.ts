@@ -67,22 +67,30 @@ export class UsagesTreeProvider
     if (!root) {
       throw new Error('Must have a workspace to check for code usages')
     }
-    const variables = await this.getCombinedAPIData()
-    const matches = await usages()
-    matches.forEach((usage) => {
-      if (variables[usage.key]) {
-        variables[usage.key].references = usage.references
-      } else {
-        variables[usage.key] = usage
-      }
-    })
-    await getOrganizationId() // load organization id into state first, otherwise each of the parallel requests will fetch it 
-    await Promise.all(Object.values(variables).map(async (match) => {
-      this.flagsSeen.push(await CodeUsageNode.flagFrom(match, root, this.context))
-      return
-    }))
-    this.flagsSeen.sort((a, b) => (a.key > b.key ? 1 : -1))
-    this._onDidChangeTreeData.fire()
+
+    // Use withProgress to show a progress indicator
+    await vscode.window.withProgress(
+      {
+        location: { viewId: 'devcycleCodeUsages' },
+      },
+      async () => {
+        const variables = await this.getCombinedAPIData()
+        const matches = await usages()
+        matches.forEach((usage) => {
+          if (variables[usage.key]) {
+            variables[usage.key].references = usage.references
+          } else {
+            variables[usage.key] = usage
+          }
+        })
+        await getOrganizationId() // load organization id into state first, otherwise each of the parallel requests will fetch it 
+        await Promise.all(Object.values(variables).map(async (match) => {
+          this.flagsSeen.push(await CodeUsageNode.flagFrom(match, root, this.context))
+          return
+        }))
+        this.flagsSeen.sort((a, b) => (a.key > b.key ? 1 : -1))
+        this._onDidChangeTreeData.fire()
+      })
     this.isRefreshing = false
   }
 
