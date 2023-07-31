@@ -5,7 +5,11 @@
   "version": "0.0.1",
   "publisher": "DevCycle",
   "engines": {
-    "vscode": "^1.63.0"
+    "vscode": "^1.64.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "CHANGE_WHEN_PUBLIC"
   },
   "categories": [
     "Other"
@@ -114,7 +118,9 @@
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "publish": "vsce publish",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/chai": "^4.3.5",
@@ -139,6 +145,7 @@
     "@types/js-yaml": "^4.0.5",
     "axios": "^0.26.0",
     "change-case": "^4.1.2",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "vsce": "^2.15.0"
   }
 }
