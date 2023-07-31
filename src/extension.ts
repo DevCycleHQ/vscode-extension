@@ -1,7 +1,7 @@
 ;('use strict')
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
-import { init, login, logout, status as cliStatus, initStorage } from './cli'
+import { init, login, logout, status as cliStatus } from './cli'
 import { CLIENT_KEYS, SecretStateManager } from './SecretStateManager'
 import { loadConfig, autoLoginIfHaveCredentials } from './utils/credentials'
 import { SidebarProvider } from './components/SidebarProvider'
@@ -21,7 +21,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   SecretStateManager.init(context)
   StateManager.globalState = context.globalState
   StateManager.workspaceState = context.workspaceState
-  StateManager.clearState()
   const autoLogin = vscode.workspace
     .getConfiguration('devcycle-featureflags')
     .get('loginOnWorkspaceOpen')

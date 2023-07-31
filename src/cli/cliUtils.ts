@@ -25,10 +25,6 @@ export type CombinedVariableData = {
   configurations?: FeatureConfigurationWithEnvNames[]
 }
 
-export const initStorage = async () => {
-  await Promise.all([getAllVariables(), getAllFeatures(), getAllEnvironments()])
-}
-
 export const getCombinedVariableDetails = async (
   variable: string | Variable,
 ) => {
