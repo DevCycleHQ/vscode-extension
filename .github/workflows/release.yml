@@ -23,6 +23,7 @@ on:
 
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
     strategy:
         matrix:
@@ -46,7 +47,7 @@ jobs:
 
       - name: Update version in code
         run: |
-          yarn version ${{ '--' + github.event.inputs.version-increment-type }}
+          yarn version --${{ github.event.inputs.version-increment-type }} --no-git-tag-version
 
       - name: Commit version change
         run: |
@@ -62,7 +63,7 @@ jobs:
         run: |
           yarn run publish -p ${{ secrets.VS_MARKETPLACE_TOKEN }} ${{ github.event.inputs.prerelease && '--pre-release' }}
 
-     - uses: DevCycleHQ/release-action/create-release@main
+      - uses: DevCycleHQ/release-action/create-release@main
         id: create-release
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
