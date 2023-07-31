@@ -1,28 +1,30 @@
 on:
-  workflow_dispatch:
-    inputs:
-      prerelease:
-        description: "Prerelease"
-        required: true
-        default: false
-        type: boolean
-      draft:
-        description: "Draft"
-        required: true
-        default: false
-        type: boolean
-      version-increment-type:
-        description: 'Which part of the version to increment:'
-        required: true
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
-        default: 'patch'
+  # workflow_dispatch:
+  #   inputs:
+  #     prerelease:
+  #       description: "Prerelease"
+  #       required: true
+  #       default: false
+  #       type: boolean
+  #     draft:
+  #       description: "Draft"
+  #       required: true
+  #       default: false
+  #       type: boolean
+  #     version-increment-type:
+  #       description: 'Which part of the version to increment:'
+  #       required: true
+  #       type: choice
+  #       options:
+  #         - major
+  #         - minor
+  #         - patch
+  #       default: 'patch'
+  pull_request
 
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
     strategy:
         matrix:
@@ -46,7 +48,7 @@ jobs:
 
       - name: Update version in code
         run: |
-          yarn version ${{ '--' + github.event.inputs.version-increment-type }}
+          yarn version ${{ `--${github.event.inputs.version-increment-type}` }} --no-git-tag-version
 
       - name: Commit version change
         run: |
@@ -62,7 +64,7 @@ jobs:
         run: |
           yarn run publish -p ${{ secrets.VS_MARKETPLACE_TOKEN }} ${{ github.event.inputs.prerelease && '--pre-release' }}
 
-     - uses: DevCycleHQ/release-action/create-release@main
+      - uses: DevCycleHQ/release-action/create-release@main
         id: create-release
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
