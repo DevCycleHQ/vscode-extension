@@ -21,9 +21,8 @@ on:
           - patch
         default: 'patch'
 
-name: Release VSCode Extension
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     strategy:
         matrix:
