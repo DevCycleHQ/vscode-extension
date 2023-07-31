@@ -6,9 +6,11 @@ import {
   getAllVariables,
   getCombinedVariableDetails,
   CombinedVariableData,
+  getOrganizationId,
 } from '../cli'
 
 import { showBusyMessage, hideBusyMessage } from './statusBarItem'
+import { KEYS, StateManager } from '../StateManager'
 
 
 type VariableCodeReference =
@@ -74,9 +76,11 @@ export class UsagesTreeProvider
         variables[usage.key] = usage
       }
     })
-    Object.values(variables).forEach((match) => {
-      this.flagsSeen.push(CodeUsageNode.flagFrom(match, root, this.context))
-    })
+    await getOrganizationId() // load organization id into state first, otherwise each of the parallel requests will fetch it 
+    await Promise.all(Object.values(variables).map(async (match) => {
+      this.flagsSeen.push(await CodeUsageNode.flagFrom(match, root, this.context))
+      return
+    }))
     this.flagsSeen.sort((a, b) => (a.key > b.key ? 1 : -1))
     this._onDidChangeTreeData.fire()
     this.isRefreshing = false
@@ -101,7 +105,7 @@ export class UsagesTreeProvider
 }
 
 export class CodeUsageNode extends vscode.TreeItem {
-  static flagFrom(
+  static async flagFrom(
     match: VariableCodeReference,
     workspaceRoot: string,
     context: vscode.ExtensionContext,
@@ -168,20 +172,24 @@ export class CodeUsageNode extends vscode.TreeItem {
           ),
         )
       }
-      const link = `https://app.devcycle.com/r/variables/${variable._id}`
-      const linkNode = new CodeUsageNode(
-        key + ':link',
-        `Open In Dashboard ↗`,
-        'detail',
-        [],
-      )
-      linkNode.command = {
-        title: '',
-        command: 'devcycle-featureflags.openLink',
-        arguments: [link],
+      const orgId = await getOrganizationId()
+      const projectId = StateManager.getState(KEYS.PROJECT_ID)
+      if (orgId && projectId) {
+        const link = `https://app.devcycle.com/o/${orgId}/p/${projectId}/variables/${variable._id}`
+        const linkNode = new CodeUsageNode(
+          key + ':link',
+          `Open In Dashboard ↗`,
+          'detail',
+          [],
+        )
+        linkNode.command = {
+          title: '',
+          command: 'devcycle-featureflags.openLink',
+          arguments: [link],
+        }
+        linkNode.tooltip = link
+        detailsChildNodes.push(linkNode)
       }
-      linkNode.tooltip = link
-      detailsChildNodes.push(linkNode)
 
       const variableDetailsRoot = new CodeUsageNode(
         key,
