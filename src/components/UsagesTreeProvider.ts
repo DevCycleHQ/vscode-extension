@@ -4,9 +4,11 @@ import {
   JSONMatch,
   VariableReference,
   getAllVariables,
+  getAllEnvironments,
   getCombinedVariableDetails,
   CombinedVariableData,
   getOrganizationId,
+  getAllFeatures,
 } from '../cli'
 
 import { showBusyMessage, hideBusyMessage } from './statusBarItem'
@@ -44,7 +46,7 @@ export class UsagesTreeProvider
 
   private async getCombinedAPIData() {
     showBusyMessage('Fetching devcycle data')
-    const variables = await getAllVariables()
+    const [variables] = await Promise.all([getAllVariables(), getAllFeatures(), getAllEnvironments()])
     const result = {} as Record<string, VariableCodeReference>
     await Promise.all(
       Object.entries(variables).map(async ([key, variable]) => {

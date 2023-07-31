@@ -21,7 +21,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   SecretStateManager.init(context)
   StateManager.globalState = context.globalState
   StateManager.workspaceState = context.workspaceState
-  StateManager.clearState()
   const autoLogin = vscode.workspace
     .getConfiguration('devcycle-featureflags')
     .get('loginOnWorkspaceOpen')
