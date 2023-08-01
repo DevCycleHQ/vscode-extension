@@ -71,42 +71,59 @@ export async function init() {
 
 export async function login() {
   showBusyMessage('Logging into DevCycle')
-  const { code, error } = await execDvc('login again')
-  if (code === 0) {
+
+  try {
+    const { output: orgResponse } = await execDvc('organizations list')
+    const organizations = JSON.parse(orgResponse) as string[]
+
+    await chooseOrganization(organizations)
+
     await vscode.commands.executeCommand(
       'setContext',
       'devcycle-featureflags.loggedIn',
       true,
     )
     vscode.window.showInformationMessage('Logged in to DevCycle')
-  } else {
-    vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
+  } catch (e) {
+    if (e instanceof Error) {
+      vscode.window.showErrorMessage(`Login failed ${e.message}}`)
+    }
   }
   hideBusyMessage()
 }
 
 export async function chooseOrganization(organizations: string[]) {
-  const organization = await vscode.window.showQuickPick(organizations, {
-    ignoreFocusOut: true,
-    title: 'Select DevCycle Organization',
-  })
+  const organization = organizations.length === 1
+    ? organizations[0]
+    : await vscode.window.showQuickPick(organizations, {
+      ignoreFocusOut: true,
+      title: 'Select DevCycle Organization',
+    })
+  StateManager.setState(KEYS.ORGANIZATION_ID, organization)
+  StateManager.setState(KEYS.PROJECT_ID, undefined)
+
   showBusyMessage('Logging into DevCycle organization')
-  const { code, error, output } = await execDvc(`org --org=${organization}`)
+  const { code, error, output } = await execDvc(`organizations select --org=${organization}`)
+  hideBusyMessage()
+
   if (code !== 0) {
     vscode.window.showErrorMessage(
       `Organization login failed ${error?.message}}`,
     )
+    throw error
   }
-  hideBusyMessage()
+
   const projects = JSON.parse(output) as string[]
-  return chooseProject(projects)
+  await chooseProject(projects)
 }
 
 export async function chooseProject(projects: string[]) {
-  const project = await vscode.window.showQuickPick(projects, {
-    ignoreFocusOut: true,
-    title: 'Select DevCycle Project',
-  })
+  const project = projects.length === 1
+    ? projects[0]
+    : await vscode.window.showQuickPick(projects, {
+      ignoreFocusOut: true,
+      title: 'Select DevCycle Project',
+    })
   const { code, error } = await execDvc(`projects select --project=${project}`)
   if (code === 0) {
     await vscode.commands.executeCommand(
@@ -115,7 +132,8 @@ export async function chooseProject(projects: string[]) {
       true,
     )
   } else {
-    vscode.window.showErrorMessage(`Choosing project failed ${error?.message}}`)
+    vscode.window.showErrorMessage(`Selecting project failed ${error?.message}}`)
+    throw error
   }
 }
 
@@ -159,9 +177,9 @@ export async function execDvc(cmd: string) {
   const cli =
     vscode.workspace.getConfiguration('devcycle-featureflags').get('cli') ||
     'dvc'
-  const { client_id, client_secret } = await getCredentials()
   const project_id = StateManager.getState(KEYS.PROJECT_ID)
-  const shellCommand = `${cli} ${cmd} --headless --client-id ${client_id} --client-secret ${client_secret} --project ${project_id}`
+  let shellCommand = `${cli} ${cmd} --headless`
+  if (project_id) shellCommand += ` --project ${project_id}`
   return execShell(shellCommand)
 }
 

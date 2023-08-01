@@ -45,7 +45,7 @@ export class UsagesTreeProvider
   ) {}
 
   private async getCombinedAPIData() {
-    showBusyMessage('Fetching devcycle data')
+    showBusyMessage('Fetching DevCycle data')
     const [variables] = await Promise.all([getAllVariables(), getAllFeatures(), getAllEnvironments()])
     const result = {} as Record<string, VariableCodeReference>
     await Promise.all(

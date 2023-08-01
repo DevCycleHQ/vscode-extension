@@ -4,7 +4,7 @@
 
 1. Run `yarn` to install packages
 2. Press `F5`(Run > Start Debugging) to run the extension in the new window
-3. Follow the login steps (input client id, secret and project id) from the side bar (EXPLORER > DEVCYCLE) in the extension window
+3. Follow the login steps from the side bar (EXPLORER > DEVCYCLE) in the extension window
 4. After the login steps, you should see your feature flags info on the side bar
 5. You can check the `commands` in `package.json` and run from the command palette by pressing (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type the commands with `DevCycle` prefix
 
