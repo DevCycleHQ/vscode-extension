@@ -1,31 +1,20 @@
 import * as vscode from 'vscode'
-import { getProject } from '../api/getProject'
-import { StateManager, KEYS } from '../StateManager'
-import { getToken } from '../api/getToken'
 import { getNonce } from '../utils/getNonce'
-import { setClientIdAndSecret } from '../utils/credentials'
+import { login } from '../cli'
 
 const enum VIEWS {
   DEFAULT = 'default',
-  PROJECT_ID_VIEW = 'projectIdView',
 }
 
 const enum ACTIONS {
   LOGIN = 'login',
-  SUBMIT_PROJECT_ID = 'submitProjectId',
 }
 
 const enum ERRORS {
   LOGIN = 'login',
-  LOGIN_UNAUTHORIZED = 'unauthorized',
-  SUBMIT_PROJECT_ID = 'submitProjectId',
-  PROJECT_UNDEFINED = 'projectUndefined',
 }
 interface Data {
   type: string
-  clientId?: string
-  secret?: string
-  projectId?: string
 }
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView
@@ -45,53 +34,21 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data: Data) => {
       if (data.type === ACTIONS.LOGIN) {
-        if (!data.clientId || !data.secret) {
+        try {
+          await login()
+
+          await vscode.commands.executeCommand(
+            'setContext',
+            'devcycle-featureflags.hasCredentialsAndProject',
+            true,
+          )
+          await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
+        } catch (e) {
           webviewView.webview.html = this._getHtmlForWebview(
             webviewView.webview,
             undefined,
             ERRORS.LOGIN,
           )
-        } else {
-          let res = await getToken(data.clientId, data.secret)
-          if (res && res.access_token) {
-            webviewView.webview.html = this._getHtmlForWebview(
-              webviewView.webview,
-              VIEWS.PROJECT_ID_VIEW,
-            )
-            await setClientIdAndSecret(data.clientId, data.secret)
-          } else if (res === 401) {
-            webviewView.webview.html = this._getHtmlForWebview(
-              webviewView.webview,
-              undefined,
-              ERRORS.LOGIN_UNAUTHORIZED,
-            )
-          }
-        }
-      } else if (data.type === ACTIONS.SUBMIT_PROJECT_ID) {
-        if (!data.projectId) {
-          webviewView.webview.html = this._getHtmlForWebview(
-            webviewView.webview,
-            VIEWS.PROJECT_ID_VIEW,
-            ERRORS.SUBMIT_PROJECT_ID,
-          )
-        } else {
-          let res = await getProject(data.projectId)
-          if (res._id) {
-            StateManager.setState(KEYS.PROJECT_ID, data.projectId)
-            StateManager.setState(KEYS.PROJECT_NAME, res.name)
-            await vscode.commands.executeCommand(
-              'setContext',
-              'devcycle-featureflags.hasCredentialsAndProject',
-              true,
-            )
-            await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
-          } else if (res === 404) {
-            webviewView.webview.html = this._getHtmlForWebview(
-              webviewView.webview,
-              VIEWS.PROJECT_ID_VIEW,
-              ERRORS.PROJECT_UNDEFINED,
-            )
-          }
         }
       }
     })
@@ -104,13 +61,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private getErrorHtml(error: ERRORS) {
     let errorMessage = ''
     if (error === ERRORS.LOGIN) {
-      errorMessage = 'Please input both client id and secret to proceed.'
-    } else if (error === ERRORS.SUBMIT_PROJECT_ID) {
-      errorMessage = 'Please input project id to proceed.'
-    } else if (error === ERRORS.LOGIN_UNAUTHORIZED) {
-      errorMessage = 'Client id or secret is not correct. Please try again.'
-    } else if (error === ERRORS.PROJECT_UNDEFINED) {
-      errorMessage = 'Project not found. Please try again.'
+      errorMessage = 'Login failed. Please try again.'
     }
     return `<p style="color:#F48771;">${errorMessage}</p>`
   }
@@ -119,8 +70,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     let script = ''
     if (view === VIEWS.DEFAULT) {
       script = 'sidebar.js'
-    } else if (view === VIEWS.PROJECT_ID_VIEW) {
-      script = 'getProjectIdView.js'
     }
     return webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'src', `scripts/${script}`),
@@ -131,19 +80,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     let body = ''
     if (view === VIEWS.DEFAULT) {
       body = `<br/>
-        <label>Client Id:</label>
-        <input id="clientId" value="" type="text"></input>
-        <label>Client Secret:</label>
-        <input id="clientSecret" value="" type="text"></input>
+        <h3>Login using the DevCycle CLI:</h3>
         <button id="loginBtn">Login</button>`
-    } else if (view === VIEWS.PROJECT_ID_VIEW) {
-      body = `<br/>
-        <b style="font-size: 16px;">Welcome!</b>
-        <p>Please select the project by inputting the project id.</p>
-        <br/>
-        <label>Project Id:</label>
-        <input id="projectId" value="" type="text"></input>
-        <button id="submitBtn">Submit</button>`
     }
     return body
   }

@@ -1,9 +1,9 @@
 ;('use strict')
 import * as vscode from 'vscode'
-import { KEYS, StateManager } from './StateManager'
-import { init, login, logout, status as cliStatus, initStorage } from './cli'
-import { CLIENT_KEYS, SecretStateManager } from './SecretStateManager'
-import { loadConfig, autoLoginIfHaveCredentials } from './utils/credentials'
+import { StateManager } from './StateManager'
+import { init, logout, status as cliStatus } from './cli'
+import { SecretStateManager } from './SecretStateManager'
+import { autoLoginIfHaveCredentials } from './utils/credentials'
 import { SidebarProvider } from './components/SidebarProvider'
 
 import { UsagesTreeProvider } from './components/UsagesTreeProvider'
