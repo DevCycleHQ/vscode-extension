@@ -6,7 +6,7 @@ import { SecretStateManager } from './SecretStateManager'
 import { autoLoginIfHaveCredentials } from './utils/credentials'
 import { SidebarProvider } from './components/SidebarProvider'
 
-import { UsagesTreeProvider } from './components/UsagesTreeProvider'
+import { UsagesTreeProvider } from './components/UsagesTree'
 import { getHoverString } from './components/hoverCard'
 
 Object.defineProperty(exports, '__esModule', { value: true })
