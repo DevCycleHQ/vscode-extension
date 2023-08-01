@@ -7,6 +7,8 @@ import { SidebarProvider } from './components/SidebarProvider'
 
 import { UsagesTreeProvider } from './components/UsagesTree'
 import { getHoverString } from './components/hoverCard'
+import { trackRudderstackEvent } from './RudderStackService'
+import { CodeUsageNode } from './components/UsagesTree/CodeUsageNode'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -29,12 +31,23 @@ export const activate = async (context: vscode.ExtensionContext) => {
       StateManager.setState(KEYS.SEND_METRICS_PROMPTED, true)
     })
   }
+ 
+  if (!StateManager.globalState.get(KEYS.EXTENSION_INSTALLED)) {
+    await StateManager.globalState.update(KEYS.EXTENSION_INSTALLED, true)
+    trackRudderstackEvent('Extension Installed')
+  }
 
   const autoLogin = vscode.workspace
     .getConfiguration('devcycle-feature-flags')
     .get('loginOnWorkspaceOpen')
 
   const sidebarProvider = new SidebarProvider(context.extensionUri)
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      'devcycle-sidebar',
+      sidebarProvider
+    ),
+  )
 
   const rootPath =
     vscode.workspace.workspaceFolders &&
@@ -42,19 +55,37 @@ export const activate = async (context: vscode.ExtensionContext) => {
       ? vscode.workspace.workspaceFolders[0].uri.fsPath
       : undefined
   const usagesDataProvider = new UsagesTreeProvider(rootPath, context)
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      'devcycle-sidebar',
-      sidebarProvider,
-    ),
-  )
-  vscode.window.registerTreeDataProvider(
+  const usagesTreeView = vscode.window.createTreeView(
     'devcycleCodeUsages',
-    usagesDataProvider,
+    { treeDataProvider: usagesDataProvider },
   )
+  usagesTreeView.onDidChangeVisibility(async (e) => {
+    trackRudderstackEvent('Usages Viewed')
+  })
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'devcycle-featureflags.usagesNodeClicked',
+      async (node: CodeUsageNode) => {
+        trackRudderstackEvent('Code Usage Clicked')
+      }
+    )
+  )
+
+  usagesTreeView.onDidChangeSelection((e) => {
+    const node = e.selection[0]
+    if (node instanceof CodeUsageNode && node.type === 'usage') {
+      vscode.commands.executeCommand(
+        'devcycle-featureflags.usagesNodeClicked',
+        node
+      )
+    }
+  })
+
 
   context.subscriptions.push(
     vscode.commands.registerCommand('devcycle-feature-flags.init', async () => {
+      trackRudderstackEvent('Init Command Ran')
       await init()
     }),
   )
@@ -72,6 +103,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
     vscode.commands.registerCommand(
       'devcycle-feature-flags.logout',
       async () => {
+        trackRudderstackEvent('Logout Command Ran')
         await Promise.all([
           StateManager.clearState(),
           vscode.commands.executeCommand(

@@ -10,6 +10,7 @@ export const enum KEYS {
   ORGANIZATION = 'organization',
   SEND_METRICS_PROMPTED = 'send_metrics_prompted',
   CODE_USAGE_KEYS = 'code_usage_keys',
+  EXTENSION_INSTALLED = 'extension_installed',
 }
 
 export class StateManager {
@@ -18,7 +19,12 @@ export class StateManager {
 
   static clearState() {
     this.workspaceState.keys().forEach((key) => {
-      if (key !== KEYS.ORGANIZATION && key !== KEYS.PROJECT_ID && key !== KEYS.PROJECT_NAME) {
+      if (
+          key !== KEYS.PROJECT_ID &&
+          key !== KEYS.PROJECT_NAME &&
+          key !== KEYS.ORGANIZATION &&
+          key !== KEYS.EXTENSION_INSTALLED
+        ) {
         this.workspaceState.update(key, undefined)
       }
     })

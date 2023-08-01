@@ -81,7 +81,7 @@ export async function login() {
     await chooseOrganization(organizations)
     const org = StateManager.getState(KEYS.ORGANIZATION)
     const project = StateManager.getState(KEYS.PROJECT_ID)
-    if (!org || !project) return
+    if (!org || !project) { return }
 
     await vscode.commands.executeCommand(
       'setContext',
@@ -108,7 +108,7 @@ export async function chooseOrganization(organizations: Organization[]) {
       ignoreFocusOut: true,
       title: 'Select DevCycle Organization',
     }))?.value
-  if (!organization) return
+  if (!organization) { return }
   StateManager.setState(KEYS.ORGANIZATION, organization)
   StateManager.setState(KEYS.PROJECT_ID, undefined)
 
@@ -134,7 +134,7 @@ export async function chooseProject(projects: string[]) {
       ignoreFocusOut: true,
       title: 'Select DevCycle Project',
     })
-  if (!project) return
+  if (!project) { return }
   const { code, error } = await execDvc(`projects select --project=${project}`)
   if (code === 0) {
     await vscode.commands.executeCommand(
@@ -192,7 +192,7 @@ export async function execDvc(cmd: string) {
     vscode.workspace.getConfiguration('devcycle-feature-flags').get('cli') ||
     'dvc'
   const project_id = StateManager.getState(KEYS.PROJECT_ID)
-  let shellCommand = `${cli} ${cmd} --headless`
+  let shellCommand = `${cli} ${cmd} --headless --caller vs_code_extension`
   if (project_id) shellCommand += ` --project ${project_id}`
   return execShell(shellCommand)
 }

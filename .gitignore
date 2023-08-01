@@ -6,3 +6,4 @@ node_modules
 .env
 .idea
 .DS_STORE
+/src/analytics.ts
