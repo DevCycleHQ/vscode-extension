@@ -21,21 +21,30 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dvcView",
+          "title": "DevCycle",
+          "icon": "media/togglebot-white-sidebar.svg"
+        }
+      ]
+    },
     "capabilities": {
       "hoverProvider": "true"
     },
     "views": {
-      "explorer": [
+      "dvcView": [
         {
           "type": "webview",
           "id": "devcycle-sidebar",
-          "name": "DevCycle",
+          "name": "Login",
           "when": "devcycle-featureflags.hasCredentialsAndProject == false"
         },
         {
           "type": "tree",
           "id": "devcycleCodeUsages",
-          "name": "DevCycle Variables",
+          "name": "Variables",
           "when": "devcycle-featureflags.hasCredentialsAndProject == true"
         }
       ]
