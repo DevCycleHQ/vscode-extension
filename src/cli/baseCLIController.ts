@@ -46,10 +46,6 @@ export type Range = {
   end: number
 }
 
-const CACHE_TIME = 15000
-
-
-
 export async function init() {
   showBusyMessage('Initializing DevCycle')
   const { code, error, output } = await execDvc('repo init')
@@ -145,6 +141,7 @@ export async function status(): Promise<DevCycleStatus> {
 export async function usages(): Promise<JSONMatch[]> {
   showBusyMessage('Finding Devcycle code usages')
   const { output } = await execDvc('usages --format=json')
+  
   const matches = JSON.parse(output) as JSONMatch[]
   hideBusyMessage()
   return matches
