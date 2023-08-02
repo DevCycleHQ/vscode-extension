@@ -9,6 +9,7 @@ import { UsagesTreeProvider } from './components/UsagesTree'
 import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
 import { CodeUsageNode } from './components/UsagesTree/CodeUsageNode'
+import yaml from 'js-yaml'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -16,6 +17,23 @@ exports.deactivate = exports.activate = void 0
 const REGEX = /[A-Za-z0-9][.A-Za-z_\-0-9]*/
 const SCHEME_FILE = {
   scheme: 'file',
+}
+
+const loadRepoConfig = async (rootPath?: string, repoConfigPath?: string) => {
+  if (rootPath && repoConfigPath) {
+    try {
+      const configFileByteArray = await vscode.workspace.fs.readFile(
+        vscode.Uri.parse(`file:${rootPath}/${repoConfigPath}`)
+      )
+      const configFileString = new TextDecoder().decode(configFileByteArray)
+      const configFileJson = yaml.load(configFileString) as Record<string, any> | undefined
+      if (configFileJson) {
+        StateManager.setState(KEYS.REPO_CONFIG, configFileJson)
+      }
+    } catch { // do nothing if file doesn't exist
+      return
+    }
+  }
 }
 
 export const activate = async (context: vscode.ExtensionContext) => {
@@ -62,6 +80,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
   usagesTreeView.onDidChangeVisibility(async (e) => {
     trackRudderstackEvent('Usages Viewed')
   })
+
+  const status = await cliStatus()
+
+  await loadRepoConfig(rootPath, status.repoConfigPath)
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -112,7 +134,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
             false,
           ),
         ])
-        // TODO we can probably remove logout() since we aren't logging into the CLI anymore
         await logout()
       },
     ),
@@ -152,7 +173,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
     }
   }
 
-  const status = await cliStatus()
   if (status.organization) {
     await vscode.commands.executeCommand(
       'setContext',
@@ -177,7 +197,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
         return
       }
 
-      const variableKey = document.getText(range)
+      const variableAliases = StateManager.getState(KEYS.REPO_CONFIG)?.codeInsights?.variableAliases || {}
+      let variableKey = document.getText(range)
+      variableKey = variableAliases[variableKey] || variableKey
+
       const variables = StateManager.getState(KEYS.VARIABLES) || {}
       const keyInAPIVariables = !!variables[variableKey]        
       const keyInCodeUsages = StateManager.getState(KEYS.CODE_USAGE_KEYS)?.includes(variableKey)
