@@ -144,6 +144,7 @@ export async function usages(): Promise<JSONMatch[]> {
   
   const matches = JSON.parse(output) as JSONMatch[]
   hideBusyMessage()
+  StateManager.setState(KEYS.CODE_USAGE_KEYS, matches.map((match) => match.key))
   return matches
 }
 
