@@ -101,7 +101,7 @@ export class CodeUsageNode extends vscode.TreeItem {
         )
         linkNode.command = {
           title: '',
-          command: 'devcycle-featureflags.openLink',
+          command: 'devcycle-feature-flags.openLink',
           arguments: [link],
         }
         linkNode.tooltip = link
@@ -163,7 +163,7 @@ export class CodeUsageNode extends vscode.TreeItem {
     const file = vscode.Uri.file(`${workspaceRoot}/${reference.fileName}`)
     instance.command = {
       title: '',
-      command: 'devcycle-featureflags.show-reference',
+      command: 'devcycle-feature-flags.show-reference',
       arguments: [file, start, end],
     }
     return instance

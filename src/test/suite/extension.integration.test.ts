@@ -14,7 +14,7 @@ suite('Integration Tests', () => {
   })
 
   test('Sample test', () => {
-    vscode.commands.executeCommand('devcycle-featureflags.logout')
+    vscode.commands.executeCommand('devcycle-feature-flags.logout')
     // TODO 
   })
 })
