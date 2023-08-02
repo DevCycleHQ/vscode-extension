@@ -4,6 +4,7 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "watch",
       "type": "npm",
       "script": "watch",
       "problemMatcher": "$tsc-watch",
@@ -11,15 +12,24 @@
       "presentation": {
         "reveal": "never"
       },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
     },
     {
       "type": "npm",
       "script": "compile",
-      "problemMatcher": []
+      "problemMatcher": [],
+    },
+    {
+      "label": "create-analytics-file",
+      "type": "npm",
+      "script": "create-analytics-file",
+    },
+    {
+      "label": "dev",
+      "dependsOn": ["create-analytics-file", "watch"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }

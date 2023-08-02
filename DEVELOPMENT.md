@@ -47,3 +47,15 @@
 - Reduce the extension size and improve the startup time by [bundling your extension](https://code.visualstudio.com/api/working-with-extensions/bundling-extension).
 - [Publish your extension](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) on the VSCode extension marketplace.
 - Automate builds by setting up [Continuous Integration](https://code.visualstudio.com/api/working-with-extensions/continuous-integration).
+
+## [Internal] RudderStack setup
+
+- In order to track events during development, you will need to get an authorization token from RudderStack.
+
+1. Go to [RudderStack](https://app.rudderstack.com/) and login with the credentials stored in 1Password
+2. Go to `Sources` and select the `VS Code Extension` source
+3. On the `Setup` tab, copy the `Write Key`
+4. Go to a [Basic Authentication Header Generator
+](https://www.blitter.se/utils/basic-authentication-header-generator/) to generate a token.
+5. Use the `Write Key` as the username and leave the password blank
+6. Copy the generated token and paste it in `src/analytics.ts`(if this file does not exist, run the extension and it should be automatically generated for you) as the value of the `RUDDERSTACK_KEY` variable

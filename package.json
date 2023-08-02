@@ -114,7 +114,7 @@
           },
           "devcycle-feature-flags.sendMetrics": {
             "type": "boolean",
-            "default": true,
+            "default": false,
             "description": "Allow DevCycle to send usage metrics."
           }
         }
@@ -125,11 +125,12 @@
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "yarn run compile && yarn run lint",
+    "pretest": "yarn create-analytics-file && yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "publish": "vsce publish",
-    "package": "vsce package"
+    "package": "vsce package",
+    "create-analytics-file": "test -f ./src/analytics.ts || echo 'export const RUDDERSTACK_KEY = \"\";' > ./src/analytics.ts"
   },
   "devDependencies": {
     "@types/chai": "^4.3.5",
