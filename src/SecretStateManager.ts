@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import { StateManager } from './StateManager'
 
 export const enum CLIENT_KEYS {
   CLIENT_ID = 'client_id',

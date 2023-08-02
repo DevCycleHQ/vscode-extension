@@ -8,6 +8,7 @@ export const enum KEYS {
   FEATURE_CONFIGURATIONS = 'feature_configurations',
   ENVIRONMENTS = 'environments',
   ORGANIZATION_ID = 'organization_id',
+  SEND_METRICS_PROMPTED = 'send_metrics_prompted',
 }
 
 export class StateManager {

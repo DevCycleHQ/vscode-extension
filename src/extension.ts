@@ -21,6 +21,17 @@ export const activate = async (context: vscode.ExtensionContext) => {
   SecretStateManager.init(context)
   StateManager.globalState = context.globalState
   StateManager.workspaceState = context.workspaceState
+
+  if (!StateManager.getState(KEYS.SEND_METRICS_PROMPTED)) {
+    const sendMetricsMessage = 
+      `DevCycle collects usage metrics to gather information on feature adoption, usage, and frequency. 
+      By clicking "Accept", you consent to the collection of this data. Would you like to opt-in?`
+    vscode.window.showInformationMessage(sendMetricsMessage, 'Accept', 'Decline').then((selection) => {
+      vscode.workspace.getConfiguration('devcycle-featureflags').update('sendMetrics', selection === 'Accept')
+      StateManager.setState(KEYS.SEND_METRICS_PROMPTED, true)
+    })
+  }
+
   const autoLogin = vscode.workspace
     .getConfiguration('devcycle-featureflags')
     .get('loginOnWorkspaceOpen')
@@ -95,7 +106,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
         const document = await vscode.workspace.openTextDocument(filePath)
         await vscode.window.showTextDocument(document)
         const editor = vscode.window.activeTextEditor
-        if (!editor) throw new Error('No active text editor')
+        if (!editor) { throw new Error('No active text editor') }
         editor.selection = new vscode.Selection(start - 1, 0, end, 0)
         editor.revealRange(
           editor.selection,
