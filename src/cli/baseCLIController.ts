@@ -1,6 +1,5 @@
 import * as vscode from 'vscode'
 import * as cp from 'child_process'
-import { getCredentials } from '../utils/credentials'
 import { StateManager, KEYS } from '../StateManager'
 import { showBusyMessage, hideBusyMessage } from '../components/statusBarItem'
 type CommandResponse = {

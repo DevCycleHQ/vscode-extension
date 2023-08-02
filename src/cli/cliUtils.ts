@@ -1,6 +1,4 @@
 import { KEYS, StateManager } from '../StateManager'
-import { getToken } from '../api/getToken'
-import { getCredentials } from '../utils/credentials'
 import { Organization } from './baseCLIController'
 import { getAllEnvironments, getEnvironment } from './environmentsCLIController'
 import {

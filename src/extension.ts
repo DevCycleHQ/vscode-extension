@@ -2,7 +2,6 @@
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
 import { init, logout, status as cliStatus, Variable } from './cli'
-import { SecretStateManager } from './SecretStateManager'
 import { autoLoginIfHaveCredentials } from './utils/credentials'
 import { SidebarProvider } from './components/SidebarProvider'
 
@@ -18,7 +17,6 @@ const SCHEME_FILE = {
 }
 
 export const activate = async (context: vscode.ExtensionContext) => {
-  SecretStateManager.init(context)
   StateManager.globalState = context.globalState
   StateManager.workspaceState = context.workspaceState
 
@@ -75,7 +73,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
       'devcycle-feature-flags.logout',
       async () => {
         await Promise.all([
-          SecretStateManager.instance.clearSecrets(),
           StateManager.clearState(),
           vscode.commands.executeCommand(
             'setContext',
