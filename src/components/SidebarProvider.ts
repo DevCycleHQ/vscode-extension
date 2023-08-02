@@ -67,12 +67,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   private getScriptUri(webview: vscode.Webview, view: string): vscode.Uri {
+    const isDebug = process.env.DEBUG_MODE === '1'
     let script = ''
     if (view === VIEWS.DEFAULT) {
-      script = 'sidebar.js'
+      script = `sidebar.${isDebug ? 'ts' : 'js'}`
     }
     return webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, process.env.DEBUG_MODE === '1' ? 'src' : 'out', `scripts/${script}`),
+      vscode.Uri.joinPath(this._extensionUri, isDebug ? 'src' : 'out', `scripts/${script}`),
     )
   }
 
