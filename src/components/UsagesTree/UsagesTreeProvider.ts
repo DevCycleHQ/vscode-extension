@@ -68,7 +68,6 @@ export class UsagesTreeProvider
             variables[usage.key] = usage
           }
         })
-        await getOrganizationId() // load organization id into state first, otherwise each of the parallel requests will fetch it 
         await Promise.all(Object.values(variables).map(async (match) => {
           this.flagsSeen.push(await CodeUsageNode.flagFrom(match, root, this.context))
           return
