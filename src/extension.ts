@@ -1,7 +1,7 @@
 ;('use strict')
 import * as vscode from 'vscode'
-import { StateManager } from './StateManager'
-import { init, logout, status as cliStatus } from './cli'
+import { KEYS, StateManager } from './StateManager'
+import { init, logout, status as cliStatus, Variable } from './cli'
 import { SecretStateManager } from './SecretStateManager'
 import { autoLoginIfHaveCredentials } from './utils/credentials'
 import { SidebarProvider } from './components/SidebarProvider'
@@ -29,7 +29,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   const rootPath =
     vscode.workspace.workspaceFolders &&
-    vscode.workspace.workspaceFolders.length > 0
+      vscode.workspace.workspaceFolders.length > 0
       ? vscode.workspace.workspaceFolders[0].uri.fsPath
       : undefined
   const usagesDataProvider = new UsagesTreeProvider(rootPath, context)
@@ -132,7 +132,19 @@ export const activate = async (context: vscode.ExtensionContext) => {
   vscode.languages.registerHoverProvider(SCHEME_FILE, {
     async provideHover(document, position) {
       const range = document.getWordRangeAtPosition(position, REGEX)
+
+      if (!range) {
+        return
+      }
+
       const variableKey = document.getText(range)
+      const variables =
+        (StateManager.getState(KEYS.VARIABLES) as Record<string, Variable>) || {}
+      const variable = variables[variableKey]
+      
+      if (!variable) {
+        return
+      }
 
       const hoverString = await getHoverString(
         variableKey,
