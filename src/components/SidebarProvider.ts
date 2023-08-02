@@ -71,8 +71,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     if (view === VIEWS.DEFAULT) {
       script = 'sidebar.js'
     }
+    vscode.window.showInformationMessage(`script: ${this._extensionUri}`)
     return webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'src', `scripts/${script}`),
+      vscode.Uri.joinPath(this._extensionUri, process.env.DEBUG_MODE === '1' ? 'src' : 'out', `scripts/${script}`),
     )
   }
 
