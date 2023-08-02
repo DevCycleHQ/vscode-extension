@@ -15,14 +15,8 @@ export type FeatureConfiguration = {
   _environment: string
 }
 
-export type FeatureConfigurationsByFeatureId = Record<
-  string,
-  FeatureConfiguration[]
->
-
 export async function getFeature(featureId: string) {
-  const features =
-    (StateManager.getState(KEYS.FEATURES) as Record<string, Feature>) || {}
+  const features = StateManager.getState(KEYS.FEATURES) || {}
   const feature = features[featureId]
   if (feature) {
     return feature
@@ -49,10 +43,7 @@ export async function getFeature(featureId: string) {
 }
 
 export async function getAllFeatures() {
-  const features = StateManager.getState(KEYS.FEATURES) as Record<
-    string,
-    Feature
-  >
+  const features = StateManager.getState(KEYS.FEATURES)
   if (features) {
     return features
   }
@@ -75,10 +66,7 @@ export async function getAllFeatures() {
 }
 
 export async function getFeatureConfigurations(featureId: string) {
-  const featureConfigsMap =
-    (StateManager.getState(
-      KEYS.FEATURE_CONFIGURATIONS,
-    ) as FeatureConfigurationsByFeatureId) || {}
+  const featureConfigsMap = StateManager.getState( KEYS.FEATURE_CONFIGURATIONS) || {}
   const featureConfigs = featureConfigsMap[featureId]
   if (featureConfigs) {
     return featureConfigs

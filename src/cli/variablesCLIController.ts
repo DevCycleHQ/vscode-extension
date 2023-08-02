@@ -12,8 +12,7 @@ export type Variable = {
 }
 
 export async function getVariable(variableKey: string) {
-  const variables =
-    (StateManager.getState(KEYS.VARIABLES) as Record<string, Variable>) || {}
+  const variables = StateManager.getState(KEYS.VARIABLES) || {}
   const variable = variables[variableKey]
   if (variable) {
     return variable

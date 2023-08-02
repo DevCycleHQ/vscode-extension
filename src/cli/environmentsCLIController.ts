@@ -8,8 +8,7 @@ export type Environment = {
 }
 
 export async function getEnvironment(environmentId: string) {
-  const environments = (StateManager.getState(KEYS.ENVIRONMENTS) ||
-    {}) as Record<string, Environment>
+  const environments = StateManager.getState(KEYS.ENVIRONMENTS) || {}
   const environment = environments[environmentId]
   if (environment) {
     return environment
@@ -38,10 +37,7 @@ export async function getEnvironment(environmentId: string) {
 }
 
 export async function getAllEnvironments() {
-  const environments = StateManager.getState(KEYS.ENVIRONMENTS) as Record<
-    string,
-    Environment
-  >
+  const environments = StateManager.getState(KEYS.ENVIRONMENTS)
   if (environments) {
     return environments
   }

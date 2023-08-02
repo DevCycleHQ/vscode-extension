@@ -178,10 +178,9 @@ export const activate = async (context: vscode.ExtensionContext) => {
       }
 
       const variableKey = document.getText(range)
-      const variables =
-        (StateManager.getState(KEYS.VARIABLES) as Record<string, Variable>) || {}
+      const variables = StateManager.getState(KEYS.VARIABLES) || {}
       const keyInAPIVariables = !!variables[variableKey]        
-      const keyInCodeUsages = (StateManager.getState(KEYS.CODE_USAGE_KEYS) as string[])?.includes(variableKey)
+      const keyInCodeUsages = StateManager.getState(KEYS.CODE_USAGE_KEYS)?.includes(variableKey)
       
       if (!keyInAPIVariables && !keyInCodeUsages) {
         return
