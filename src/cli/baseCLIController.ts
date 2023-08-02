@@ -46,6 +46,13 @@ export type Range = {
   end: number
 }
 
+export type Organization = {
+  id: string
+  name: string
+  display_name: string
+}
+
+
 export async function init() {
   showBusyMessage('Initializing DevCycle')
   const { code, error, output } = await execDvc('repo init')
@@ -59,7 +66,7 @@ export async function init() {
     vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
   }
   hideBusyMessage()
-  const organizations = JSON.parse(output) as string[]
+  const organizations = JSON.parse(output) as Organization[]
   await chooseOrganization(organizations)
   await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
   vscode.window.showInformationMessage('DevCycle Configured')
@@ -69,10 +76,13 @@ export async function login() {
   showBusyMessage('Logging into DevCycle')
 
   try {
-    const { output: orgResponse } = await execDvc('organizations list')
-    const organizations = JSON.parse(orgResponse) as string[]
+    const { output: orgResponse } = await execDvc('organizations get')
+    const organizations = JSON.parse(orgResponse) as Organization[]
 
     await chooseOrganization(organizations)
+    const org = StateManager.getState(KEYS.ORGANIZATION)
+    const project = StateManager.getState(KEYS.PROJECT_ID)
+    if (!org || !project) return
 
     await vscode.commands.executeCommand(
       'setContext',
@@ -88,18 +98,23 @@ export async function login() {
   hideBusyMessage()
 }
 
-export async function chooseOrganization(organizations: string[]) {
-  const organization = organizations.length === 1
-    ? organizations[0]
-    : await vscode.window.showQuickPick(organizations, {
+export async function chooseOrganization(organizations: Organization[]) {
+  const quickPickItems = organizations.map((org) => ({
+    label: org.display_name,
+    value: org
+  }))
+  const organization = quickPickItems.length === 1
+    ? quickPickItems[0].value
+    : (await vscode.window.showQuickPick(quickPickItems, {
       ignoreFocusOut: true,
       title: 'Select DevCycle Organization',
-    })
-  StateManager.setState(KEYS.ORGANIZATION_ID, organization)
+    }))?.value
+  if (!organization) return
+  StateManager.setState(KEYS.ORGANIZATION, organization)
   StateManager.setState(KEYS.PROJECT_ID, undefined)
 
   showBusyMessage('Logging into DevCycle organization')
-  const { code, error, output } = await execDvc(`organizations select --org=${organization}`)
+  const { code, error, output } = await execDvc(`organizations select --org=${organization?.name}`)
   hideBusyMessage()
 
   if (code !== 0) {
@@ -120,6 +135,7 @@ export async function chooseProject(projects: string[]) {
       ignoreFocusOut: true,
       title: 'Select DevCycle Project',
     })
+  if (!project) return
   const { code, error } = await execDvc(`projects select --project=${project}`)
   if (code === 0) {
     await vscode.commands.executeCommand(
@@ -127,6 +143,7 @@ export async function chooseProject(projects: string[]) {
       'devcycle-feature-flags.repoConfigured',
       true,
     )
+    StateManager.setState(KEYS.PROJECT_ID, project)
   } else {
     vscode.window.showErrorMessage(`Selecting project failed ${error?.message}}`)
     throw error

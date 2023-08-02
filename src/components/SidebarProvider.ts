@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../utils/getNonce'
-import { login } from '../cli'
+import { getOrganizationId, login } from '../cli'
+import { KEYS, StateManager } from '../StateManager'
 
 const enum VIEWS {
   DEFAULT = 'default',
@@ -16,6 +17,7 @@ const enum ERRORS {
 interface Data {
   type: string
 }
+
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView
   _doc?: vscode.TextDocument
@@ -36,6 +38,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       if (data.type === ACTIONS.LOGIN) {
         try {
           await login()
+
+          const org = StateManager.getState(KEYS.ORGANIZATION)
+          const project = StateManager.getState(KEYS.PROJECT_ID)
+          if (!org || !project) return
 
           await vscode.commands.executeCommand(
             'setContext',

@@ -7,7 +7,7 @@ export const enum KEYS {
   VARIABLES = 'variables',
   FEATURE_CONFIGURATIONS = 'feature_configurations',
   ENVIRONMENTS = 'environments',
-  ORGANIZATION_ID = 'organization_id',
+  ORGANIZATION = 'organization',
   SEND_METRICS_PROMPTED = 'send_metrics_prompted',
   CODE_USAGE_KEYS = 'code_usage_keys',
 }
@@ -18,7 +18,7 @@ export class StateManager {
 
   static clearState() {
     this.workspaceState.keys().forEach((key) => {
-      if (key !== KEYS.PROJECT_ID && key !== KEYS.PROJECT_NAME) {
+      if (key !== KEYS.ORGANIZATION && key !== KEYS.PROJECT_ID && key !== KEYS.PROJECT_NAME) {
         this.workspaceState.update(key, undefined)
       }
     })
