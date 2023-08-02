@@ -33,7 +33,7 @@ export class UsagesTreeProvider
     const result = {} as Record<string, VariableCodeReference>
     await Promise.all(
       Object.entries(variables).map(async ([key, variable]) => {
-        const data = await getCombinedVariableDetails(variable)
+        const data = await getCombinedVariableDetails(variable, true)
         result[key] = data
       }),
     )

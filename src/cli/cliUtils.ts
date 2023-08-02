@@ -30,6 +30,7 @@ export const initStorage = async () => {
 
 export const getCombinedVariableDetails = async (
   variable: string | Variable,
+  skipConfigurations: boolean = false
 ) => {
   let fullVariable: Variable
   if (typeof variable === 'string') {
@@ -49,6 +50,7 @@ export const getCombinedVariableDetails = async (
     }
 
     const setFeatureConfigsWithEnvNames = async () => {
+      if (skipConfigurations) return
       const featureConfigurations = await getFeatureConfigurations(featureId)
       await Promise.all(
         featureConfigurations?.map(async (config) => {
