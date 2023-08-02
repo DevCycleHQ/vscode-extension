@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-const STATUS_BAR_ITEM: string = 'devcycle-featureflags'
+const STATUS_BAR_ITEM: string = 'devcycle-feature-flags'
 export const statusBarItem = vscode.window.createStatusBarItem(STATUS_BAR_ITEM)
 statusBarItem.name = 'DevCycle Status'
 

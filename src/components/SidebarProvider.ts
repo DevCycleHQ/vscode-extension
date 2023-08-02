@@ -39,10 +39,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
           await vscode.commands.executeCommand(
             'setContext',
-            'devcycle-featureflags.hasCredentialsAndProject',
+            'devcycle-feature-flags.hasCredentialsAndProject',
             true,
           )
-          await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
+          await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
         } catch (e) {
           webviewView.webview.html = this._getHtmlForWebview(
             webviewView.webview,

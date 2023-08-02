@@ -27,13 +27,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
       `DevCycle collects usage metrics to gather information on feature adoption, usage, and frequency. 
       By clicking "Accept", you consent to the collection of this data. Would you like to opt-in?`
     vscode.window.showInformationMessage(sendMetricsMessage, 'Accept', 'Decline').then((selection) => {
-      vscode.workspace.getConfiguration('devcycle-featureflags').update('sendMetrics', selection === 'Accept')
+      vscode.workspace.getConfiguration('devcycle-feature-flags').update('sendMetrics', selection === 'Accept')
       StateManager.setState(KEYS.SEND_METRICS_PROMPTED, true)
     })
   }
 
   const autoLogin = vscode.workspace
-    .getConfiguration('devcycle-featureflags')
+    .getConfiguration('devcycle-feature-flags')
     .get('loginOnWorkspaceOpen')
 
   const sidebarProvider = new SidebarProvider(context.extensionUri)
@@ -56,14 +56,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
   )
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('devcycle-featureflags.init', async () => {
+    vscode.commands.registerCommand('devcycle-feature-flags.init', async () => {
       await init()
     }),
   )
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      'devcycle-featureflags.openLink',
+      'devcycle-feature-flags.openLink',
       async (link: string) => {
         vscode.env.openExternal(vscode.Uri.parse(link))
       },
@@ -72,14 +72,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      'devcycle-featureflags.logout',
+      'devcycle-feature-flags.logout',
       async () => {
         await Promise.all([
           SecretStateManager.instance.clearSecrets(),
           StateManager.clearState(),
           vscode.commands.executeCommand(
             'setContext',
-            'devcycle-featureflags.hasCredentialsAndProject',
+            'devcycle-feature-flags.hasCredentialsAndProject',
             false,
           ),
         ])
@@ -91,7 +91,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      'devcycle-featureflags.refresh-usages',
+      'devcycle-feature-flags.refresh-usages',
       async () => {
         StateManager.clearState()
         await usagesDataProvider.refresh()
@@ -101,7 +101,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      'devcycle-featureflags.show-reference',
+      'devcycle-feature-flags.show-reference',
       async (filePath: string, start: number, end: number) => {
         const document = await vscode.workspace.openTextDocument(filePath)
         await vscode.window.showTextDocument(document)
@@ -119,7 +119,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   if (autoLogin) {
     const isLoggedIn = await autoLoginIfHaveCredentials()
     if (isLoggedIn) {
-      await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
+      await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
     }
   }
 
@@ -127,13 +127,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
   if (status.organization) {
     await vscode.commands.executeCommand(
       'setContext',
-      'devcycle-featureflags.repoConfigured',
+      'devcycle-feature-flags.repoConfigured',
       status.repoConfigExists,
     )
     if (status.hasAccessToken) {
       await vscode.commands.executeCommand(
         'setContext',
-        'devcycle-featureflags.loggedIn',
+        'devcycle-feature-flags.loggedIn',
         status.hasAccessToken,
       )
     }

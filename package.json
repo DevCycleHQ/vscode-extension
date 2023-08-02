@@ -1,6 +1,6 @@
 {
-  "name": "devcycle-featureflags",
-  "displayName": "DevCycle-FeatureFlags",
+  "name": "devcycle-feature-flags",
+  "displayName": "DevCycle Feature Flags",
   "description": "",
   "version": "0.0.1",
   "publisher": "DevCycle",
@@ -15,8 +15,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:devcycle-featureflags.init",
-    "onCommand:devcycle-featureflags.status",
+    "onCommand:devcycle-feature-flags.init",
+    "onCommand:devcycle-feature-flags.status",
     "workspaceContains:.devcycle/config.yml"
   ],
   "main": "./out/extension.js",
@@ -39,13 +39,13 @@
           "type": "webview",
           "id": "devcycle-sidebar",
           "name": "Login",
-          "when": "devcycle-featureflags.hasCredentialsAndProject == false"
+          "when": "devcycle-feature-flags.hasCredentialsAndProject == false"
         },
         {
           "type": "tree",
           "id": "devcycleCodeUsages",
           "name": "Variables",
-          "when": "devcycle-featureflags.hasCredentialsAndProject == true"
+          "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
         }
       ]
     },
@@ -53,7 +53,7 @@
       "editor/context": [],
       "view/title": [
         {
-          "command": "devcycle-featureflags.refresh-usages",
+          "command": "devcycle-feature-flags.refresh-usages",
           "when": "view == devcycleCodeUsages",
           "group": "navigation"
         }
@@ -61,58 +61,58 @@
     },
     "commands": [
       {
-        "command": "devcycle-featureflags.init",
+        "command": "devcycle-feature-flags.init",
         "category": "DevCycle",
         "title": "Initialize Repo",
         "icon": {
           "light": "media/togglebot.svg",
           "dark": "media/togglebot-white.svg"
         },
-        "enablement": "devcycle-featureflags.repoConfigured == false"
+        "enablement": "devcycle-feature-flags.repoConfigured == false"
       },
       {
-        "command": "devcycle-featureflags.logout",
+        "command": "devcycle-feature-flags.logout",
         "category": "DevCycle",
         "title": "Log out of DevCycle",
         "icon": {
           "light": "media/togglebot.svg",
           "dark": "media/togglebot-white.svg"
         },
-        "enablement": "devcycle-featureflags.hasCredentialsAndProject == true"
+        "enablement": "devcycle-feature-flags.hasCredentialsAndProject == true"
       },
       {
-        "command": "devcycle-featureflags.refresh-usages",
+        "command": "devcycle-feature-flags.refresh-usages",
         "category": "DevCycle",
         "title": "Refresh Code Usages",
         "icon": "$(refresh)",
-        "enablement": "devcycle-featureflags.repoConfigured == true"
+        "enablement": "devcycle-feature-flags.repoConfigured == true"
       }
     ],
     "configuration": [
       {
         "title": "DevCycle",
         "properties": {
-          "devcycle-featureflags.loginOnWorkspaceOpen": {
+          "devcycle-feature-flags.loginOnWorkspaceOpen": {
             "type": "boolean",
             "default": false,
             "description": "Automatically log in to DevCycle when a configured workspace is opened."
           },
-          "devcycle-featureflags.usagesOnWorkspaceOpen": {
+          "devcycle-feature-flags.usagesOnWorkspaceOpen": {
             "type": "boolean",
             "default": true,
             "description": "Automatically check for code usages when a configured workspace is opened."
           },
-          "devcycle-featureflags.debug": {
+          "devcycle-feature-flags.debug": {
             "type": "boolean",
             "default": false,
             "description": "Displays debug output for the extension, including what CLI commands are being executed."
           },
-          "devcycle-featureflags.cli": {
+          "devcycle-feature-flags.cli": {
             "type": "string",
             "default": "dvc",
             "description": "How the CLI will be invoked"
           },
-          "devcycle-featureflags.sendMetrics": {
+          "devcycle-feature-flags.sendMetrics": {
             "type": "boolean",
             "default": true,
             "description": "Allow DevCycle to send usage metrics."

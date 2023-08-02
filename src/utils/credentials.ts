@@ -72,7 +72,7 @@ export async function autoLoginIfHaveCredentials() {
   const hasAllCredentials = client_id && client_secret && project_id
   await vscode.commands.executeCommand(
     'setContext',
-    'devcycle-featureflags.hasCredentialsAndProject',
+    'devcycle-feature-flags.hasCredentialsAndProject',
     hasAllCredentials,
   )
 

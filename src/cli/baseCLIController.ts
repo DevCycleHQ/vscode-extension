@@ -52,7 +52,7 @@ export async function init() {
   if (code === 0) {
     await vscode.commands.executeCommand(
       'setContext',
-      'devcycle-featureflags.loggedIn',
+      'devcycle-feature-flags.loggedIn',
       true,
     )
   } else {
@@ -61,7 +61,7 @@ export async function init() {
   hideBusyMessage()
   const organizations = JSON.parse(output) as string[]
   await chooseOrganization(organizations)
-  await vscode.commands.executeCommand('devcycle-featureflags.refresh-usages')
+  await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
   vscode.window.showInformationMessage('DevCycle Configured')
 }
 
@@ -76,7 +76,7 @@ export async function login() {
 
     await vscode.commands.executeCommand(
       'setContext',
-      'devcycle-featureflags.loggedIn',
+      'devcycle-feature-flags.loggedIn',
       true,
     )
     vscode.window.showInformationMessage('Logged in to DevCycle')
@@ -124,7 +124,7 @@ export async function chooseProject(projects: string[]) {
   if (code === 0) {
     await vscode.commands.executeCommand(
       'setContext',
-      'devcycle-featureflags.repoConfigured',
+      'devcycle-feature-flags.repoConfigured',
       true,
     )
   } else {
@@ -152,7 +152,7 @@ export async function logout() {
   if (code === 0) {
     await vscode.commands.executeCommand(
       'setContext',
-      'devcycle-featureflags.loggedIn',
+      'devcycle-feature-flags.loggedIn',
       false,
     )
     vscode.window.showInformationMessage('Logged out of DevCycle')
@@ -172,7 +172,7 @@ export async function addAlias(alias: string, variableKey: string) {
 
 export async function execDvc(cmd: string) {
   const cli =
-    vscode.workspace.getConfiguration('devcycle-featureflags').get('cli') ||
+    vscode.workspace.getConfiguration('devcycle-feature-flags').get('cli') ||
     'dvc'
   const project_id = StateManager.getState(KEYS.PROJECT_ID)
   let shellCommand = `${cli} ${cmd} --headless`
@@ -224,7 +224,7 @@ function getWorkspace() {
 
 function showDebugOutput(message: string) {
   const debug = vscode.workspace
-    .getConfiguration('devcycle-featureflags')
+    .getConfiguration('devcycle-feature-flags')
     .get('debug')
   if (debug) {
     vscode.window.showInformationMessage(message)
