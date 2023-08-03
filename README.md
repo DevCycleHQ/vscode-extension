@@ -1,67 +1,78 @@
-## Features
+# DevCycle Feature Flags extension for Visual Studio Code
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+DevCycle is an intuitive extension for Visual Studio Code, built to manage and keep track of your feature flags from the comfort of your IDE.
 
-For example if there is an image subfolder under your extension project workspace:
+## About DevCycle
 
-\!\[feature X\]\(images/feature-x.png\)
+DevCycle simplifies complex use of feature flags by providing a feature management platform that emphasizes user experience and flexibility.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Learn more on our website: [DevCycle.com](https://devcycle.com).
+
+You can access this GitHub repository at: [https://github.com/DevCycleHQ/VSCode-Extension](https://github.com/DevCycleHQ/VSCode-Extension).
+
+## Feature Overview
+
+### Current Features
+
+
+1. **View All Feature Flags**: The variable view in the extension displays a list of all variables existing within your code and your project.
+
+2. **See Code Usages**: The variable view also shows you where each of your DevCycle variables resides in your codebase, providing a convenient click-to-navigate feature.
+
+3. **Understand Feature Status**: Hovering over your DevCycle variables in your code brings up a card detailing information about the variable and the current status of the feature across environments.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Before getting started with DevCycle, make sure you meet the following requirements:
+
+- You need a DevCycle account. Sign up for a free account [here](https://devcycle.com/signup) (no credit card required).
+- This extension makes use of the  DevCycle CLI. Installation instructions and info can be found [here](https://docs.devcycle.com/cli).
+  - To install via npm, use the command `npm install -g @devcycle/cli`.
+  - To install via brew, use the command `brew install devcycle-cli`.
+
+## Extension Installation
+
+DevCycle extension can be installed directly within Visual Studio Code or via the Visual Studio Code Marketplace.
+
+### Visual Studio Code Marketplace
+1. Visit the DevCycle Feature Flags Extension page at Visual Studio Marketplace.
+2. Click on the "Install" button.
+
+### Within Visual Studio Code
+1. Search for "DevCycle Feature Flags" in the Extensions page.
+2. Click on the "Install" button.
+
+Post-installation, you can start utilizing the extension straightaway. No additional configuration is necessary.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+DevCycle extension contributes the following settings:
 
-For example:
+- `Devcycle-feature-flags: Cli`: Determines how the CLI will be invoked. Default is `dvc`.
+- `Devcycle-feature-flags: Debug`: Displays debug output for the extension, including what CLI commands are being executed. Default is off.
+- `Devcycle-feature-flags: Login On Workspace Open`: Automatically logs into DevCycle when a configured workspace is opened. Default is on.
+- `Devcycle-feature-flags: Send Metrics`: Allows DevCycle to send usage metrics. Default is off.
+- `Devcycle-feature-flags: Usages On Workspace Open`: Automatically checks for code usages when a configured workspace is opened. Default is on.
 
-This extension contributes the following settings:
 
-- `myExtension.enable`: enable/disable this extension
-- `myExtension.thing`: set to `blah` to do something
+## Upcoming Features
 
-## Known Issues
+We're excited about the future of DevCycle! Many advanced features are under development to further enhance the capabilities of the DevCycle extension. To stay updated on our progress, keep checking our GitHub repository and official website.
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+## Contributing
 
-## Release Notes
+DevCycle is an open-source project, and we welcome contributions! If you're interested in contributing, please visit our GitHub repository and check out our contribution guidelines. [Read the development info here](/development.md)
 
-Users appreciate release notes as you update your extension.
+## Documentation
 
-### 1.0.0
+For detailed information about DevCycle and its usage, visit our documentation page: [https://docs.devcycle.com](https://docs.devcycle.com).
 
-Initial release of ...
+## Sign Up for DevCycle
 
-### 1.0.1
+Ready to get started with DevCycle
 
-Fixed issue #.
+Sign up today at [https://devcycle.com/signup](https://devcycle.com/signup). 
 
-### 1.1.0
+Our platform is free to sign up, and we have a transparent pricing model that doesn't charge based on seats. 
 
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-- Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-- Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-- Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-- [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-- [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+View our pricing details here: [https://devcycle.com/pricing](https://devcycle.com/pricing). Start exploring DevCycle today!
