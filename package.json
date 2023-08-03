@@ -2,7 +2,7 @@
   "name": "devcycle-feature-flags",
   "displayName": "DevCycle Feature Flags",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "DevCycle",
   "engines": {
     "vscode": "^1.64.0"
