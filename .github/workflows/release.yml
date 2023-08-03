@@ -22,6 +22,7 @@ on:
           - patch
         default: 'patch'
 
+
 jobs:
   release:
     name: Release
@@ -67,7 +68,7 @@ jobs:
 
       - name: Publish VSCode Extension
         run: |
-          yarn run publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} ${{ github.event.inputs.prerelease === 'true' && '--pre-release' }}
+          yarn run publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
       - name: Push version change
         run: |
