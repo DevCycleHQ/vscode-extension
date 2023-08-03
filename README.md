@@ -61,7 +61,7 @@ We're excited about the future of DevCycle! Many advanced features are under dev
 
 ## Contributing
 
-DevCycle is an open-source project, and we welcome contributions! If you're interested in contributing, please visit our GitHub repository and check out our contribution guidelines. [Read the development info here](/development.md)
+DevCycle is an open-source project, and we welcome contributions! If you're interested in contributing, please visit our GitHub repository and check out our contribution guidelines. [Read the development info here](DEVELOPMENT.md)
 
 ## Documentation
 
