@@ -1,15 +1,16 @@
 {
   "name": "devcycle-feature-flags",
   "displayName": "DevCycle Feature Flags",
-  "description": "",
+  "description": "DevCycle is an intuitive extension for Visual Studio Code, built to manage and keep track of your feature flags from the comfort of your IDE.",
   "version": "0.1.0",
   "publisher": "DevCycle",
+  "icon": "media/togglebot.png",
   "engines": {
     "vscode": "^1.64.0"
   },
   "repository": {
     "type": "git",
-    "url": "CHANGE_WHEN_PUBLIC"
+    "url": "https://github.com/devcyclehq/vscode-extension"
   },
   "categories": [
     "Other"
