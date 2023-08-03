@@ -67,7 +67,12 @@ jobs:
 
       - name: Publish VSCode Extension
         run: |
-          yarn run publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} ${{ github.event.inputs.prerelease && '--pre-release' }}
+          yarn run publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} ${{ github.event.inputs.prerelease === 'true' && '--pre-release' }}
+
+      - name: Push version change
+        run: |
+          git push origin HEAD:main
+        if: inputs.draft != true
 
       - uses: DevCycleHQ/release-action/create-release@main
         id: create-release
