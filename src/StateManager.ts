@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { Environment, Feature, FeatureConfiguration, Organization, Variable } from './cli'
 import { Project } from './cli/projectsCLIController'
+import { RepoConfig } from './utils'
 
 export const enum KEYS {
   ROOT_PATH = 'root_path',
@@ -35,7 +36,7 @@ export class StateManager {
   }
 
   static setState(key: KEYS.ROOT_PATH, value: string | undefined): Thenable<void>
-  static setState(key: KEYS.REPO_CONFIG, value: Record<string, any>): Thenable<void>
+  static setState(key: KEYS.REPO_CONFIG, value: RepoConfig): Thenable<void>
   static setState(key: KEYS.PROJECT_ID, value: string | undefined): Thenable<void>
   static setState(key: KEYS.PROJECTS, value: Record<string, Project> | undefined): Thenable<void>
   static setState(key: KEYS.FEATURES, value: Record<string, Feature> | undefined): Thenable<void>
@@ -50,7 +51,7 @@ export class StateManager {
   }
 
   static getState(key: KEYS.ROOT_PATH): string | undefined
-  static getState(key: KEYS.REPO_CONFIG): Record<string, any> | undefined
+  static getState(key: KEYS.REPO_CONFIG): RepoConfig | undefined
   static getState(key: KEYS.PROJECT_ID): string | undefined
   static getState(key: KEYS.PROJECTS): Record<string, Project> | undefined
   static getState(key: KEYS.FEATURES): Record<string, Feature> | undefined
