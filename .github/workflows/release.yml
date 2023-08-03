@@ -59,7 +59,7 @@ jobs:
       - name: Fill in Rudderstack Key
         run: |
           touch src/analytics.ts
-          echo "const RUDDERSTACK_KEY = '${{ secrets.RUDDERSTACK_KEY }}'" >> src/analytics.ts
+          echo "export const RUDDERSTACK_KEY = '${{ secrets.RUDDERSTACK_KEY }}'" >> src/analytics.ts
 
       - name: Package VSCode Extension
         run: yarn run package
