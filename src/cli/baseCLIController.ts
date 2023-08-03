@@ -2,6 +2,9 @@ import * as vscode from 'vscode'
 import * as cp from 'child_process'
 import { StateManager, KEYS } from '../StateManager'
 import { showBusyMessage, hideBusyMessage } from '../components/statusBarItem'
+import { Organization, selectOrganizationFromConfig, selectOrganizationFromList } from './organizationsCLIController'
+import { loadRepoConfig } from '../utils'
+
 type CommandResponse = {
   output: string
   error: Error | null
@@ -16,11 +19,7 @@ type DevCycleStatus = {
   userConfigExists: 'true' | 'false'
   authConfigPath: string
   hasAccessToken: 'true' | 'false'
-  organization?: {
-    id: string
-    name: string
-    display_name: string
-  }
+  organization?: string
 }
 
 export type JSONMatch = {
@@ -45,12 +44,6 @@ export type Range = {
   end: number
 }
 
-export type Organization = {
-  id: string
-  name: string
-  display_name: string
-}
-
 
 export async function init() {
   showBusyMessage('Initializing DevCycle')
@@ -66,7 +59,7 @@ export async function init() {
   }
   hideBusyMessage()
   const organizations = JSON.parse(output) as Organization[]
-  await chooseOrganization(organizations)
+  await selectOrganizationFromList(organizations)
   await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
   vscode.window.showInformationMessage('DevCycle Configured')
 }
@@ -75,13 +68,18 @@ export async function login() {
   showBusyMessage('Logging into DevCycle')
 
   try {
-    const { output: orgResponse } = await execDvc('organizations get')
-    const organizations = JSON.parse(orgResponse) as Organization[]
+    await loadRepoConfig()
+    StateManager.setState(KEYS.ORGANIZATION, undefined)
+    StateManager.setState(KEYS.PROJECT_ID, undefined)
 
-    await chooseOrganization(organizations)
-    const org = StateManager.getState(KEYS.ORGANIZATION)
-    const project = StateManager.getState(KEYS.PROJECT_ID)
-    if (!org || !project) { return }
+    const orgFromConfig = await selectOrganizationFromConfig()
+
+    if (!orgFromConfig) {
+      const { output: orgResponse } = await execDvc('organizations get')
+      const organizations = JSON.parse(orgResponse) as Organization[]
+
+      await selectOrganizationFromList(organizations)
+    }
 
     await vscode.commands.executeCommand(
       'setContext',
@@ -91,61 +89,11 @@ export async function login() {
     vscode.window.showInformationMessage('Logged in to DevCycle')
   } catch (e) {
     if (e instanceof Error) {
-      vscode.window.showErrorMessage(`Login failed ${e.message}}`)
+      showDebugOutput(`Login failed ${e.message}`)
+      throw e
     }
-  }
-  hideBusyMessage()
-}
-
-export async function chooseOrganization(organizations: Organization[]) {
-  const quickPickItems = organizations.map((org) => ({
-    label: org.display_name,
-    value: org
-  }))
-  const organization = quickPickItems.length === 1
-    ? quickPickItems[0].value
-    : (await vscode.window.showQuickPick(quickPickItems, {
-      ignoreFocusOut: true,
-      title: 'Select DevCycle Organization',
-    }))?.value
-  if (!organization) { return }
-  StateManager.setState(KEYS.ORGANIZATION, organization)
-  StateManager.setState(KEYS.PROJECT_ID, undefined)
-
-  showBusyMessage('Logging into DevCycle organization')
-  const { code, error, output } = await execDvc(`organizations select --org=${organization?.name}`)
-  hideBusyMessage()
-
-  if (code !== 0) {
-    vscode.window.showErrorMessage(
-      `Organization login failed ${error?.message}}`,
-    )
-    throw error
-  }
-
-  const projects = JSON.parse(output) as string[]
-  await chooseProject(projects)
-}
-
-export async function chooseProject(projects: string[]) {
-  const project = projects.length === 1
-    ? projects[0]
-    : await vscode.window.showQuickPick(projects, {
-      ignoreFocusOut: true,
-      title: 'Select DevCycle Project',
-    })
-  if (!project) { return }
-  const { code, error } = await execDvc(`projects select --project=${project}`)
-  if (code === 0) {
-    await vscode.commands.executeCommand(
-      'setContext',
-      'devcycle-feature-flags.repoConfigured',
-      true,
-    )
-    StateManager.setState(KEYS.PROJECT_ID, project)
-  } else {
-    vscode.window.showErrorMessage(`Selecting project failed ${error?.message}}`)
-    throw error
+  } finally {
+    hideBusyMessage()
   }
 }
 

@@ -1,7 +1,7 @@
 ;('use strict')
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
-import { init, logout, status as cliStatus, Variable } from './cli'
+import { init, logout, status as cliStatus } from './cli'
 import { autoLoginIfHaveCredentials } from './utils/credentials'
 import { SidebarProvider } from './components/SidebarProvider'
 
@@ -9,7 +9,7 @@ import { UsagesTreeProvider } from './components/UsagesTree'
 import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
 import { CodeUsageNode } from './components/UsagesTree/CodeUsageNode'
-import yaml from 'js-yaml'
+import { loadRepoConfig } from './utils'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -17,23 +17,6 @@ exports.deactivate = exports.activate = void 0
 const REGEX = /[A-Za-z0-9][.A-Za-z_\-0-9]*/
 const SCHEME_FILE = {
   scheme: 'file',
-}
-
-const loadRepoConfig = async (rootPath?: string, repoConfigPath?: string) => {
-  if (rootPath && repoConfigPath) {
-    try {
-      const configFileByteArray = await vscode.workspace.fs.readFile(
-        vscode.Uri.parse(`file:${rootPath}/${repoConfigPath}`)
-      )
-      const configFileString = new TextDecoder().decode(configFileByteArray)
-      const configFileJson = yaml.load(configFileString) as Record<string, any> | undefined
-      if (configFileJson) {
-        StateManager.setState(KEYS.REPO_CONFIG, configFileJson)
-      }
-    } catch { // do nothing if file doesn't exist
-      return
-    }
-  }
 }
 
 export const activate = async (context: vscode.ExtensionContext) => {
@@ -72,7 +55,9 @@ export const activate = async (context: vscode.ExtensionContext) => {
       vscode.workspace.workspaceFolders.length > 0
       ? vscode.workspace.workspaceFolders[0].uri.fsPath
       : undefined
+  StateManager.setState(KEYS.ROOT_PATH, rootPath)
   const usagesDataProvider = new UsagesTreeProvider(rootPath, context)
+
   const usagesTreeView = vscode.window.createTreeView(
     'devcycleCodeUsages',
     { treeDataProvider: usagesDataProvider },
@@ -83,7 +68,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   const status = await cliStatus()
 
-  await loadRepoConfig(rootPath, status.repoConfigPath)
+  await loadRepoConfig()
 
   context.subscriptions.push(
     vscode.commands.registerCommand(

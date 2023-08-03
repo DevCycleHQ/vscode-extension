@@ -1,5 +1,4 @@
 import { KEYS, StateManager } from '../StateManager'
-import { Organization } from './baseCLIController'
 import { getAllEnvironments, getEnvironment } from './environmentsCLIController'
 import {
   Feature,
