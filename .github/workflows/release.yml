@@ -1,3 +1,4 @@
+name: Release
 on:
   workflow_dispatch:
     inputs:
@@ -66,7 +67,7 @@ jobs:
 
       - name: Publish VSCode Extension
         run: |
-          yarn run publish -p ${{ secrets.VS_MARKETPLACE_TOKEN }} ${{ github.event.inputs.prerelease && '--pre-release' }}
+          yarn run publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} ${{ github.event.inputs.prerelease && '--pre-release' }}
 
       - uses: DevCycleHQ/release-action/create-release@main
         id: create-release
