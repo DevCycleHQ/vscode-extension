@@ -16,6 +16,7 @@ export const enum KEYS {
   SEND_METRICS_PROMPTED = 'send_metrics_prompted',
   CODE_USAGE_KEYS = 'code_usage_keys',
   EXTENSION_INSTALLED = 'extension_installed',
+  AUTH0_USER_ID = 'auth0_user_id',
 }
 
 export class StateManager {
@@ -27,8 +28,10 @@ export class StateManager {
       if (
           key !== KEYS.PROJECT_ID &&
           key !== KEYS.ORGANIZATION &&
-          key !== KEYS.EXTENSION_INSTALLED &&
-          key !== KEYS.ROOT_PATH
+          key !== KEYS.ROOT_PATH &&
+          key !== KEYS.AUTH0_USER_ID &&
+          key !== KEYS.SEND_METRICS_PROMPTED &&
+          key !== KEYS.EXTENSION_INSTALLED
         ) {
         this.workspaceState.update(key, undefined)
       }
@@ -46,6 +49,7 @@ export class StateManager {
   static setState(key: KEYS.ORGANIZATION, value: Organization | undefined): Thenable<void>
   static setState(key: KEYS.SEND_METRICS_PROMPTED, value: boolean | undefined): Thenable<void>
   static setState(key: KEYS.CODE_USAGE_KEYS, value: string[] | undefined): Thenable<void>
+  static setState(key: KEYS.AUTH0_USER_ID, value: string | undefined): Thenable<void>
   static setState(key: string, value: any) {
     return this.workspaceState.update(key, value)
   }
@@ -61,6 +65,7 @@ export class StateManager {
   static getState(key: KEYS.ORGANIZATION): Organization | undefined
   static getState(key: KEYS.SEND_METRICS_PROMPTED): boolean | undefined
   static getState(key: KEYS.CODE_USAGE_KEYS): string[] | undefined
+  static getState(key: KEYS.AUTH0_USER_ID): string | undefined
   static getState(key: string) {
     return this.workspaceState.get(key)
   }
