@@ -2,7 +2,6 @@ import * as vscode from 'vscode'
 import { execDvc } from './baseCLIController'
 import { getAllProjects, selectProjectFromConfig, selectProjectFromList } from './projectsCLIController'
 import { KEYS, StateManager } from '../StateManager'
-import { loadRepoConfig } from '../utils'
 import { hideBusyMessage, showBusyMessage } from '../components/statusBarItem'
 
 export type Organization = {
@@ -48,6 +47,7 @@ export async function selectOrganizationFromList(organizations: Organization[]) 
   showBusyMessage('Logging into DevCycle organization')
 
   await selectOrganization(selectedOrg).finally(hideBusyMessage)
+  return selectedOrg
 }
 
 async function selectOrganization(org: Organization) {
