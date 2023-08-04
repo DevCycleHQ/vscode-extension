@@ -55,6 +55,7 @@ export async function selectProjectFromList(projects: string[]) {
   }
 
   await selectProject(project)
+  return project
 }
 
 async function selectProject(project: string) {

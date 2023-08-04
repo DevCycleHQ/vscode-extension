@@ -10,6 +10,9 @@ export type RepoConfig = {
     name: string
     display_name: string
   }
+  codeInsights?: {
+    variableAliases?: Record<string, string>
+  }
 }
 
 export const loadRepoConfig = async (): Promise<RepoConfig> => {
