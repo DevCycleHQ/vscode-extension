@@ -73,7 +73,7 @@ export const getCombinedVariableDetails = async (
   }
 }
 
-export const getOrganizationId = async () => {
+export const getOrganizationId = () => {
   const cachedOrganization = StateManager.getState(KEYS.ORGANIZATION)
   return cachedOrganization?.id
 }

@@ -2,6 +2,7 @@ import axios from "axios";
 import * as vscode from 'vscode'
 import { RUDDERSTACK_KEY } from "./analytics";
 import { getOrganizationId } from "./cli";
+import { KEYS, StateManager } from "./StateManager";
 
 type RudderstackEvent = {
   event: string,
@@ -23,10 +24,11 @@ export const trackRudderstackEvent = async (
   const sendMetrics = vscode.workspace.getConfiguration('devcycle-feature-flags').get('sendMetrics')
   if (sendMetrics) {
     const orgId = getOrganizationId()
-    if (!orgId) { return }
+    const userId = StateManager.getState(KEYS.AUTH0_USER_ID)
+    if (!userId) { return }
     const event = {
       event: eventName,
-      userId: orgId,
+      userId: userId,
       properties: {
         a0_organization: orgId
       }

@@ -20,6 +20,7 @@ type DevCycleStatus = {
   authConfigPath: string
   hasAccessToken: 'true' | 'false'
   organization?: string
+  a0UserId: string
 }
 
 export type JSONMatch = {
@@ -81,6 +82,10 @@ export async function login() {
       await selectOrganizationFromList(organizations)
     }
 
+    const cliStatus = await status()
+    const auth0UserId = cliStatus.a0UserId
+    StateManager.setState(KEYS.AUTH0_USER_ID, auth0UserId)
+
     await vscode.commands.executeCommand(
       'setContext',
       'devcycle-feature-flags.loggedIn',
@@ -140,7 +145,7 @@ export async function execDvc(cmd: string) {
     vscode.workspace.getConfiguration('devcycle-feature-flags').get('cli') ||
     'dvc'
   const project_id = StateManager.getState(KEYS.PROJECT_ID)
-  let shellCommand = `${cli} ${cmd} --headless --caller vs_code_extension`
+  let shellCommand = `${cli} ${cmd} --headless --caller vscode_extension`
   if (project_id) shellCommand += ` --project ${project_id}`
   return execShell(shellCommand)
 }
