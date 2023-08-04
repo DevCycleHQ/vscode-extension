@@ -9,7 +9,7 @@ import { UsagesTreeProvider } from './components/UsagesTree'
 import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
 import { CodeUsageNode } from './components/UsagesTree/CodeUsageNode'
-import { loadRepoConfig } from './utils'
+import { getRepoConfig, loadRepoConfig } from './utils'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -182,7 +182,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
         return
       }
 
-      const variableAliases = StateManager.getState(KEYS.REPO_CONFIG)?.codeInsights?.variableAliases || {}
+      const variableAliases = (await getRepoConfig()).codeInsights?.variableAliases || {}
       let variableKey = document.getText(range)
       variableKey = variableAliases[variableKey] || variableKey
 

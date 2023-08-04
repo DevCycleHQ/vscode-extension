@@ -26,9 +26,19 @@ export const loadRepoConfig = async (): Promise<RepoConfig> => {
       const configFileString = new TextDecoder().decode(configFileByteArray)
       const configFileJson = yaml.load(configFileString) as RepoConfig
       StateManager.setState(KEYS.REPO_CONFIG, configFileJson)
-      return configFileJson
+      return configFileJson || {}
     } catch (e) {}
   }
   StateManager.setState(KEYS.REPO_CONFIG, {})
   return {}
+}
+
+export const getRepoConfig = async () => {
+  const storedConfig = StateManager.getState(KEYS.REPO_CONFIG)
+  if (storedConfig) {
+    return storedConfig
+  }
+  else {
+    return await loadRepoConfig()
+  }
 }
