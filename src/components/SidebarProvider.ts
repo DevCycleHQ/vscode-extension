@@ -39,10 +39,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         try {
           await login()
 
-          const org = StateManager.getState(KEYS.ORGANIZATION)
-          const project = StateManager.getState(KEYS.PROJECT_ID)
-          if (!org || !project) { return }
-
           await vscode.commands.executeCommand(
             'setContext',
             'devcycle-feature-flags.hasCredentialsAndProject',
