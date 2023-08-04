@@ -2,8 +2,8 @@ import * as vscode from 'vscode'
 import { execDvc } from './baseCLIController'
 import { getAllProjects, selectProjectFromConfig, selectProjectFromList } from './projectsCLIController'
 import { KEYS, StateManager } from '../StateManager'
-import { loadRepoConfig } from '../utils'
 import { hideBusyMessage, showBusyMessage } from '../components/statusBarItem'
+import { getRepoConfig } from '../utils'
 
 export type Organization = {
   id: string
@@ -12,7 +12,7 @@ export type Organization = {
 }
 
 export async function selectOrganizationFromConfig() {
-  const { org: orgFromConfig } = StateManager.getState(KEYS.REPO_CONFIG) || {}
+  const { org: orgFromConfig } = await getRepoConfig()
 
   if (orgFromConfig) {
     await execDvc('login again')

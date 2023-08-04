@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from '../StateManager'
 import { execDvc } from './baseCLIController'
-import { loadRepoConfig } from '../utils'
+import { getRepoConfig } from '../utils'
 
 export type Project = {
   _id: string
@@ -33,7 +33,7 @@ export async function getAllProjects() {
 }
 
 export async function selectProjectFromConfig() {
-  const { project: projFromConfig } = StateManager.getState(KEYS.REPO_CONFIG) || {}
+  const { project: projFromConfig } = await getRepoConfig()
 
   if (projFromConfig) {
     await selectProject(projFromConfig)
