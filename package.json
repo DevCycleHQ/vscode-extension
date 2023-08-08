@@ -38,9 +38,15 @@
       "dvcView": [
         {
           "type": "webview",
+          "id": "devcycle-startup",
+          "name": "DevCycle",
+          "when": "devcycle-feature-flags.shouldShowCliView || devcycle-feature-flags.shouldShowWorkspaceView"
+        },
+        {
+          "type": "webview",
           "id": "devcycle-sidebar",
-          "name": "Login",
-          "when": "devcycle-feature-flags.hasCredentialsAndProject == false"
+          "name": "DevCycle",
+          "when": "!devcycle-feature-flags.shouldShowCliView && !devcycle-feature-flags.shouldShowWorkspaceView && !devcycle-feature-flags.hasCredentialsAndProject"
         },
         {
           "type": "tree",
