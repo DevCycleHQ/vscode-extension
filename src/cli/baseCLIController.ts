@@ -154,14 +154,8 @@ function execShell(cmd: string) {
   showDebugOutput(`Executing shell command ${cmd}`)
   return new Promise<CommandResponse>((resolve, reject) => {
     const workspace = getWorkspace()
-    if (!workspace) {
-      vscode.window.showErrorMessage(
-        'DevCycle extension requires an open workspace',
-      )
-      return
-    }
     const cpOptions: cp.ExecOptions = {
-      cwd: workspace.uri.fsPath,
+      cwd: workspace?.uri?.fsPath,
     }
     cp.exec(cmd, cpOptions, (err, out) => {
       if (err) {
@@ -199,4 +193,14 @@ function showDebugOutput(message: string) {
   if (debug) {
     vscode.window.showInformationMessage(message)
   }
+}
+
+export async function isCliInstalled() {
+  const { error } = await execDvc('--version')
+  return !error
+}
+
+export function hasWorkSpace() {
+  const workspaces = vscode.workspace.workspaceFolders
+  return !!workspaces
 }

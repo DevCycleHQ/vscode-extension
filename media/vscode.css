@@ -4,6 +4,8 @@
   --input-padding-horizontal: 4px;
   --input-margin-vertical: 4px;
   --input-margin-horizontal: 0;
+  --preview-padding-vertical: 10px;
+  --preview-padding-horizontal: 20px;
 }
 
 body {
@@ -42,6 +44,15 @@ a:active {
 code {
   font-size: var(--vscode-editor-font-size);
   font-family: var(--vscode-editor-font-family);
+}
+
+pre {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--preview-padding-vertical) var(--preview-padding-horizontal);
+  background-color: var(--vscode-input-background);
+  overflow-x: auto;
 }
 
 button {

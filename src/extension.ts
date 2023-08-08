@@ -10,6 +10,8 @@ import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
 import { CodeUsageNode } from './components/UsagesTree/CodeUsageNode'
 import { getRepoConfig, loadRepoConfig } from './utils'
+import { setUpCliStartupView, setUpWorkspaceStartupView } from './utils/setUpViews'
+import { STARTUP_VIEWS, StartupViewProvider } from './components/StartupViewProvider'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -41,6 +43,22 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const autoLogin = vscode.workspace
     .getConfiguration('devcycle-feature-flags')
     .get('loginOnWorkspaceOpen')
+  
+  let startupViewProvider: StartupViewProvider | undefined
+  if (await setUpCliStartupView()) {
+    startupViewProvider = new StartupViewProvider(context.extensionUri, STARTUP_VIEWS.CLI)
+  } else if (setUpWorkspaceStartupView()) {
+    startupViewProvider = new StartupViewProvider(context.extensionUri, STARTUP_VIEWS.WORKSPACE)
+  }
+
+  if (startupViewProvider) {
+    context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider(
+        'devcycle-startup',
+        startupViewProvider
+      ),
+    )
+  }
 
   const sidebarProvider = new SidebarProvider(context.extensionUri)
   context.subscriptions.push(
