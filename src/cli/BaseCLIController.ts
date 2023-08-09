@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as cp from 'child_process'
+import * as semver from 'semver'
 import { StateManager, KEYS } from '../StateManager'
 
 type CommandResponse = {
@@ -87,5 +88,19 @@ export class BaseCLIController {
   public async isCliInstalled() {
     const { error } = await this.execDvc('--version')
     return !error
+  }
+  
+  public requiredPackageVersion = '5.2.1'
+  public packageName = '@devcycle/cli'
+
+  public async isCliMinVersion() {
+    const { error, output } = await this.execShell(`npm list -g ${this.packageName} --depth=0 --json`)
+    if (error) {
+      console.error(`Error checking package version: ${error.message}`);
+      return false
+    }
+    const parsed = JSON.parse(output)
+    const installedVersion = parsed.dependencies[this.packageName]?.version
+    return installedVersion && semver.gte(this.requiredPackageVersion, installedVersion)
   }
 }
