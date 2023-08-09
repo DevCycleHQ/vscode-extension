@@ -2,10 +2,11 @@ import * as vscode from 'vscode'
 import { CombinedVariableData, getCombinedVariableDetails } from '../cli'
 
 export const getHoverString = async (
+  folder: vscode.WorkspaceFolder,
   variableKey: string,
   extensionUri: string,
 ) => {
-  const variableData = await getCombinedVariableDetails(variableKey)
+  const variableData = await getCombinedVariableDetails(folder, variableKey)
 
   const hoverString = new vscode.MarkdownString('')
   hoverString.isTrusted = true

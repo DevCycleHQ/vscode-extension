@@ -1,8 +1,10 @@
 import * as vscode from 'vscode'
-import { hasWorkSpace, isCliInstalled } from '../cli'
+import { BaseCLIController } from '../cli'
 
 export const setUpCliStartupView = async () => {
-    const shouldShowCliStartUpView = !(await isCliInstalled())
+    const [folder] = vscode.workspace.workspaceFolders || []
+    const cli = new BaseCLIController(folder)
+    const shouldShowCliStartUpView = !(await cli.isCliInstalled())
 
     vscode.commands.executeCommand(
         'setContext',
@@ -20,7 +22,7 @@ export const setUpCliStartupView = async () => {
 }
 
 export const setUpWorkspaceStartupView = () => {
-    const shouldShowWorkspaceView = !hasWorkSpace()
+    const shouldShowWorkspaceView = !vscode.workspace.workspaceFolders
 
     vscode.commands.executeCommand(
         'setContext',

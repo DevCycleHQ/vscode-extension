@@ -2,9 +2,8 @@ import * as vscode from 'vscode'
 import { assert, expect } from 'chai'
 import { describe, it, beforeEach, afterEach } from 'mocha'
 import sinon from 'sinon'
-import { getAllProjects, selectProjectFromConfig, selectProjectFromList } from './projectsCLIController'
+import { ProjectsCLIController } from './ProjectsCLIController'
 import { StateManager } from '../StateManager'
-import * as baseCLIController from './baseCLIController'
 
 const mockCachedProjects = {
   'cached-project': {
@@ -25,15 +24,17 @@ const mockCLIProjects = [
 const mockSetState = sinon.stub()
 const mockGetState = sinon.stub().returns(null)
 
-describe('projectsCLIController', () => {
+describe('ProjectsCLIController', () => {
+  const folder = { name: 'test-folder', uri: vscode.Uri.parse('file:///test-folder'), index: 0 }
+  const projectsCLIController = new ProjectsCLIController(folder)
   let execDvcStub: sinon.SinonStub
 
   beforeEach(() => {
-    StateManager.getState = mockGetState
-    StateManager.setState = mockSetState
+    StateManager.getFolderState = mockGetState
+    StateManager.setFolderState = mockSetState
     mockGetState.returns(null)
 
-    execDvcStub = sinon.stub(baseCLIController, 'execDvc').resolves({
+    execDvcStub = sinon.stub(projectsCLIController, 'execDvc').resolves({
       code: 0,
       output: JSON.stringify(mockCLIProjects),
       error: null,
@@ -48,14 +49,14 @@ describe('projectsCLIController', () => {
     it('should use cached projects if available', async () => {
       mockGetState.returns(mockCachedProjects)
 
-      const result = await getAllProjects()
+      const result = await projectsCLIController.getAllProjects()
 
       expect(result).to.deep.equal(mockCachedProjects)
-      sinon.assert.calledWith(mockGetState, 'projects')
+      sinon.assert.calledWith(mockGetState, 'test-folder', 'projects')
     })
 
     it('should use CLI to fetch projects if none cached', async () => {
-      const result = await getAllProjects()
+      const result = await projectsCLIController.getAllProjects()
 
       assert.isTrue(execDvcStub.calledWithExactly('projects get'))
       const expectedCLIResult = {
@@ -69,10 +70,10 @@ describe('projectsCLIController', () => {
     it('calls cli to select project when it exists in config', async () => {
       mockGetState.returns({ project: 'project-id' })
 
-      const result = await selectProjectFromConfig()
+      const result = await projectsCLIController.selectProjectFromConfig()
 
       expect(result).to.equal('project-id')
-      sinon.assert.calledWith(mockGetState, 'repo_config')
+      sinon.assert.calledWith(mockGetState, 'test-folder', 'repo_config')
 
       assert.isTrue(execDvcStub.calledWithExactly('projects select --project=project-id'))
     })
@@ -80,10 +81,10 @@ describe('projectsCLIController', () => {
     it('returns undefined when project is not set in config', async () => {
       mockGetState.returns({})
 
-      const result = await selectProjectFromConfig()
+      const result = await projectsCLIController.selectProjectFromConfig()
 
       expect(result).to.be.undefined
-      sinon.assert.calledWith(mockGetState, 'repo_config')
+      sinon.assert.calledWith(mockGetState, 'test-folder', 'repo_config')
 
       sinon.assert.notCalled(execDvcStub)
     })
@@ -93,7 +94,7 @@ describe('projectsCLIController', () => {
     it('calls cli to select project when only one in list', async () => {
       const projectKey = 'hello-world'
 
-      const result = await selectProjectFromList([projectKey])
+      const result = await projectsCLIController.selectProjectFromList([projectKey])
 
       expect(result).to.equal(projectKey)
 
@@ -105,7 +106,7 @@ describe('projectsCLIController', () => {
         .stub(vscode.window, 'showQuickPick')
         .resolves('foo-bar' as unknown as vscode.QuickPickItem)
 
-      const result = await selectProjectFromList(['hello-world', 'foo-bar'])
+      const result = await projectsCLIController.selectProjectFromList(['hello-world', 'foo-bar'])
 
       expect(result).to.equal('foo-bar')
 

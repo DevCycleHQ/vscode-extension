@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../utils/getNonce'
-import { getOrganizationId, login } from '../cli'
-import { KEYS, StateManager } from '../StateManager'
+import { AuthCLIController } from '../cli'
 
 const enum VIEWS {
   DEFAULT = 'default',
@@ -37,14 +36,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (data: Data) => {
       if (data.type === ACTIONS.LOGIN) {
         try {
-          await login()
+          vscode.workspace.workspaceFolders?.forEach(async (folder) => {
+            const cli = new AuthCLIController(folder)
+            await cli.login()
 
-          await vscode.commands.executeCommand(
-            'setContext',
-            'devcycle-feature-flags.hasCredentialsAndProject',
-            true,
-          )
-          await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
+            await vscode.commands.executeCommand(
+              'setContext',
+              'devcycle-feature-flags.hasCredentialsAndProject',
+              true,
+            )
+            await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages', folder)
+          })
         } catch (e) {
           webviewView.webview.html = this._getHtmlForWebview(
             webviewView.webview,
