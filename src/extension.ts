@@ -1,7 +1,7 @@
 ;('use strict')
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
-import { init, logout, status as cliStatus } from './cli'
+import { BaseCLIController, AuthCLIController, getOrganizationId } from './cli'
 import { autoLoginIfHaveCredentials } from './utils/credentials'
 import { SidebarProvider } from './components/SidebarProvider'
 
@@ -25,19 +25,22 @@ export const activate = async (context: vscode.ExtensionContext) => {
   StateManager.globalState = context.globalState
   StateManager.workspaceState = context.workspaceState
 
-  if (!StateManager.getState(KEYS.SEND_METRICS_PROMPTED)) {
+  const [workspaceFolder] = vscode.workspace.workspaceFolders || []
+
+  if (!StateManager.getWorkspaceState(KEYS.SEND_METRICS_PROMPTED)) {
     const sendMetricsMessage = 
       `DevCycle collects usage metrics to gather information on feature adoption, usage, and frequency. 
       By clicking "Accept", you consent to the collection of this data. Would you like to opt-in?`
     vscode.window.showInformationMessage(sendMetricsMessage, 'Accept', 'Decline').then((selection) => {
       vscode.workspace.getConfiguration('devcycle-feature-flags').update('sendMetrics', selection === 'Accept')
-      StateManager.setState(KEYS.SEND_METRICS_PROMPTED, true)
+      StateManager.setWorkspaceState(KEYS.SEND_METRICS_PROMPTED, true)
     })
   }
  
-  if (!StateManager.globalState.get(KEYS.EXTENSION_INSTALLED)) {
-    await StateManager.globalState.update(KEYS.EXTENSION_INSTALLED, true)
-    trackRudderstackEvent('Extension Installed')
+  if (!StateManager.getGlobalState(KEYS.EXTENSION_INSTALLED)) {
+    const orgId = getOrganizationId(workspaceFolder)
+    trackRudderstackEvent('Extension Installed', orgId)
+    await StateManager.setGlobalState(KEYS.EXTENSION_INSTALLED, true)
   }
 
   const autoLogin = vscode.workspace
@@ -68,31 +71,28 @@ export const activate = async (context: vscode.ExtensionContext) => {
     ),
   )
 
-  const rootPath =
-    vscode.workspace.workspaceFolders &&
-      vscode.workspace.workspaceFolders.length > 0
-      ? vscode.workspace.workspaceFolders[0].uri.fsPath
-      : undefined
-  StateManager.setState(KEYS.ROOT_PATH, rootPath)
-  const usagesDataProvider = new UsagesTreeProvider(rootPath, context)
+  // TODO: render all folders
+  const usagesDataProvider = new UsagesTreeProvider(workspaceFolder, context)
 
   const usagesTreeView = vscode.window.createTreeView(
     'devcycleCodeUsages',
     { treeDataProvider: usagesDataProvider },
   )
   usagesTreeView.onDidChangeVisibility(async (e) => {
-    trackRudderstackEvent('Usages Viewed')
+    const orgId = getOrganizationId(workspaceFolder)
+    trackRudderstackEvent('Usages Viewed', orgId)
   })
 
-  const status = await cliStatus()
-
-  await loadRepoConfig()
+  vscode.workspace.workspaceFolders?.forEach(async (folder) => {
+    await loadRepoConfig(folder)
+  })
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
       'devcycle-featureflags.usagesNodeClicked',
       async (node: CodeUsageNode) => {
-        trackRudderstackEvent('Code Usage Clicked')
+        const orgId = getOrganizationId(workspaceFolder)
+        trackRudderstackEvent('Code Usage Clicked', orgId)
       }
     )
   )
@@ -110,8 +110,12 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('devcycle-feature-flags.init', async () => {
-      trackRudderstackEvent('Init Command Ran')
-      await init()
+      vscode.workspace.workspaceFolders?.forEach(async (folder) => {
+        const orgId = getOrganizationId(folder)
+        trackRudderstackEvent('Init Command Ran', orgId)
+        const cli = new AuthCLIController(folder)
+        await cli.init()
+      })
     }),
   )
 
@@ -128,7 +132,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
     vscode.commands.registerCommand(
       'devcycle-feature-flags.logout',
       async () => {
-        trackRudderstackEvent('Logout Command Ran')
         await Promise.all([
           StateManager.clearState(),
           vscode.commands.executeCommand(
@@ -137,7 +140,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
             false,
           ),
         ])
-        await logout()
+        const [folder] = vscode.workspace.workspaceFolders || []
+        if (folder) {
+          const cli = new AuthCLIController(folder)
+          await cli.logout()
+        }
+        const orgId = getOrganizationId(folder)
+        trackRudderstackEvent('Logout Command Ran', orgId)
       },
     ),
   )
@@ -145,8 +154,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       'devcycle-feature-flags.refresh-usages',
-      async () => {
-        StateManager.clearState()
+      async (folder: vscode.WorkspaceFolder) => {
+        StateManager.clearFolderState(folder.name)
         await usagesDataProvider.refresh()
       },
     ),
@@ -169,50 +178,59 @@ export const activate = async (context: vscode.ExtensionContext) => {
     ),
   )
 
-  if (autoLogin) {
-    const isLoggedIn = await autoLoginIfHaveCredentials()
-    if (isLoggedIn) {
-      await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
+  vscode.workspace.workspaceFolders?.forEach(async (folder) => {
+    if (autoLogin) {
+        const isLoggedIn = await autoLoginIfHaveCredentials(folder)
+        if (isLoggedIn) {
+          await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages', folder)
+        }
     }
-  }
 
-  if (status.organization) {
-    await vscode.commands.executeCommand(
-      'setContext',
-      'devcycle-feature-flags.repoConfigured',
-      status.repoConfigExists,
-    )
-    if (status.hasAccessToken) {
+    const cli = new BaseCLIController(folder)
+    const status = await cli.status()
+    if (status.organization) {
+      // TODO: scope commands to folder
       await vscode.commands.executeCommand(
         'setContext',
-        'devcycle-feature-flags.loggedIn',
-        status.hasAccessToken,
+        'devcycle-feature-flags.repoConfigured',
+        status.repoConfigExists,
       )
+      if (status.hasAccessToken) {
+        await vscode.commands.executeCommand(
+          'setContext',
+          'devcycle-feature-flags.loggedIn',
+          status.hasAccessToken,
+        )
+      }
     }
-  }
+  })
 
   // On Hover
   vscode.languages.registerHoverProvider(SCHEME_FILE, {
     async provideHover(document, position) {
+      const activeDocument = vscode.window.activeTextEditor?.document
+      const currentFolder = activeDocument ? vscode.workspace.getWorkspaceFolder(activeDocument.uri) : undefined
+      if (!currentFolder) return
       const range = document.getWordRangeAtPosition(position, REGEX)
 
       if (!range) {
         return
       }
 
-      const variableAliases = (await getRepoConfig()).codeInsights?.variableAliases || {}
+      const variableAliases = (await getRepoConfig(currentFolder)).codeInsights?.variableAliases || {}
       let variableKey = document.getText(range)
       variableKey = variableAliases[variableKey] || variableKey
 
-      const variables = StateManager.getState(KEYS.VARIABLES) || {}
+      const variables = StateManager.getFolderState(currentFolder.name, KEYS.VARIABLES) || {}
       const keyInAPIVariables = !!variables[variableKey]        
-      const keyInCodeUsages = StateManager.getState(KEYS.CODE_USAGE_KEYS)?.includes(variableKey)
+      const keyInCodeUsages = StateManager.getFolderState(currentFolder.name, KEYS.CODE_USAGE_KEYS)?.includes(variableKey)
       
       if (!keyInAPIVariables && !keyInCodeUsages) {
         return
       }
 
       const hoverString = await getHoverString(
+        currentFolder,
         variableKey,
         context.extensionUri.toString(),
       )

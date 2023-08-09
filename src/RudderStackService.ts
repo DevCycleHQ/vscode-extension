@@ -19,12 +19,12 @@ const rudderstackClient = axios.create({
 })
 
 export const trackRudderstackEvent = async (
-  eventName: string
+  eventName: string,
+  orgId?: string,
 ): Promise<void> => {
   const sendMetrics = vscode.workspace.getConfiguration('devcycle-feature-flags').get('sendMetrics')
   if (sendMetrics) {
-    const orgId = getOrganizationId()
-    const userId = StateManager.getState(KEYS.AUTH0_USER_ID)
+    const userId = StateManager.getWorkspaceState(KEYS.AUTH0_USER_ID)
     if (!userId) { return }
     const event = {
       event: eventName,

@@ -1,9 +1,9 @@
+import * as vscode from 'vscode'
 import { assert, expect } from 'chai'
 import { describe, it, beforeEach, afterEach } from 'mocha'
 import sinon from 'sinon'
-import { getAllVariables, getVariable } from './variablesCLIController'
+import { VariablesCLIController } from './VariablesCLIController'
 import { StateManager } from '../StateManager'
-import * as baseCLIController from './baseCLIController'
 
 const mockCachedVariables = {
   'cached-variable': {
@@ -28,15 +28,17 @@ const mockCLIVariables = [
 const mockSetState = sinon.stub()
 const mockGetState = sinon.stub().returns(null)
 
-describe('variablesCLIController', () => {
+describe('VariablesCLIController', () => {
+  const folder = { name: 'test-folder', uri: vscode.Uri.parse('file:///test-folder'), index: 0 }
+  const variablesCLIController = new VariablesCLIController(folder)
   let execDvcStub: sinon.SinonStub
 
   beforeEach(function() {
-    StateManager.getState = mockGetState
-    StateManager.setState = mockSetState
+    StateManager.getFolderState = mockGetState
+    StateManager.setFolderState = mockSetState
     mockGetState.returns(null)
 
-    execDvcStub = sinon.stub(baseCLIController, 'execDvc').resolves({
+    execDvcStub = sinon.stub(variablesCLIController, 'execDvc').resolves({
       code: 0,
       output: JSON.stringify(mockCLIVariables),
       error: null,
@@ -51,14 +53,14 @@ describe('variablesCLIController', () => {
     it('should use cached variables if available', async () => {
       mockGetState.returns(mockCachedVariables)
 
-      const result = await getAllVariables()
+      const result = await variablesCLIController.getAllVariables()
 
       expect(result).to.deep.equal(mockCachedVariables)
-      sinon.assert.calledWith(mockGetState, 'variables')
+      sinon.assert.calledWith(mockGetState, 'test-folder', 'variables')
     })
 
     it('should use CLI to fetch variables if none cached', async () => {
-      const result = await getAllVariables()
+      const result = await variablesCLIController.getAllVariables()
 
       assert.isTrue(execDvcStub.calledWithExactly('variables get'))
       const expectedCLIResult = {
@@ -72,14 +74,14 @@ describe('variablesCLIController', () => {
     it('should use cached variables if available', async () => {
       mockGetState.returns(mockCachedVariables)
 
-      const result = await getVariable('cached-variable')
+      const result = await variablesCLIController.getVariable('cached-variable')
 
       expect(result).to.deep.equal(mockCachedVariables['cached-variable'])
-      sinon.assert.calledWith(mockGetState, 'variables')
+      sinon.assert.calledWith(mockGetState, 'test-folder', 'variables')
     })
 
     it('should use CLI to fetch variables if none cached', async () => {    
-      const result = await getVariable('cli-variables')
+      const result = await variablesCLIController.getVariable('cli-variables')
 
       assert.isTrue(execDvcStub.calledWithExactly("variables get --keys='cli-variables'"))
       expect(result).to.deep.equal(mockCLIVariables[0])

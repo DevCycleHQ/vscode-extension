@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import yaml from 'js-yaml'
-import { status } from '../cli/index'
+import { BaseCLIController } from '../cli'
 import { KEYS, StateManager } from '../StateManager'
 
 export type RepoConfig = {
@@ -15,30 +15,26 @@ export type RepoConfig = {
   }
 }
 
-export const loadRepoConfig = async (): Promise<RepoConfig> => {
-  const rootPath = StateManager.getState(KEYS.ROOT_PATH)
-  if (rootPath) {
-    try {
-      const { repoConfigPath } = await status()
-      const configFileByteArray = await vscode.workspace.fs.readFile(
-        vscode.Uri.parse(`file:${rootPath}/${repoConfigPath}`)
-      )
-      const configFileString = new TextDecoder().decode(configFileByteArray)
-      const configFileJson = yaml.load(configFileString) as RepoConfig
-      StateManager.setState(KEYS.REPO_CONFIG, configFileJson)
-      return configFileJson || {}
-    } catch (e) {}
-  }
-  StateManager.setState(KEYS.REPO_CONFIG, {})
-  return {}
+export const loadRepoConfig = async (folder: vscode.WorkspaceFolder): Promise<RepoConfig> => {
+  const rootPath = folder.uri.fsPath
+  let configFileJson = {}
+  try {
+    const cli = new BaseCLIController(folder)
+    const { repoConfigPath } = await cli.status()
+    const configFileByteArray = await vscode.workspace.fs.readFile(
+      vscode.Uri.parse(`file:${rootPath}/${repoConfigPath}`)
+    )
+    const configFileString = new TextDecoder().decode(configFileByteArray)
+    configFileJson = yaml.load(configFileString) as RepoConfig
+  } catch (e) {}
+  StateManager.setFolderState(folder.name, KEYS.REPO_CONFIG, configFileJson)
+  return configFileJson
 }
 
-export const getRepoConfig = async () => {
-  const storedConfig = StateManager.getState(KEYS.REPO_CONFIG)
+export const getRepoConfig = async (folder: vscode.WorkspaceFolder) => {
+  const storedConfig = StateManager.getFolderState(folder.name, KEYS.REPO_CONFIG)
   if (storedConfig) {
     return storedConfig
   }
-  else {
-    return await loadRepoConfig()
-  }
+  return await loadRepoConfig(folder)
 }

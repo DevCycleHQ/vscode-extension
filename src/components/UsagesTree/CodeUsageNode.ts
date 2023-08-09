@@ -24,7 +24,7 @@ const collapsedMap = {
 export class CodeUsageNode extends vscode.TreeItem {
   static async flagFrom(
     match: VariableCodeReference,
-    workspaceRoot: string,
+    folder: vscode.WorkspaceFolder,
     context: vscode.ExtensionContext,
   ) {
     const children = []
@@ -89,8 +89,8 @@ export class CodeUsageNode extends vscode.TreeItem {
           ),
         )
       }
-      const orgId = await getOrganizationId()
-      const projectId = StateManager.getState(KEYS.PROJECT_ID)
+      const orgId = await getOrganizationId(folder)
+      const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
       if (orgId && projectId) {
         const link = `https://app.devcycle.com/o/${orgId}/p/${projectId}/variables/${variable._id}`
         const linkNode = new CodeUsageNode(
@@ -119,7 +119,7 @@ export class CodeUsageNode extends vscode.TreeItem {
 
     if (references) {
       const usagesChildNodes = references?.map((reference) =>
-        this.usageFrom(match, reference, workspaceRoot),
+        this.usageFrom(match, reference, folder.uri.fsPath),
       )
       const usagesRoot = new CodeUsageNode(
         key,
@@ -150,7 +150,7 @@ export class CodeUsageNode extends vscode.TreeItem {
   static usageFrom(
     match: VariableCodeReference,
     reference: VariableReference,
-    workspaceRoot: string,
+    folderPath: string,
   ): CodeUsageNode {
     const key = 'key' in match ? match.key : match.variable.key
     const start = reference.lineNumbers.start
@@ -160,7 +160,7 @@ export class CodeUsageNode extends vscode.TreeItem {
         ? `${reference.fileName}:L${start}`
         : `${reference.fileName}:L${start}-${end}`
     const instance = new CodeUsageNode(key, label, 'usage')
-    const file = vscode.Uri.file(`${workspaceRoot}/${reference.fileName}`)
+    const file = vscode.Uri.file(`${folderPath}/${reference.fileName}`)
     instance.command = {
       title: '',
       command: 'devcycle-feature-flags.show-reference',

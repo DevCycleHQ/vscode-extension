@@ -1,11 +1,10 @@
 import * as vscode from 'vscode'
 import {
-  usages,
-  getAllVariables,
-  getAllEnvironments,
   getCombinedVariableDetails,
-  getOrganizationId,
-  getAllFeatures,
+  EnvironmentsCLIController,
+  FeaturesCLIController,
+  VariablesCLIController,
+  UsagesCLIController,
 } from '../../cli'
 
 import { showBusyMessage, hideBusyMessage } from '../statusBarItem'
@@ -21,19 +20,39 @@ export class UsagesTreeProvider
     this._onDidChangeTreeData.event
   private flagsSeen: CodeUsageNode[] = []
   private isRefreshing = false
+  private folder: vscode.WorkspaceFolder
+
+  private variablesCLIController: VariablesCLIController
+  private featuresCLIController: FeaturesCLIController
+  private environmentsCLIController: EnvironmentsCLIController
+  private usagesCLIController: UsagesCLIController
 
   constructor(
-    private workspaceRoot: string | undefined,
+    folder: vscode.WorkspaceFolder | undefined,
     private context: vscode.ExtensionContext,
-  ) {}
+  ) {
+    if (!folder) {
+      throw new Error('Must have a workspace to check for code usages')
+    }
+
+    this.folder = folder
+    this.variablesCLIController = new VariablesCLIController(folder)
+    this.featuresCLIController = new FeaturesCLIController(folder)
+    this.environmentsCLIController = new EnvironmentsCLIController(folder)
+    this.usagesCLIController = new UsagesCLIController(folder)
+  }
 
   private async getCombinedAPIData() {
     showBusyMessage('Fetching DevCycle data')
-    const [variables] = await Promise.all([getAllVariables(), getAllFeatures(), getAllEnvironments()])
-    const result = {} as Record<string, VariableCodeReference>
+    const [variables] = await Promise.all([
+      this.variablesCLIController.getAllVariables(),
+      this.featuresCLIController.getAllFeatures(),
+      this.environmentsCLIController.getAllEnvironments()
+    ])
+    const result: Record<string, VariableCodeReference> = {}
     await Promise.all(
       Object.entries(variables).map(async ([key, variable]) => {
-        const data = await getCombinedVariableDetails(variable, true)
+        const data = await getCombinedVariableDetails(this.folder, variable, true)
         result[key] = data
       }),
     )
@@ -48,10 +67,6 @@ export class UsagesTreeProvider
     this.isRefreshing = true
     this.flagsSeen = []
     this._onDidChangeTreeData.fire(undefined)
-    const root = this.workspaceRoot
-    if (!root) {
-      throw new Error('Must have a workspace to check for code usages')
-    }
 
     // Use withProgress to show a progress indicator
     await vscode.window.withProgress(
@@ -60,7 +75,7 @@ export class UsagesTreeProvider
       },
       async () => {
         const variables = await this.getCombinedAPIData()
-        const matches = await usages()
+        const matches = await this.usagesCLIController.usages()
         matches.forEach((usage) => {
           if (variables[usage.key]) {
             variables[usage.key].references = usage.references
@@ -69,7 +84,7 @@ export class UsagesTreeProvider
           }
         })
         await Promise.all(Object.values(variables).map(async (match) => {
-          this.flagsSeen.push(await CodeUsageNode.flagFrom(match, root, this.context))
+          this.flagsSeen.push(await CodeUsageNode.flagFrom(match, this.folder, this.context))
           return
         }))
         this.flagsSeen.sort((a, b) => (a.key > b.key ? 1 : -1))
@@ -83,15 +98,6 @@ export class UsagesTreeProvider
   }
 
   async getChildren(element?: CodeUsageNode): Promise<CodeUsageNode[]> {
-    if (!this.workspaceRoot) {
-      vscode.window.showInformationMessage('No dependency in empty workspace')
-      return []
-    }
-    
-    if (element) {
-      return element.children
-    }
-    
-    return this.flagsSeen
+    return element ? element.children : this.flagsSeen
   }
 }

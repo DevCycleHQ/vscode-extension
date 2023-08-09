@@ -1,17 +1,15 @@
+import * as vscode from 'vscode'
 import { KEYS, StateManager } from '../StateManager'
-import { getAllEnvironments, getEnvironment } from './environmentsCLIController'
+import { EnvironmentsCLIController } from './EnvironmentsCLIController'
 import {
   Feature,
   FeatureConfiguration,
-  getAllFeatures,
-  getFeature,
-  getFeatureConfigurations,
-} from './featuresCLIController'
+  FeaturesCLIController,
+} from './FeaturesCLIController'
 import {
   Variable,
-  getAllVariables,
-  getVariable,
-} from './variablesCLIController'
+  VariablesCLIController,
+} from './VariablesCLIController'
 
 export type FeatureConfigurationWithEnvNames = FeatureConfiguration & {
   envName: string
@@ -23,17 +21,18 @@ export type CombinedVariableData = {
   configurations?: FeatureConfigurationWithEnvNames[]
 }
 
-export const initStorage = async () => {
-  await Promise.all([getAllVariables(), getAllFeatures(), getAllEnvironments()])
-}
-
 export const getCombinedVariableDetails = async (
+  folder: vscode.WorkspaceFolder,
   variable: string | Variable,
   skipConfigurations: boolean = false
 ) => {
+  const variablesCLIController = new VariablesCLIController(folder)
+  const featuresCLIController = new FeaturesCLIController(folder)
+  const environmentsCLIController = new EnvironmentsCLIController(folder)
+
   let fullVariable: Variable
   if (typeof variable === 'string') {
-    fullVariable = await getVariable(variable)
+    fullVariable = await variablesCLIController.getVariable(variable)
   } else {
     fullVariable = variable
   }
@@ -45,15 +44,15 @@ export const getCombinedVariableDetails = async (
 
   if (featureId) {
     const setFeature = async () => {
-      feature = await getFeature(featureId)
+      feature = await featuresCLIController.getFeature(featureId)
     }
 
     const setFeatureConfigsWithEnvNames = async () => {
       if (skipConfigurations) return
-      const featureConfigurations = await getFeatureConfigurations(featureId)
+      const featureConfigurations = await featuresCLIController.getFeatureConfigurations(featureId)
       await Promise.all(
         featureConfigurations?.map(async (config) => {
-          const environment = await getEnvironment(config._environment)
+          const environment = await environmentsCLIController.getEnvironment(config._environment)
           featureConfigsWithEnvNames.push({
             ...config,
             envName: environment?.name || '',
@@ -73,7 +72,7 @@ export const getCombinedVariableDetails = async (
   }
 }
 
-export const getOrganizationId = () => {
-  const cachedOrganization = StateManager.getState(KEYS.ORGANIZATION)
+export const getOrganizationId = (folder: vscode.WorkspaceFolder) => {
+  const cachedOrganization = StateManager.getFolderState(folder.name, KEYS.ORGANIZATION)
   return cachedOrganization?.id
 }

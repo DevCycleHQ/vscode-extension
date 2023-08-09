@@ -1,9 +1,9 @@
+import * as vscode from 'vscode'
 import { assert, expect } from 'chai'
-import { describe, it, beforeEach, afterEach, after } from 'mocha'
+import { describe, it, beforeEach, afterEach } from 'mocha'
 import sinon from 'sinon'
-import { getAllFeatures, getFeature, getFeatureConfigurations } from './featuresCLIController'
+import { FeaturesCLIController } from './FeaturesCLIController'
 import { StateManager } from '../StateManager'
-import * as baseCLIController from './baseCLIController'
 
 const mockCachedFeatures = {
   "64659286ff07741f83cece66": {
@@ -258,18 +258,21 @@ let mockGetState: sinon.SinonStub<any[], any>,
 mockSetState: sinon.SinonStub<any[], any>, 
 execDvcStub: sinon.SinonStub<[cmd: string], Promise<{ output: string; error: Error | null; code: number }>>
 
-describe('featuresCLIController', () => {
+describe('FeaturesCLIController', () => {
+  const folder = { name: 'test-folder', uri: vscode.Uri.parse('file:///test-folder'), index: 0 }
+  const featuresCLIController = new FeaturesCLIController(folder)
+
   beforeEach(() => {
     mockSetState = sinon.stub()
     mockGetState = sinon.stub().returns(null)
 
-    execDvcStub = sinon.stub(baseCLIController, 'execDvc').resolves({
+    execDvcStub = sinon.stub(featuresCLIController, 'execDvc').resolves({
         code: 0,
         output: JSON.stringify(mockCLIFeatures),
         error: null,
     })
-    StateManager.getState = mockGetState
-    StateManager.setState = mockSetState
+    StateManager.getFolderState = mockGetState
+    StateManager.setFolderState = mockSetState
   })
 
   afterEach(() => {
@@ -280,14 +283,14 @@ describe('featuresCLIController', () => {
     it('should use cached features if available', async () => {
       mockGetState.returns(mockCachedFeatures)
 
-      const result = await getAllFeatures()
+      const result = await featuresCLIController.getAllFeatures()
 
       expect(result).to.deep.equal(mockCachedFeatures)
-      sinon.assert.calledWith(mockGetState, 'features')
+      sinon.assert.calledWith(mockGetState, 'test-folder', 'features')
     })
 
     it('should use CLI to fetch features if none cached', async () => {
-      const result = await getAllFeatures()
+      const result = await featuresCLIController.getAllFeatures()
 
       assert.isTrue(execDvcStub.calledWithExactly('features get'))
       const expectedCLIResult = {
@@ -301,14 +304,14 @@ describe('featuresCLIController', () => {
       it('should use cached features if available', async () => {
         mockGetState.returns(mockCachedFeatures)
 
-        const result = await getFeature('64659286ff07741f83cece66')
+        const result = await featuresCLIController.getFeature('64659286ff07741f83cece66')
 
         expect(result).to.deep.equal(mockCachedFeatures['64659286ff07741f83cece66'])
-        sinon.assert.calledWith(mockGetState, 'features')
+        sinon.assert.calledWith(mockGetState, 'test-folder', 'features')
       })
 
       it('should use CLI to fetch features if none cached', async () => {    
-        const result = await getFeature('varkey')
+        const result = await featuresCLIController.getFeature('varkey')
 
         assert.isTrue(execDvcStub.calledWithExactly("features get --keys='varkey'"))
         expect(result).to.deep.equal(mockCLIFeatures[0])
@@ -319,20 +322,20 @@ describe('featuresCLIController', () => {
       it('should use cached configuration if available', async () => {
         mockGetState.returns(mockCachedTargeting)
 
-        const result = await getFeatureConfigurations('64659286ff07741f83cece66')
+        const result = await featuresCLIController.getFeatureConfigurations('64659286ff07741f83cece66')
 
         expect(result).to.deep.equal(mockCachedTargeting['64659286ff07741f83cece66'])
-        sinon.assert.calledWith(mockGetState, 'feature_configurations')
+        sinon.assert.calledWith(mockGetState, 'test-folder', 'feature_configurations')
       })
 
       it('should use CLI to fetch features if none cached', async () => {    
         execDvcStub.restore()
-        execDvcStub = sinon.stub(baseCLIController, 'execDvc').resolves({
+        execDvcStub = sinon.stub(featuresCLIController, 'execDvc').resolves({
           code: 0,
           output: JSON.stringify(mockCLITargeting),
           error: null,
       })
-        const result = await getFeatureConfigurations('varkey')
+        const result = await featuresCLIController.getFeatureConfigurations('varkey')
 
         assert.isTrue(execDvcStub.calledWithExactly("targeting get varkey"))
         expect(result).to.deep.equal(mockCLITargeting)
