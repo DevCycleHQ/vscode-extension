@@ -56,16 +56,6 @@
         }
       ]
     },
-    "menus": {
-      "editor/context": [],
-      "view/title": [
-        {
-          "command": "devcycle-feature-flags.refresh-usages",
-          "when": "view == devcycleCodeUsages",
-          "group": "navigation"
-        }
-      ]
-    },
     "commands": [
       {
         "command": "devcycle-feature-flags.init",
