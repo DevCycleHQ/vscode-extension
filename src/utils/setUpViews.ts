@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { BaseCLIController } from '../cli'
-
+import { minimumCliVersion } from '../constants'
 export const setUpCliStartupView = async () => {
     const [folder] = vscode.workspace.workspaceFolders || []
     const cli = new BaseCLIController(folder)
@@ -19,7 +19,7 @@ export const setUpCliStartupView = async () => {
         )
     } else if (!isMinVersion) {
         vscode.window.showErrorMessage(
-            `Your installed version of @devcycle/cli is outdated. Please update to version ${cli.requiredPackageVersion} or later.`
+            `Your installed version of @devcycle/cli is outdated. Please update to version ${minimumCliVersion} or later.`
           )
     }
 

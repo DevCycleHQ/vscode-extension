@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import * as cp from 'child_process'
 import * as semver from 'semver'
 import { StateManager, KEYS } from '../StateManager'
+import { minimumCliVersion } from '../constants'
 
 type CommandResponse = {
   output: string
@@ -23,7 +24,6 @@ type DevCycleStatus = {
 
 export class BaseCLIController {
   folder: vscode.WorkspaceFolder
-
   constructor(folder: vscode.WorkspaceFolder) {
     this.folder = folder
   }
@@ -90,8 +90,6 @@ export class BaseCLIController {
     return !error
   }
 
-  public requiredPackageVersion = '5.2.1'
-
   public async isCliMinVersion() {
     const { error, output } = await this.execDvc('--version')
     if (error) {
@@ -103,7 +101,7 @@ export class BaseCLIController {
 
     if (match) {
       const cliVersion = match[1]
-      return cliVersion && semver.gte(cliVersion, this.requiredPackageVersion)
+      return cliVersion && semver.gte(cliVersion, minimumCliVersion)
     } else {
       return false
     }
