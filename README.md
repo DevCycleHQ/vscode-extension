@@ -62,10 +62,6 @@ We're excited about the future of DevCycle! Many advanced features are under dev
 
 DevCycle is an open-source project, and we welcome contributions! If you're interested in contributing, please visit our GitHub repository and check out our contribution guidelines. [Read the development info here](DEVELOPMENT.md)
 
-### Development
-
-To get the development environment to build locally properly, you must install a problem matcher for webpack, e.g. [this one](https://marketplace.visualstudio.com/items?itemName=eamodio.tsl-problem-matcher).
-
 ## Documentation
 
 For detailed information about DevCycle and its usage, visit our documentation page: [https://docs.devcycle.com](https://docs.devcycle.com).

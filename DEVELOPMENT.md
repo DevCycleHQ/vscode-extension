@@ -3,10 +3,11 @@
 ## TLDR (Quick Start)
 
 1. Run `yarn` to install packages
-2. Press `F5`(Run > Start Debugging) to run the extension in the new window
-3. Follow the login steps from the side bar (EXPLORER > DEVCYCLE) in the extension window
-4. After the login steps, you should see your feature flags info on the side bar
-5. You can check the `commands` in `package.json` and run from the command palette by pressing (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type the commands with `DevCycle` prefix
+2. Install [webpack matcher](https://marketplace.visualstudio.com/items?itemName=eamodio.tsl-problem-matcher) for VSCode
+3. Press `F5`(Run > Start Debugging) to run the extension in the new window
+4. Follow the login steps from the side bar (EXPLORER > DEVCYCLE) in the extension window
+5. After the login steps, you should see your feature flags info on the side bar
+6. You can check the `commands` in `package.json` and run from the command palette by pressing (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and type the commands with `DevCycle` prefix
 
 ## What's in the folder
 
@@ -19,6 +20,7 @@
 
 ## Get up and running straight away
 
+- To get the development environment to build locally properly, you must install a problem matcher for webpack, e.g. [this one](https://marketplace.visualstudio.com/items?itemName=eamodio.tsl-problem-matcher).
 - Press `F5` to open a new window with your extension loaded.
 - Run your command from the command palette by pressing (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and typing `Hello World`.
 - Set breakpoints in your code inside `src/extension.ts` to debug your extension.
