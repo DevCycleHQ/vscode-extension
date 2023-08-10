@@ -12,6 +12,7 @@
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}",
+      "sourceMaps": true,
       "env": {
         "DEBUG_MODE": "1"
       }

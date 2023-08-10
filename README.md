@@ -54,7 +54,6 @@ DevCycle extension contributes the following settings:
 - `Devcycle-feature-flags: Send Metrics`: Allows DevCycle to send usage metrics. Default is off.
 - `Devcycle-feature-flags: Usages On Workspace Open`: Automatically checks for code usages when a configured workspace is opened. Default is on.
 
-
 ## Upcoming Features
 
 We're excited about the future of DevCycle! Many advanced features are under development to further enhance the capabilities of the DevCycle extension. To stay updated on our progress, keep checking our GitHub repository and official website.
@@ -62,6 +61,10 @@ We're excited about the future of DevCycle! Many advanced features are under dev
 ## Contributing
 
 DevCycle is an open-source project, and we welcome contributions! If you're interested in contributing, please visit our GitHub repository and check out our contribution guidelines. [Read the development info here](DEVELOPMENT.md)
+
+### Development
+
+To get the development environment to build locally properly, you must install a problem matcher for webpack, e.g. [this one](https://marketplace.visualstudio.com/items?itemName=eamodio.tsl-problem-matcher).
 
 ## Documentation
 

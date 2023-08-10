@@ -91,6 +91,25 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return body
   }
 
+  private getButtonScript(view: string, nonce: string) : string {
+    let script = ''
+    if (view === VIEWS.DEFAULT) {
+      script = `
+      <script nonce="${nonce}">
+        const vscode = acquireVsCodeApi()
+        const loginBtn = document.querySelector('#loginBtn')
+      
+        loginBtn && loginBtn.addEventListener('click', () => {
+          vscode.postMessage({
+            type: 'login',
+          })
+        })
+      </script>
+      `
+    }
+    return script
+  }
+
   private _getHtmlForWebview(
     webview: vscode.Webview,
     view: VIEWS = VIEWS.DEFAULT,
@@ -128,7 +147,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         ${this.getBodyHtml(view)}
         ${error ? this.getErrorHtml(error) : ''}
         </body>
-        <script nonce="${nonce}" src="${scriptUri}"></script>
+        ${this.getButtonScript(view, nonce)}
         </html>`
   }
 }
