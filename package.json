@@ -50,7 +50,7 @@
         },
         {
           "type": "tree",
-          "id": "devcycleCodeUsages",
+          "id": "devcycle-code-usages",
           "name": "Variables",
           "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
         }
@@ -61,7 +61,7 @@
       "view/title": [
         {
           "command": "devcycle-feature-flags.refresh-usages",
-          "when": "view == devcycleCodeUsages",
+          "when": "view == devcycle-code-usages",
           "group": "navigation"
         }
       ]
