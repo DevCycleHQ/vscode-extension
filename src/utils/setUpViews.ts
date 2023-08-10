@@ -19,7 +19,7 @@ export const setUpCliStartupView = async () => {
         )
     } else if (!isMinVersion) {
         vscode.window.showErrorMessage(
-            `Your installed version of ${cli.packageName} is outdated. Please update to version ${cli.requiredPackageVersion} or later.`
+            `Your installed version of @devcycle/cli is outdated. Please update to version ${cli.requiredPackageVersion} or later.`
           )
     }
 

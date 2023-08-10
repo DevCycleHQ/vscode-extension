@@ -89,18 +89,24 @@ export class BaseCLIController {
     const { error } = await this.execDvc('--version')
     return !error
   }
-  
+
   public requiredPackageVersion = '5.2.1'
-  public packageName = '@devcycle/cli'
 
   public async isCliMinVersion() {
-    const { error, output } = await this.execShell(`npm list -g ${this.packageName} --depth=0 --json`)
+    const { error, output } = await this.execDvc('--version')
     if (error) {
       console.error(`Error checking package version: ${error.message}`);
       return false
     }
-    const parsed = JSON.parse(output)
-    const installedVersion = parsed.dependencies[this.packageName]?.version
-    return installedVersion && semver.gte(this.requiredPackageVersion, installedVersion)
+    const regex = /\/(\d+\.\d+\.\d+)\b/;
+    const match = output.match(regex);
+
+    if (match) {
+      const cliVersion = match[1]
+      return cliVersion && semver.gte(cliVersion, this.requiredPackageVersion)
+    } else {
+      return false
+    }
+    
   }
 }
