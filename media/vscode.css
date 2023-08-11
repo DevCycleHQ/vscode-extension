@@ -100,3 +100,21 @@ input::placeholder,
 textarea::placeholder {
   color: var(--vscode-input-placeholderForeground);
 }
+
+.icon-button {
+  display: inline-block;
+  margin-right: 10px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.form-container {
+  margin-top: 20px;
+}
+
+.dropdown-container {
+  display: inline-block;
+  margin-right: 10px;
+}

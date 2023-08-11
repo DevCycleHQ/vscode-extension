@@ -49,6 +49,12 @@
           "when": "!devcycle-feature-flags.shouldShowWorkspaceView && !devcycle-feature-flags.hasCredentialsAndProject"
         },
         {
+          "type": "webview",
+          "id": "devcycle-home",
+          "name": "Home",
+          "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
+        },
+        {
           "type": "tree",
           "id": "devcycle-code-usages",
           "name": "Variables",
