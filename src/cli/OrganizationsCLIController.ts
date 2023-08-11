@@ -13,10 +13,38 @@ export type Organization = {
 
 export class OrganizationsCLIController extends BaseCLIController {
   projectController: ProjectsCLIController
+  baseCLIController: BaseCLIController
 
   constructor(folder: vscode.WorkspaceFolder) {
     super(folder)
     this.projectController = new ProjectsCLIController(folder)
+    this.baseCLIController = new BaseCLIController(folder)
+  }
+
+  public async getActiveOrganization() {
+    const stateOrg = StateManager.getFolderState(this.folder.name, KEYS.ORGANIZATION)
+    if (stateOrg) {
+      return stateOrg
+    }
+    const orgName = (await this.baseCLIController.status()).organization
+    const orgObject = (await this.getAllOrganizations()).find((o) => o.name === orgName)
+
+    StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, orgObject)
+    return orgObject
+  }
+
+  public async getAllOrganizations() {
+    const { code, error, output } = await this.execDvc('organizations get')
+
+    if (code === 0) {
+      const organizations = JSON.parse(output) as Organization[]
+      return organizations
+    } else {
+      vscode.window.showErrorMessage(
+        `Retrieving organizations failed: ${error?.message}}`,
+      )
+      return []
+    }
   }
 
   public async getAllOrganizations() {
