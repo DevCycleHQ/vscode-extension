@@ -1,4 +1,4 @@
-; (function () {
+;(function () {
     const vscode = acquireVsCodeApi()
     const cliBtn = document.querySelector('#installedCli')
     const openFolderBtn = document.querySelector('#openFolder')
