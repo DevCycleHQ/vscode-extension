@@ -5,16 +5,17 @@ import { after } from 'mocha'
 // as well as import your extension to test it
 import * as vscode from 'vscode'
 import { activate } from '../../extension';
+import { expect } from 'chai'
 
 suite('Integration Tests', () => {
   vscode.window.showInformationMessage('Starting integration tests');
+  let extension: vscode.Extension<any> =  vscode.extensions.getExtension('Devcycle.devcycle-feature-flags') as vscode.Extension<any>
 
   after(() => {
     vscode.window.showInformationMessage('All tests done!')
   })
 
-  test('Sample test', () => {
-    vscode.commands.executeCommand('devcycle-feature-flags.logout')
-    // TODO 
+  test('should activate', async () => {
+    await extension.activate()
   })
 })
