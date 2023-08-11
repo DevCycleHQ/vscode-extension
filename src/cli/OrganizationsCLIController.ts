@@ -13,10 +13,38 @@ export type Organization = {
 
 export class OrganizationsCLIController extends BaseCLIController {
   projectController: ProjectsCLIController
+  baseCLIController: BaseCLIController
 
   constructor(folder: vscode.WorkspaceFolder) {
     super(folder)
     this.projectController = new ProjectsCLIController(folder)
+    this.baseCLIController = new BaseCLIController(folder)
+  }
+
+  public async getActiveOrganization() {
+    const stateOrg = StateManager.getFolderState(this.folder.name, KEYS.ORGANIZATION)
+    if (stateOrg) {
+      return stateOrg
+    }
+    const orgName = (await this.baseCLIController.status()).organization
+    const orgObject = (await this.getAllOrganizations()).find((o) => o.name === orgName)
+
+    StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, orgObject)
+    return orgObject
+  }
+
+  public async getAllOrganizations() {
+    const { code, error, output } = await this.execDvc('organizations get')
+
+    if (code === 0) {
+      const organizations = JSON.parse(output) as Organization[]
+      return organizations  
+    } else {
+      vscode.window.showErrorMessage(
+        `Retrieving organizations failed: ${error?.message}}`,
+      )
+      return []
+    }
   }
 
   public async selectOrganizationFromConfig() {
@@ -59,9 +87,10 @@ export class OrganizationsCLIController extends BaseCLIController {
     await this.selectOrganization(selectedOrg).finally(hideBusyMessage)
     return selectedOrg
   }
-  
-  protected async selectOrganization(org: Organization) {
-    const { code, error, output } = await this.execDvc(`organizations select --org=${org?.name}`)
+
+  public async selectOrganization(org: Organization | string, selectProjectFromList?: boolean) {
+    const orgName = typeof org === 'string' ? org : org?.name
+    const { code, error, output } = await this.execDvc(`organizations select --org=${orgName}`)
   
     if (code !== 0) {
       vscode.window.showErrorMessage(
@@ -70,10 +99,15 @@ export class OrganizationsCLIController extends BaseCLIController {
       throw error
     }
   
-    StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, org)
+    if (typeof org === 'string') {
+      const orgObject = (await this.getAllOrganizations()).find((o) => o.name === org)
+      StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, orgObject)
+    } else {
+      StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, org)
+    }
   
     const projectFromConfig = await this.projectController.selectProjectFromConfig()
-    if (!projectFromConfig) {
+    if (!projectFromConfig && selectProjectFromList) {
       const projects = JSON.parse(output)
       await this.projectController.selectProjectFromList(projects)
     }
