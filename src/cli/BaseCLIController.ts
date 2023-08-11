@@ -52,7 +52,7 @@ export class BaseCLIController {
     return this.execShell(shellCommand)
   }
   
-  private execShell(cmd: string) {
+  execShell(cmd: string) {
     this.showDebugOutput(`Executing shell command ${cmd}`)
     return new Promise<CommandResponse>((resolve, reject) => {
       const cpOptions: cp.ExecOptions = {
