@@ -59,7 +59,7 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
 
     if (view === STARTUP_VIEWS.CLI) {
       body = `<br/>
-        <p>In order to use DevCycle extension, please install Devcycle CLI.</p>
+        <p>In order to use DevCycle extension, please install DevCycle CLI.</p>
         <br/>
         <p>To install via npm, use the command: </p>
         <pre><code>npm install -g @devcycle/cli</code></pre>

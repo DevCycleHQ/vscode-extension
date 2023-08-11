@@ -15,7 +15,7 @@ export const setUpCliStartupView = async () => {
 
     if (!isInstalled) {
         vscode.window.showErrorMessage(
-            'In order to use DevCycle extension, please install Devcycle CLI.'
+            'In order to use DevCycle extension, please install DevCycle CLI.'
         )
     } else if (!isMinVersion) {
         vscode.window.showErrorMessage(

@@ -48,11 +48,11 @@ export const activate = async (context: vscode.ExtensionContext) => {
     .get('loginOnWorkspaceOpen')
   
   let startupViewProvider: StartupViewProvider | undefined
-  if (await setUpCliStartupView()) {
-    startupViewProvider = new StartupViewProvider(context.extensionUri, STARTUP_VIEWS.CLI)
-  } else if (setUpWorkspaceStartupView()) {
+  if (setUpWorkspaceStartupView()) {
     startupViewProvider = new StartupViewProvider(context.extensionUri, STARTUP_VIEWS.WORKSPACE)
-  }
+  } else if (await setUpCliStartupView()) {
+    startupViewProvider = new StartupViewProvider(context.extensionUri, STARTUP_VIEWS.CLI)
+  } 
 
   if (startupViewProvider) {
     context.subscriptions.push(
