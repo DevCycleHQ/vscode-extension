@@ -71,16 +71,25 @@ export const activate = async (context: vscode.ExtensionContext) => {
     ),
   )
 
-  // TODO: render all folders
-  const usagesDataProvider = new UsagesTreeProvider(workspaceFolder, context)
+  const usagesDataProvider = new UsagesTreeProvider(context)
 
   const usagesTreeView = vscode.window.createTreeView(
-    'devcycleCodeUsages',
+    'devcycle-code-usages',
     { treeDataProvider: usagesDataProvider },
   )
   usagesTreeView.onDidChangeVisibility(async (e) => {
     const orgId = getOrganizationId(workspaceFolder)
     trackRudderstackEvent('Usages Viewed', orgId)
+  })
+
+  usagesTreeView.onDidChangeSelection((e) => {
+    const node = e.selection[0]
+    if (node instanceof CodeUsageNode && node.type === 'usage') {
+      vscode.commands.executeCommand(
+        'devcycle-featureflags.usagesNodeClicked',
+        node
+      )
+    }
   })
 
   vscode.workspace.workspaceFolders?.forEach(async (folder) => {
@@ -96,17 +105,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
       }
     )
   )
-
-  usagesTreeView.onDidChangeSelection((e) => {
-    const node = e.selection[0]
-    if (node instanceof CodeUsageNode && node.type === 'usage') {
-      vscode.commands.executeCommand(
-        'devcycle-featureflags.usagesNodeClicked',
-        node
-      )
-    }
-  })
-
 
   context.subscriptions.push(
     vscode.commands.registerCommand('devcycle-feature-flags.init', async () => {
@@ -154,9 +152,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       'devcycle-feature-flags.refresh-usages',
-      async (folder: vscode.WorkspaceFolder) => {
-        StateManager.clearFolderState(folder.name)
-        await usagesDataProvider.refresh()
+      async (folder?: vscode.WorkspaceFolder) => {
+        if (folder) {
+          StateManager.clearFolderState(folder.name)
+          await usagesDataProvider.refresh(folder)
+        } else {
+          StateManager.clearState()
+          await usagesDataProvider.refreshAll()
+        }
       },
     ),
   )

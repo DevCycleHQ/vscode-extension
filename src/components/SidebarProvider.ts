@@ -36,17 +36,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (data: Data) => {
       if (data.type === ACTIONS.LOGIN) {
         try {
-          vscode.workspace.workspaceFolders?.forEach(async (folder) => {
+          const folders = vscode.workspace.workspaceFolders || []
+
+          for (const folder of folders) {
             const cli = new AuthCLIController(folder)
             await cli.login()
+          }
+          await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
 
-            await vscode.commands.executeCommand(
-              'setContext',
-              'devcycle-feature-flags.hasCredentialsAndProject',
-              true,
-            )
-            await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages', folder)
-          })
+          await vscode.commands.executeCommand(
+            'setContext',
+            'devcycle-feature-flags.hasCredentialsAndProject',
+            true,
+          )
         } catch (e) {
           webviewView.webview.html = this._getHtmlForWebview(
             webviewView.webview,

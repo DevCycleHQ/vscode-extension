@@ -9,6 +9,7 @@ import {
 
 import { showBusyMessage, hideBusyMessage } from '../statusBarItem'
 import { CodeUsageNode, VariableCodeReference } from './CodeUsageNode'
+import { FolderNode } from './FolderNode'
 
 export class UsagesTreeProvider
   implements vscode.TreeDataProvider<CodeUsageNode>
@@ -18,41 +19,32 @@ export class UsagesTreeProvider
   > = new vscode.EventEmitter<CodeUsageNode | undefined | void>()
   readonly onDidChangeTreeData: vscode.Event<CodeUsageNode | undefined | void> =
     this._onDidChangeTreeData.event
-  private flagsSeen: CodeUsageNode[] = []
-  private isRefreshing = false
-  private folder: vscode.WorkspaceFolder
-
-  private variablesCLIController: VariablesCLIController
-  private featuresCLIController: FeaturesCLIController
-  private environmentsCLIController: EnvironmentsCLIController
-  private usagesCLIController: UsagesCLIController
+  private flagsByFolder: Record<string, CodeUsageNode[]> = {}
+  private isRefreshing: Record<string, boolean> = {}
 
   constructor(
-    folder: vscode.WorkspaceFolder | undefined,
     private context: vscode.ExtensionContext,
   ) {
-    if (!folder) {
+    if (!vscode.workspace.workspaceFolders) {
       throw new Error('Must have a workspace to check for code usages')
     }
-
-    this.folder = folder
-    this.variablesCLIController = new VariablesCLIController(folder)
-    this.featuresCLIController = new FeaturesCLIController(folder)
-    this.environmentsCLIController = new EnvironmentsCLIController(folder)
-    this.usagesCLIController = new UsagesCLIController(folder)
   }
 
-  private async getCombinedAPIData() {
+  private async getCombinedAPIData(folder: vscode.WorkspaceFolder) {
     showBusyMessage('Fetching DevCycle data')
+    const variablesCLIController = new VariablesCLIController(folder)
+    const featuresCLIController = new FeaturesCLIController(folder)
+    const environmentsCLIController = new EnvironmentsCLIController(folder)
+
     const [variables] = await Promise.all([
-      this.variablesCLIController.getAllVariables(),
-      this.featuresCLIController.getAllFeatures(),
-      this.environmentsCLIController.getAllEnvironments()
+      variablesCLIController.getAllVariables(),
+      featuresCLIController.getAllFeatures(),
+      environmentsCLIController.getAllEnvironments()
     ])
     const result: Record<string, VariableCodeReference> = {}
     await Promise.all(
       Object.entries(variables).map(async ([key, variable]) => {
-        const data = await getCombinedVariableDetails(this.folder, variable, true)
+        const data = await getCombinedVariableDetails(folder, variable, true)
         result[key] = data
       }),
     )
@@ -60,22 +52,30 @@ export class UsagesTreeProvider
     return result
   }
 
-  async refresh(): Promise<void> {
-    if (this.isRefreshing) {
+  async refreshAll(): Promise<void> {
+    const folders = vscode.workspace.workspaceFolders || []
+    await Promise.all(
+      folders.map((folder) => this.refresh(folder))
+    )
+  }
+
+  async refresh(folder: vscode.WorkspaceFolder): Promise<void> {
+    if (this.isRefreshing[folder.name]) {
       return
     }
-    this.isRefreshing = true
-    this.flagsSeen = []
+    this.isRefreshing[folder.name] = true
+    this.flagsByFolder[folder.name] = []
     this._onDidChangeTreeData.fire(undefined)
 
     // Use withProgress to show a progress indicator
     await vscode.window.withProgress(
       {
-        location: { viewId: 'devcycleCodeUsages' },
+        location: { viewId: 'devcycle-code-usages' },
       },
       async () => {
-        const variables = await this.getCombinedAPIData()
-        const matches = await this.usagesCLIController.usages()
+        const usagesCLIController = new UsagesCLIController(folder)
+        const variables = await this.getCombinedAPIData(folder)
+        const matches = await usagesCLIController.usages()
         matches.forEach((usage) => {
           if (variables[usage.key]) {
             variables[usage.key].references = usage.references
@@ -84,20 +84,39 @@ export class UsagesTreeProvider
           }
         })
         await Promise.all(Object.values(variables).map(async (match) => {
-          this.flagsSeen.push(await CodeUsageNode.flagFrom(match, this.folder, this.context))
+          this.flagsByFolder[folder.name].push(await CodeUsageNode.flagFrom(match, folder, this.context))
           return
         }))
-        this.flagsSeen.sort((a, b) => (a.key > b.key ? 1 : -1))
+        this.flagsByFolder[folder.name].sort((a, b) => (a.key > b.key ? 1 : -1))
         this._onDidChangeTreeData.fire()
       })
-    this.isRefreshing = false
+    this.isRefreshing[folder.name] = false
   }
 
   getTreeItem(element: CodeUsageNode): vscode.TreeItem {
     return element
   }
 
-  async getChildren(element?: CodeUsageNode): Promise<CodeUsageNode[]> {
-    return element ? element.children : this.flagsSeen
+  async getChildren(): Promise<FolderNode[] | CodeUsageNode[]>
+  async getChildren(element: FolderNode): Promise<CodeUsageNode[]>
+  async getChildren(element: CodeUsageNode): Promise<CodeUsageNode[]>
+  async getChildren(element?: vscode.TreeItem): Promise<vscode.TreeItem[]> {
+    const workspaceFolders = vscode.workspace.workspaceFolders || []
+
+    if (!element) {
+      return workspaceFolders.length > 1
+        ? workspaceFolders.map((folder) => (new FolderNode(folder)))
+        : this.flagsByFolder[workspaceFolders[0].name]
+    }
+
+    if (element instanceof FolderNode) {
+      return this.flagsByFolder[element.folder.name]
+    }
+
+    if (element instanceof CodeUsageNode) {
+      return element.children
+    }
+
+    return []
   }
 }
