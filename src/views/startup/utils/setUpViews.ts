@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
-import { BaseCLIController } from '../cli'
-import { minimumCliVersion } from '../constants'
+import { BaseCLIController } from '../../../cli'
+import { minimumCliVersion } from '../../../constants'
 export const setUpCliStartupView = async () => {
     const [folder] = vscode.workspace.workspaceFolders || []
     const cli = new BaseCLIController(folder)

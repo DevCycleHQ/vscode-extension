@@ -1,0 +1,1 @@
+export const COMMAND_INIT = 'devcycle-feature-flags.init'

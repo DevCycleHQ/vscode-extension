@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
-import { getNonce } from '../utils/getNonce'
-import { AuthCLIController } from '../cli'
+import { getNonce } from '../../utils/getNonce'
+import { AuthCLIController } from '../../cli'
+import { executeRefreshUsagesCommand } from '../../commands/refreshUsages'
 
 const enum VIEWS {
   DEFAULT = 'default',
@@ -17,7 +18,7 @@ interface Data {
   type: string
 }
 
-export class SidebarProvider implements vscode.WebviewViewProvider {
+export class LoginViewProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView
   _doc?: vscode.TextDocument
   constructor(private readonly _extensionUri: vscode.Uri) {}
@@ -42,7 +43,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             const cli = new AuthCLIController(folder)
             await cli.login()
           }
-          await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
+          await executeRefreshUsagesCommand()
 
           await vscode.commands.executeCommand(
             'setContext',

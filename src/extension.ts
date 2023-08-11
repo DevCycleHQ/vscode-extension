@@ -1,17 +1,23 @@
 ;('use strict')
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
-import { BaseCLIController, AuthCLIController, getOrganizationId } from './cli'
+import { BaseCLIController, getOrganizationId } from './cli'
 import { autoLoginIfHaveCredentials } from './utils/credentials'
-import { SidebarProvider } from './components/SidebarProvider'
 
-import { UsagesTreeProvider } from './components/UsagesTree'
 import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
-import { CodeUsageNode } from './components/UsagesTree/CodeUsageNode'
 import { getRepoConfig, loadRepoConfig } from './utils'
-import { setUpCliStartupView, setUpWorkspaceStartupView } from './utils/setUpViews'
-import { STARTUP_VIEWS, StartupViewProvider } from './components/StartupViewProvider'
+import { registerStartupViewProvider } from './views/startup'
+import { registerLoginViewProvider } from './views/login'
+import { registerUsagesViewProvider } from './views/usages'
+import {
+  registerInitCommand,
+  registerUsagesNodeClickedCommand,
+  registerOpenLinkCommand
+} from './commands'
+import { registerLogoutCommand } from './commands/logout'
+import { executeRefreshUsagesCommand, registerRefreshUsagesCommand } from './commands/refreshUsages'
+import { registerShowReferenceCommand } from './commands/showReference'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -47,145 +53,26 @@ export const activate = async (context: vscode.ExtensionContext) => {
     .getConfiguration('devcycle-feature-flags')
     .get('loginOnWorkspaceOpen')
   
-  let startupViewProvider: StartupViewProvider | undefined
-  if (setUpWorkspaceStartupView()) {
-    startupViewProvider = new StartupViewProvider(context.extensionUri, STARTUP_VIEWS.WORKSPACE)
-  } else if (await setUpCliStartupView()) {
-    startupViewProvider = new StartupViewProvider(context.extensionUri, STARTUP_VIEWS.CLI)
-  } 
-
-  if (startupViewProvider) {
-    context.subscriptions.push(
-      vscode.window.registerWebviewViewProvider(
-        'devcycle-startup',
-        startupViewProvider
-      ),
-    )
-  }
-
-  const sidebarProvider = new SidebarProvider(context.extensionUri)
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      'devcycle-sidebar',
-      sidebarProvider
-    ),
-  )
-
-  const usagesDataProvider = new UsagesTreeProvider(context)
-
-  const usagesTreeView = vscode.window.createTreeView(
-    'devcycle-code-usages',
-    { treeDataProvider: usagesDataProvider },
-  )
-  usagesTreeView.onDidChangeVisibility(async (e) => {
-    const orgId = getOrganizationId(workspaceFolder)
-    trackRudderstackEvent('Usages Viewed', orgId)
-  })
-
-  usagesTreeView.onDidChangeSelection((e) => {
-    const node = e.selection[0]
-    if (node instanceof CodeUsageNode && node.type === 'usage') {
-      vscode.commands.executeCommand(
-        'devcycle-featureflags.usagesNodeClicked',
-        node
-      )
-    }
-  })
+  await registerStartupViewProvider(context)
+  await registerLoginViewProvider(context)
+  const usagesDataProvider = await registerUsagesViewProvider(context)
 
   vscode.workspace.workspaceFolders?.forEach(async (folder) => {
     await loadRepoConfig(folder)
   })
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'devcycle-featureflags.usagesNodeClicked',
-      async (node: CodeUsageNode) => {
-        const orgId = getOrganizationId(workspaceFolder)
-        trackRudderstackEvent('Code Usage Clicked', orgId)
-      }
-    )
-  )
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand('devcycle-feature-flags.init', async () => {
-      vscode.workspace.workspaceFolders?.forEach(async (folder) => {
-        const orgId = getOrganizationId(folder)
-        trackRudderstackEvent('Init Command Ran', orgId)
-        const cli = new AuthCLIController(folder)
-        await cli.init()
-      })
-    }),
-  )
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'devcycle-feature-flags.openLink',
-      async (link: string) => {
-        vscode.env.openExternal(vscode.Uri.parse(link))
-      },
-    ),
-  )
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'devcycle-feature-flags.logout',
-      async () => {
-        await Promise.all([
-          StateManager.clearState(),
-          vscode.commands.executeCommand(
-            'setContext',
-            'devcycle-feature-flags.hasCredentialsAndProject',
-            false,
-          ),
-        ])
-        const [folder] = vscode.workspace.workspaceFolders || []
-        if (folder) {
-          const cli = new AuthCLIController(folder)
-          await cli.logout()
-        }
-        const orgId = getOrganizationId(folder)
-        trackRudderstackEvent('Logout Command Ran', orgId)
-      },
-    ),
-  )
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'devcycle-feature-flags.refresh-usages',
-      async (folder?: vscode.WorkspaceFolder) => {
-        if (folder) {
-          StateManager.clearFolderState(folder.name)
-          await usagesDataProvider.refresh(folder)
-        } else {
-          StateManager.clearState()
-          await usagesDataProvider.refreshAll()
-        }
-      },
-    ),
-  )
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'devcycle-feature-flags.show-reference',
-      async (filePath: string, start: number, end: number) => {
-        const document = await vscode.workspace.openTextDocument(filePath)
-        await vscode.window.showTextDocument(document)
-        const editor = vscode.window.activeTextEditor
-        if (!editor) { throw new Error('No active text editor') }
-        editor.selection = new vscode.Selection(start - 1, 0, end, 0)
-        editor.revealRange(
-          editor.selection,
-          vscode.TextEditorRevealType.InCenterIfOutsideViewport,
-        )
-      },
-    ),
-  )
+  await registerUsagesNodeClickedCommand(context)
+  await registerInitCommand(context)
+  await registerOpenLinkCommand(context)
+  await registerLogoutCommand(context)
+  await registerRefreshUsagesCommand(context, usagesDataProvider)
+  await registerShowReferenceCommand(context)
 
   vscode.workspace.workspaceFolders?.forEach(async (folder) => {
     if (autoLogin) {
         const isLoggedIn = await autoLoginIfHaveCredentials(folder)
         if (isLoggedIn) {
-          await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages', folder)
+          await executeRefreshUsagesCommand(folder)
         }
     }
 

@@ -1,0 +1,1 @@
+export const COMMAND_REFRESH_USAGES = 'devcycle-feature-flags.refresh-usages'

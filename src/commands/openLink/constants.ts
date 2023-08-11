@@ -1,0 +1,1 @@
+export const COMMAND_OPEN_LINK = 'devcycle-feature-flags.openLink'
