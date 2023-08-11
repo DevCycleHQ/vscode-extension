@@ -11,6 +11,7 @@ export const enum KEYS {
   FEATURE_CONFIGURATIONS = 'feature_configurations',
   ENVIRONMENTS = 'environments',
   ORGANIZATION = 'organization',
+  ORGANIZATIONS = 'organizations',
   SEND_METRICS_PROMPTED = 'send_metrics_prompted',
   CODE_USAGE_KEYS = 'code_usage_keys',
   EXTENSION_INSTALLED = 'extension_installed',
@@ -58,12 +59,14 @@ export class StateManager {
 
   static setWorkspaceState(key: KEYS.SEND_METRICS_PROMPTED, value: boolean | undefined): Thenable<void>
   static setWorkspaceState(key: KEYS.AUTH0_USER_ID, value: string | undefined): Thenable<void>
+  static setWorkspaceState(key: KEYS.ORGANIZATIONS, value: Record<string, Organization> | undefined): Thenable<void>
   static setWorkspaceState(key: string, value: any) {
     return this.workspaceState.update(key, value)
   }
 
   static getWorkspaceState(key: KEYS.SEND_METRICS_PROMPTED): boolean | undefined
   static getWorkspaceState(key: KEYS.AUTH0_USER_ID): string | undefined
+  static getWorkspaceState(key: KEYS.ORGANIZATIONS): Record<string, Organization> | undefined
   static getWorkspaceState(key: string) {
     return this.workspaceState.get(key)
   }

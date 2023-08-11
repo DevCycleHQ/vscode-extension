@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as vscode from 'vscode'
 import { RUDDERSTACK_KEY } from "./analytics";
-import { getOrganizationId } from "./cli";
 import { KEYS, StateManager } from "./StateManager";
 
 type RudderstackEvent = {
