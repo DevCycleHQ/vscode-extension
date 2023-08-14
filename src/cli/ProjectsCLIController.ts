@@ -62,11 +62,6 @@ export class ProjectsCLIController extends BaseCLIController {
   protected async selectProject(project: string) {
     const { code, error } = await this.execDvc(`projects select --project=${project}`)
     if (code === 0) {
-      await vscode.commands.executeCommand(
-        'setContext',
-        'devcycle-feature-flags.repoConfigured',
-        true,
-      )
       StateManager.setFolderState(this.folder.name, KEYS.PROJECT_ID, project)
     } else {
       vscode.window.showErrorMessage(`Selecting project failed ${error?.message}}`)

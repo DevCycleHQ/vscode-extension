@@ -75,24 +75,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
           await executeRefreshUsagesCommand(folder)
         }
     }
-
-    const cli = new BaseCLIController(folder)
-    const status = await cli.status()
-    if (status.organization) {
-      // TODO: scope commands to folder
-      await vscode.commands.executeCommand(
-        'setContext',
-        'devcycle-feature-flags.repoConfigured',
-        status.repoConfigExists,
-      )
-      if (status.hasAccessToken) {
-        await vscode.commands.executeCommand(
-          'setContext',
-          'devcycle-feature-flags.loggedIn',
-          status.hasAccessToken,
-        )
-      }
-    }
   })
 
   // On Hover
