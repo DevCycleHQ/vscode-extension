@@ -17,13 +17,7 @@ export class AuthCLIController extends BaseCLIController {
   public async init() {
     showBusyMessage('Initializing DevCycle')
     const { code, error, output } = await this.execDvc('repo init')
-    if (code === 0) {
-      await vscode.commands.executeCommand(
-        'setContext',
-        'devcycle-feature-flags.loggedIn',
-        true,
-      )
-    } else {
+    if (code !== 0) {
       vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
     }
     hideBusyMessage()
@@ -54,12 +48,6 @@ export class AuthCLIController extends BaseCLIController {
       const cliStatus = await this.status()
       const auth0UserId = cliStatus.a0UserId
       StateManager.setWorkspaceState(KEYS.AUTH0_USER_ID, auth0UserId)
-  
-      await vscode.commands.executeCommand(
-        'setContext',
-        'devcycle-feature-flags.loggedIn',
-        true,
-      )
       vscode.window.showInformationMessage('Logged in to DevCycle')
     } catch (e) {
       if (e instanceof Error) {
@@ -74,11 +62,6 @@ export class AuthCLIController extends BaseCLIController {
   public async logout() {
     const { code, error } = await this.execDvc('logout')
     if (code === 0) {
-      await vscode.commands.executeCommand(
-        'setContext',
-        'devcycle-feature-flags.loggedIn',
-        false,
-      )
       vscode.window.showInformationMessage('Logged out of DevCycle')
     } else {
       vscode.window.showInformationMessage(`Logout failed ${error?.message}}`)

@@ -74,8 +74,7 @@
         "icon": {
           "light": "media/togglebot.svg",
           "dark": "media/togglebot-white.svg"
-        },
-        "enablement": "devcycle-feature-flags.repoConfigured == false"
+        }
       },
       {
         "command": "devcycle-feature-flags.logout",
@@ -91,8 +90,7 @@
         "command": "devcycle-feature-flags.refresh-usages",
         "category": "DevCycle",
         "title": "Refresh Code Usages",
-        "icon": "$(refresh)",
-        "enablement": "devcycle-feature-flags.repoConfigured == true"
+        "icon": "$(refresh)"
       }
     ],
     "configuration": [
