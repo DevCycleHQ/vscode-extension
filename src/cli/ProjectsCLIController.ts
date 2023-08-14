@@ -48,7 +48,7 @@ export class ProjectsCLIController extends BaseCLIController {
       ? projects[0]
       : await vscode.window.showQuickPick(projects, {
         ignoreFocusOut: true,
-        title: 'Select DevCycle Project',
+        title: `Select DevCycle Project (${this.folder.name})`,
       })
     
     if (!project) {
