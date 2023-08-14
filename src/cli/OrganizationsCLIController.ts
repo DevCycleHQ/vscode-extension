@@ -46,7 +46,7 @@ export class OrganizationsCLIController extends BaseCLIController {
       ? quickPickItems[0]
       : await vscode.window.showQuickPick(quickPickItems, {
         ignoreFocusOut: true,
-        title: 'Select DevCycle Organization',
+        title: `Select DevCycle Organization (${this.folder.name})`,
       })
     const selectedOrg = selectedItem?.value
     
