@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
-import { getNonce } from '../utils/getNonce'
-import { setUpCliStartupView, setUpWorkspaceStartupView } from '../utils/setUpViews'
+import { getNonce } from '../../utils/getNonce'
+import { setUpCliStartupView, setUpWorkspaceStartupView } from './utils/setUpViews'
 
 export const enum STARTUP_VIEWS {
   CLI = 'cli',

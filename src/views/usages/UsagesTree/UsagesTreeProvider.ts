@@ -5,9 +5,9 @@ import {
   FeaturesCLIController,
   VariablesCLIController,
   UsagesCLIController,
-} from '../../cli'
+} from '../../../cli'
 
-import { showBusyMessage, hideBusyMessage } from '../statusBarItem'
+import { showBusyMessage, hideBusyMessage } from '../../../components/statusBarItem'
 import { CodeUsageNode, VariableCodeReference } from './CodeUsageNode'
 import { FolderNode } from './FolderNode'
 

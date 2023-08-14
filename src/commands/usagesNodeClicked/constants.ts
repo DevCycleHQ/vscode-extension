@@ -1,0 +1,1 @@
+export const COMMAND_USAGES_NODE_CLICKED = 'devcycle-featureflags.usagesNodeClicked'

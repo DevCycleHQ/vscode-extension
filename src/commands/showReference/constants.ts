@@ -1,0 +1,1 @@
+export const COMMAND_SHOW_REFERENCE = 'devcycle-feature-flags.show-reference'

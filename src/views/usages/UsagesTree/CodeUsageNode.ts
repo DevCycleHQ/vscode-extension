@@ -4,9 +4,9 @@ import {
   VariableReference,
   CombinedVariableData,
   getOrganizationId,
-} from '../../cli'
+} from '../../../cli'
 
-import { KEYS, StateManager } from '../../StateManager'
+import { KEYS, StateManager } from '../../../StateManager'
 
 export type VariableCodeReference =
   | (CombinedVariableData & {
