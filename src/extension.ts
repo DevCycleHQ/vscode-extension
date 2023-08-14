@@ -1,7 +1,7 @@
 ;('use strict')
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
-import { BaseCLIController, getOrganizationId } from './cli'
+import { AuthCLIController, BaseCLIController, getOrganizationId } from './cli'
 import { autoLoginIfHaveCredentials } from './utils/credentials'
 
 import { getHoverString } from './components/hoverCard'
@@ -126,6 +126,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
       )
       return new vscode.Hover(hoverString || '')
     },
+  })
+
+  vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
+    for (const folder of event.added) {
+      const cli = new AuthCLIController(folder)
+      await cli.login()
+    }
+    await executeRefreshUsagesCommand()
   })
 }
 
