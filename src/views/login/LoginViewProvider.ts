@@ -14,6 +14,7 @@ const enum ACTIONS {
 const enum ERRORS {
   LOGIN = 'login',
 }
+
 interface Data {
   type: string
 }

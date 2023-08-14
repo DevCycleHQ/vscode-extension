@@ -5,6 +5,7 @@ import {
   CombinedVariableData,
   getOrganizationId,
 } from '../../../cli'
+import path from 'path'
 
 import { KEYS, StateManager } from '../../../StateManager'
 
@@ -89,7 +90,7 @@ export class CodeUsageNode extends vscode.TreeItem {
           ),
         )
       }
-      const orgId = await getOrganizationId(folder)
+      const orgId = getOrganizationId(folder)
       const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
       if (orgId && projectId) {
         const link = `https://app.devcycle.com/o/${orgId}/p/${projectId}/variables/${variable._id}`
@@ -117,6 +118,15 @@ export class CodeUsageNode extends vscode.TreeItem {
       children.push(variableDetailsRoot)
     }
 
+    if (!('variable' in match)) {
+      const notFoundNode = new CodeUsageNode(
+        key + ':not-found',
+        '',
+        'detail'
+      )
+      notFoundNode.description = 'VARIABLE NOT FOUND IN DEVCYCLE'
+      children.push(notFoundNode)
+    }
     if (references) {
       const usagesChildNodes = references?.map((reference) =>
         this.usageFrom(match, reference, folder.uri.fsPath),
@@ -136,12 +146,12 @@ export class CodeUsageNode extends vscode.TreeItem {
       dark: vscode.Uri.joinPath(
         context.extensionUri,
         'media',
-        'flag-filled-white.svg',
+        'variable' in match ? 'flag-filled-white.svg' : 'flag-filled-white-red-dot.svg',
       ),
       light: vscode.Uri.joinPath(
         context.extensionUri,
         'media',
-        'flag-filled.svg',
+        'variable' in match ? 'flag-filled.svg' : 'flag-filled-red-dot.svg',
       ),
     }
     return instance
@@ -155,12 +165,10 @@ export class CodeUsageNode extends vscode.TreeItem {
     const key = 'key' in match ? match.key : match.variable.key
     const start = reference.lineNumbers.start
     const end = reference.lineNumbers.end
-    const label =
-      start === end
-        ? `${reference.fileName}:L${start}`
-        : `${reference.fileName}:L${start}-${end}`
+    const label = path.basename(reference.fileName)
     const instance = new CodeUsageNode(key, label, 'usage')
-    const file = vscode.Uri.file(`${folderPath}/${reference.fileName}`)
+    const file = vscode.Uri.file(`${folderPath}/${reference.fileName}`) 
+    instance.description = start === end ? `L${start}` : `L${start}-${end}`
     instance.command = {
       title: '',
       command: 'devcycle-feature-flags.show-reference',
