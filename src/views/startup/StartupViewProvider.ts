@@ -29,14 +29,10 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, this.viewType)
 
     webviewView.webview.onDidReceiveMessage(async (data: { btnType: BUTTON_TYPES }) => {
-      if (data.btnType === BUTTON_TYPES.CLI) {
-        const { shouldShowCliStartUpView, shouldShowWorkspaceView } = await this.checkView()
-        if (shouldShowWorkspaceView && !shouldShowCliStartUpView) {
-          webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, STARTUP_VIEWS.WORKSPACE)
-        }
-      } else if (data.btnType === BUTTON_TYPES.WORKSPACE) {
+      if (data.btnType === BUTTON_TYPES.WORKSPACE) {
         await vscode.commands.executeCommand('vscode.openFolder')
       }
+      this.refreshStartupView(webviewView)
     })
   }
 
@@ -124,6 +120,17 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
     return {
       shouldShowCliStartUpView: await setUpCliStartupView(),
       shouldShowWorkspaceView: setUpWorkspaceStartupView()
+    }
+  }
+
+  private async refreshStartupView(webviewView: vscode.WebviewView) {
+    const { shouldShowCliStartUpView, shouldShowWorkspaceView } = await this.checkView()
+    if (shouldShowWorkspaceView) {
+      webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, STARTUP_VIEWS.WORKSPACE)
+    } else if (shouldShowCliStartUpView) {
+      webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, STARTUP_VIEWS.CLI)
+    } else {
+      await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
     }
   }
 }
