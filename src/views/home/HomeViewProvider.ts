@@ -28,10 +28,12 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
       const folder = vscode.workspace.workspaceFolders?.[data.folderIndex]
       // TODO (home view) get switching org/ project working
       if (folder && data.type === 'organization') {
-        await (new OrganizationsCLIController(folder)).selectOrganization(data.value, false)
+        const organizationsController = new OrganizationsCLIController(folder)
+        await organizationsController.selectOrganization(data.value, false)
         webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview) // refresh view to get new projects
       } else if (folder && data.type === 'project') {
-        await (new ProjectsCLIController(folder)).selectProject(data.value)
+        const projectsController = new ProjectsCLIController(folder)
+        await projectsController.selectProject(data.value)
       }
     })
   }
@@ -54,22 +56,29 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const organizationId = `organization${folder.index}`
 
     return `
-    <div class="form-container">
-            ${showHeader ? `<h3>${folder.name}</h3>`: ''}
-            <div class="dropdown-container">
-                <label for="${organizationId}">Organization:</label>
-                <select id="${organizationId}" name="organization">
-                ${Object.values(organizations).map((organization) => `<option value="${organization.id}" ${organization.name === activeOrganizationName ? 'selected' : ''}>${organization.display_name || organization.name}</option>`)}
-                </select>
-            </div>
-            <div class="dropdown-container">
-                <label for="${projectId}">Project:</label>
-                <select id="${projectId}" name="project">
-                  ${Object.values(projectKeys).map((project) => `<option value="${project}" ${project === activeProjectKey ? 'selected' : ''}>${project}</option>`)}
-                </select>
-            </div>
+      <div class="form-container">
+        ${showHeader ? `<h3>${folder.name}</h3>`: ''}
+        <div class="dropdown-container">
+          <label for="${organizationId}">Organization:</label>
+          <select id="${organizationId}" name="organization">
+            ${Object.values(organizations).map((organization) => 
+              `<option value="${organization.id}" ${organization.name === activeOrganizationName ? 'selected' : ''}>${organization.display_name || organization.name}</option>`
+            )}
+          </select>
+        </div>
+        <div class="dropdown-container">
+          <label for="${projectId}">Project:</label>
+          <select id="${projectId}" name="project">
+            ${Object.values(projectKeys).map((project) => `<option value="${project}" ${project === activeProjectKey ? 'selected' : ''}>${project}</option>`)}
+          </select>
+        </div>
       </div>
       <a>✎ Edit Config </a>
+      <vscode-dropdown>
+        <vscode-option value="option1">Option 1</vscode-option>
+        <vscode-option value="option2">Option 2</vscode-option>
+        <vscode-option value="option3">Option 3</vscode-option>
+      </vscode-dropdown>
     ` // TODO (home view) add link to 'edit config' and add icons
   }
 
@@ -98,7 +107,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
       \n
     `
   }
-    
+
   private getButtonRow() { // TODO (home view) add real links, icons, and styling
     return `
     <div>
@@ -123,12 +132,15 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     </div>
     `
   }
-  
+
   private async _getHtmlForWebview(
     webview: vscode.Webview,
   ) {
     const styleVSCodeUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'),
+    )
+    const webViewUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'out', 'webview.js'),
     )
 
     const nonce = getNonce()
@@ -141,30 +153,27 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     }
 
     return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<!--
-					Use a content security policy to only allow loading images from https or from our extension directory,
-					and only allow scripts that have a specific nonce.
-        -->
-        <meta http-equiv="Content-Security-Policy" content="img-src https: data:; style-src 'unsafe-inline' ${
-          webview.cspSource
-        }; script-src 'nonce-${nonce}';">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<link href="${styleVSCodeUri}" rel="stylesheet">
-        
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <!--
+            Use a content security policy to only allow loading images from https or from our extension directory,
+            and only allow scripts that have a specific nonce.
+          -->
+          <meta http-equiv="Content-Security-Policy" content="img-src https: data:; style-src 'unsafe-inline' ${
+            webview.cspSource
+          }; script-src 'nonce-${nonce}';">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <link href="${styleVSCodeUri}" rel="stylesheet">
         </head>
         <body>
-        ${this.getButtonRow()}
-
-        ${body}
+          ${this.getButtonRow()}
+          ${body}
+          <script type="module" nonce="${nonce} src=${webViewUri}">
+            const vscode = acquireVsCodeApi()
+            ${script}
+          </script>
         </body>
-        <script nonce="${nonce}">
-          const vscode = acquireVsCodeApi()
-          let element
-          ${script}
-        </script>
-        </html>`
+      </html>`
   }
 }

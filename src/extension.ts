@@ -3,7 +3,6 @@ import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
 import { AuthCLIController, getOrganizationId } from './cli'
 import { autoLoginIfHaveCredentials } from './utils/credentials'
-
 import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
 import { getRepoConfig, loadRepoConfig } from './utils'
@@ -48,7 +47,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       StateManager.setWorkspaceState(KEYS.SEND_METRICS_PROMPTED, true)
     })
   }
- 
+
   if (!StateManager.getGlobalState(KEYS.EXTENSION_INSTALLED)) {
     const orgId = getOrganizationId(workspaceFolder)
     trackRudderstackEvent('Extension Installed', orgId)
@@ -69,7 +68,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
     await loadRepoConfig(folder)
   })
 
-  await registerUsagesNodeClickedCommand(context)
+  registerUsagesNodeClickedCommand(context)
   await registerInitCommand(context)
   await registerOpenLinkCommand(context)
   await registerLogoutCommand(context)
@@ -92,7 +91,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
     async provideHover(document, position) {
       const activeDocument = vscode.window.activeTextEditor?.document
       const currentFolder = activeDocument ? vscode.workspace.getWorkspaceFolder(activeDocument.uri) : undefined
-      if (!currentFolder) return
+      if (!currentFolder) { return }
       const range = document.getWordRangeAtPosition(position, REGEX)
 
       if (!range) {
@@ -106,7 +105,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       const variables = StateManager.getFolderState(currentFolder.name, KEYS.VARIABLES) || {}
       const keyInAPIVariables = !!variables[variableKey]        
       const keyInCodeUsages = StateManager.getFolderState(currentFolder.name, KEYS.CODE_USAGE_KEYS)?.includes(variableKey)
-      
+
       if (!keyInAPIVariables && !keyInCodeUsages) {
         return
       }
