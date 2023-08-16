@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
-import { setUpCliStartupView, setUpWorkspaceStartupView } from './utils/setUpViews'
+import { setUpWorkspaceStartupView } from './utils/setUpViews'
 
 export const enum STARTUP_VIEWS {
   CLI = 'cli',
@@ -118,17 +118,14 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
 
   private async checkView() {
     return {
-      shouldShowCliStartUpView: await setUpCliStartupView(),
       shouldShowWorkspaceView: setUpWorkspaceStartupView()
     }
   }
 
   private async refreshStartupView(webviewView: vscode.WebviewView) {
-    const { shouldShowCliStartUpView, shouldShowWorkspaceView } = await this.checkView()
+    const { shouldShowWorkspaceView } = await this.checkView()
     if (shouldShowWorkspaceView) {
       webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, STARTUP_VIEWS.WORKSPACE)
-    } else if (shouldShowCliStartUpView) {
-      webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, STARTUP_VIEWS.CLI)
     } else {
       await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
     }

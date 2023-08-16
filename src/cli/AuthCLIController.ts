@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import { StateManager, KEYS } from '../StateManager'
 import { showBusyMessage, hideBusyMessage } from '../components/statusBarItem'
 import { Organization, OrganizationsCLIController } from './OrganizationsCLIController'
-import { loadRepoConfig } from '../utils'
+import { loadRepoConfig, showDebugOutput } from '../utils'
 import { BaseCLIController } from './BaseCLIController'
 import { executeRefreshUsagesCommand } from '../commands/refreshUsages'
 
@@ -51,7 +51,7 @@ export class AuthCLIController extends BaseCLIController {
       vscode.window.showInformationMessage('Logged in to DevCycle')
     } catch (e) {
       if (e instanceof Error) {
-        this.showDebugOutput(`Login failed ${e.message}`)
+        showDebugOutput(`Login failed ${e.message}`)
         throw e
       }
     } finally {

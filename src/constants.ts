@@ -1,1 +1,1 @@
-export const minimumCliVersion = '5.3.1'
+export const CLI_VERSION = '5.4.0'
