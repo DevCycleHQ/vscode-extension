@@ -164,6 +164,9 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const codiconsUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css')
     )
+    const webViewUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'out', 'webview.js'),
+    )
 
     const nonce = getNonce()
     let body = ''
