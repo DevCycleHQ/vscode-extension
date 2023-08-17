@@ -3,12 +3,10 @@ import { getNonce } from '../../utils/getNonce'
 import { setUpWorkspaceStartupView } from './utils/setUpViews'
 
 export const enum STARTUP_VIEWS {
-  CLI = 'cli',
   WORKSPACE = 'workspace',
 }
 
 enum BUTTON_TYPES {
-  CLI = 'installedCli',
   WORKSPACE = 'openFolder',
 }
 
@@ -53,21 +51,6 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
   ): string {
     let body = ''
 
-    if (view === STARTUP_VIEWS.CLI) {
-      body = `<br/>
-        <p>In order to use DevCycle extension, please install DevCycle CLI.</p>
-        <br/>
-        <p>To install via npm, use the command: </p>
-        <pre><code>npm install -g @devcycle/cli</code></pre>
-        <br/>
-        <p>To install via brew, use the command: </p>
-        <pre><code>brew install devcycle-cli</code></pre>
-        <br/>
-        <button id="installedCli">I have installed DevCycle CLI</button>
-        <br/>
-        <p>To learn more about DevCycle and this extension, <a href="https://docs.devcycle.com">read our docs</a></p>
-        `
-    }
     if (view === STARTUP_VIEWS.WORKSPACE) {
       body = `<br/>
         <p>In order to use DevCycle features, open a folder.</p>

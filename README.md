@@ -26,9 +26,6 @@ You can access this GitHub repository at: [https://github.com/DevCycleHQ/VSCode-
 Before getting started with DevCycle, make sure you meet the following requirements:
 
 - You need a DevCycle account. Sign up for a free account [here](https://devcycle.com/signup) (no credit card required).
-- This extension makes use of the  DevCycle CLI. Installation instructions and info can be found [here](https://docs.devcycle.com/cli).
-  - To install via npm, use the command `npm install -g @devcycle/cli`.
-  - To install via brew, use the command `brew install devcycle-cli`.
 
 ## Extension Installation
 
@@ -48,7 +45,6 @@ Post-installation, you can start utilizing the extension straightaway. No additi
 
 DevCycle extension contributes the following settings:
 
-- `Devcycle-feature-flags: Cli`: Determines how the CLI will be invoked. Default is `dvc`.
 - `Devcycle-feature-flags: Debug`: Displays debug output for the extension, including what CLI commands are being executed. Default is off.
 - `Devcycle-feature-flags: Login On Workspace Open`: Automatically logs into DevCycle when a configured workspace is opened. Default is on.
 - `Devcycle-feature-flags: Send Metrics`: Allows DevCycle to send usage metrics. Default is off.
