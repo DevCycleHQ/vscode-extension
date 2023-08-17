@@ -1,7 +1,7 @@
 ;('use strict')
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
-import { AuthCLIController, BaseCLIController, getOrganizationId } from './cli'
+import { AuthCLIController, getOrganizationId } from './cli'
 import { autoLoginIfHaveCredentials } from './utils/credentials'
 
 import { getHoverString } from './components/hoverCard'
@@ -18,6 +18,7 @@ import {
 import { registerLogoutCommand } from './commands/logout'
 import { executeRefreshUsagesCommand, registerRefreshUsagesCommand } from './commands/refreshUsages'
 import { registerShowReferenceCommand } from './commands/showReference'
+import cliUtils from './cli/utils'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -30,6 +31,8 @@ const SCHEME_FILE = {
 export const activate = async (context: vscode.ExtensionContext) => {
   StateManager.globalState = context.globalState
   StateManager.workspaceState = context.workspaceState
+
+  await cliUtils.loadCli()
 
   const [workspaceFolder] = vscode.workspace.workspaceFolders || []
 
