@@ -9,9 +9,12 @@ import { hideBusyMessage, showBusyMessage } from '../../components/statusBarItem
 
 const CLI_ARTIFACTS = 'https://github.com/DevCycleHQ/cli/releases/download'
 const SUPPORTED_PLATFORMS = [
+  'darwin-x64',
   'darwin-arm64',
   'linux-arm',
+  'linux-x64',
   'win32-x64',
+  'win32-x86'
 ]
 const OUTPUT_DIR = path.join(path.resolve(__dirname), '..')
 const CLI_ROOT = path.join(OUTPUT_DIR, 'dvc')
