@@ -62,6 +62,6 @@
 5. Use the `Write Key` as the username and leave the password blank
 6. Copy the generated token and paste it in `src/analytics.ts`(if this file does not exist, run the extension and it should be automatically generated for you) as the value of the `RUDDERSTACK_KEY` variable
 
-## Minimum CLI Version
+## CLI Version
 
-- If a change is made that requires updating the minimum required devcycle CLI version, be sure to update the `minimumCliVersion` variable in the `constants.ts` file.
+- If a change is made that requires updating the minimum required devcycle CLI version, be sure to update the `CLI_VERSION` variable in the `constants.ts` file.

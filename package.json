@@ -40,13 +40,13 @@
           "type": "webview",
           "id": "devcycle-startup",
           "name": "DevCycle",
-          "when": "devcycle-feature-flags.shouldShowCliView || devcycle-feature-flags.shouldShowWorkspaceView"
+          "when": "devcycle-feature-flags.shouldShowWorkspaceView"
         },
         {
           "type": "webview",
           "id": "devcycle-sidebar",
           "name": "DevCycle",
-          "when": "!devcycle-feature-flags.shouldShowCliView && !devcycle-feature-flags.shouldShowWorkspaceView && !devcycle-feature-flags.hasCredentialsAndProject"
+          "when": "!devcycle-feature-flags.shouldShowWorkspaceView && !devcycle-feature-flags.hasCredentialsAndProject"
         },
         {
           "type": "tree",
@@ -111,11 +111,6 @@
             "type": "boolean",
             "default": false,
             "description": "Displays debug output for the extension, including what CLI commands are being executed."
-          },
-          "devcycle-feature-flags.cli": {
-            "type": "string",
-            "default": "dvc",
-            "description": "How the CLI will be invoked"
           },
           "devcycle-feature-flags.sendMetrics": {
             "type": "boolean",

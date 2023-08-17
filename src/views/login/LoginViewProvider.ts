@@ -89,7 +89,7 @@ export class LoginViewProvider implements vscode.WebviewViewProvider {
     let body = ''
     if (view === VIEWS.DEFAULT) {
       body = `<br/>
-        <h3>Login using the DevCycle CLI:</h3>
+        <h3>Login to DevCycle:</h3>
         <button id="loginBtn">Login</button>`
     }
     return body
