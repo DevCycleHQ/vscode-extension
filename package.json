@@ -63,6 +63,10 @@
           "command": "devcycle-feature-flags.refresh-usages",
           "when": "view == devcycle-code-usages",
           "group": "navigation"
+        },
+        {
+          "command": "workbench.action.openSettings",
+          "group": "navigation"
         }
       ]
     },
@@ -91,6 +95,12 @@
         "category": "DevCycle",
         "title": "Refresh Code Usages",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "workbench.action.openSettings",
+        "category": "DevCycle",
+        "title": "DevCycle Settings",
+        "icon": "$(gear)"
       }
     ],
     "configuration": [
