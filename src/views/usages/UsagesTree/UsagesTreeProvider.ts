@@ -22,7 +22,7 @@ export class UsagesTreeProvider
   private flagsByFolder: Record<string, CodeUsageNode[]> = {}
   private isRefreshing: Record<string, boolean> = {}
   sortKey: 'key' | 'createdAt' | 'updatedAt' = 'key'
-
+  sortAsc: boolean = true
   
   constructor(
     private context: vscode.ExtensionContext,
@@ -66,14 +66,15 @@ export class UsagesTreeProvider
       if (criteria === 'key') {
         return node.key
       }
-      const detailNode = node.children[0].children.find(child => child.key.includes(`:${criteria}`));
-      return detailNode?.description || '';
-    };
+      const detailNode = node.children[0].children.find(child => child.key.includes(`:${criteria}`))
+      return detailNode?.description || ''
+    }
     
-    const aValue = getSortValue(a, this.sortKey);
-    const bValue = getSortValue(b, this.sortKey);
+    const aValue = getSortValue(a, this.sortKey)
+    const bValue = getSortValue(b, this.sortKey)
 
-    return aValue > bValue ? 1 : -1;
+    const val = aValue > bValue ? 1 : -1
+    return this.sortAsc ? val : val * -1
   }
 
   async refreshAll(): Promise<void> {

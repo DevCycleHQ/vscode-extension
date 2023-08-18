@@ -8,23 +8,28 @@ export const registerSortUsagesCommand = (
   ) => {
     context.subscriptions.push(
         vscode.commands.registerCommand('devcycle-code-usages.sortByKey', async () => {
-            usagesDataProvider.sortKey = SortCriteria.KEY
-            usagesDataProvider.sortData()
-
+            setSortKeyAndSort(usagesDataProvider, SortCriteria.KEY)
         })
     )
     context.subscriptions.push(
         vscode.commands.registerCommand('devcycle-code-usages.sortByCreatedAt', async () => {
-            usagesDataProvider.sortKey = SortCriteria.CREATED_AT
-            usagesDataProvider.sortData()
+            setSortKeyAndSort(usagesDataProvider, SortCriteria.CREATED_AT)
 
         })
     )
     context.subscriptions.push(
         vscode.commands.registerCommand('devcycle-code-usages.sortByUpdatedAt', async () => {
-            usagesDataProvider.sortKey = SortCriteria.UPDATED_AT
-            usagesDataProvider.sortData()
-
+            setSortKeyAndSort(usagesDataProvider, SortCriteria.UPDATED_AT)
         })
     )
+}
+
+const setSortKeyAndSort = (usagesDataProvider: UsagesTreeProvider, criteria: SortCriteria) => {
+    if (usagesDataProvider.sortKey === criteria) {
+        usagesDataProvider.sortAsc = !usagesDataProvider.sortAsc
+    } else {
+        usagesDataProvider.sortAsc = true
+    }
+    usagesDataProvider.sortKey = criteria
+    usagesDataProvider.sortData()
 }
