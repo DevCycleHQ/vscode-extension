@@ -56,13 +56,54 @@
         }
       ]
     },
+    "submenus": [
+      {
+          "id": "sortMenu",
+          "label": "Sort By",
+          "icon": "$(keybindings-sort)"
+      }
+    ],
     "menus": {
+      "view/item/context": [
+        {
+          "command": "devcycle-code-usages.sortByKey",
+          "when": "view == devcycle-code-usages"
+        },
+        {
+          "command": "devcycle-code-usages.sortByCreatedAt",
+          "when": "view == devcycle-code-usages"
+        },
+        {
+          "command": "devcycle-code-usages.sortByUpdatedAt",
+          "when": "view == devcycle-code-usages"
+        }
+      ],
+      "commandPalette": [{
+        "command": "devcycle-code-usages.sortMenu",
+        "when": "view == devcycle-code-usages.view",
+        "icon": "$(keybindings-sort)"
+      }],
+      "sortMenu": [
+          {
+              "command": "devcycle-code-usages.sortByKey"
+          },
+          {
+              "command": "devcycle-code-usages.sortByCreatedAt"
+          },
+          {
+              "command": "devcycle-code-usages.sortByUpdatedAt"
+          }
+      ],
       "editor/context": [],
       "view/title": [
         {
           "command": "devcycle-feature-flags.refresh-usages",
           "when": "view == devcycle-code-usages",
-          "group": "navigation"
+          "group": "navigation@1"
+        },{
+          "submenu": "sortMenu",
+          "when": "view == devcycle-code-usages",
+          "group": "navigation@2"
         }
       ]
     },
@@ -91,7 +132,28 @@
         "category": "DevCycle",
         "title": "Refresh Code Usages",
         "icon": "$(refresh)"
-      }
+      },
+      {
+        "command": "devcycle-code-usages.sortByKey",
+        "title": "Sort by Key",
+        "category": "DevCycle Code Usages"
+      },
+      {
+        "command": "devcycle-code-usages.sortByCreatedAt",
+        "title": "Sort by Creation Date",
+        "category": "DevCycle Code Usages"
+      },
+      {
+        "command": "devcycle-code-usages.sortByUpdatedAt",
+        "title": "Sort by Updated Date",
+        "category": "DevCycle Code Usages"
+      },
+      {
+        "command": "devcycle-code-usages.sortMenu",
+        "title": "Sort By",
+        "category": "DevCycle",
+        "icon": "$(keybindings-sort)"
+    }
     ],
     "configuration": [
       {

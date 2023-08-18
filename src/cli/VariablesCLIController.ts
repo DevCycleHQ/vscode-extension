@@ -8,6 +8,8 @@ export type Variable = {
   _id: string
   name: string
   description?: string
+  createdAt: string
+  updatedAt: string
   status: 'active' | 'archived'
 }
 

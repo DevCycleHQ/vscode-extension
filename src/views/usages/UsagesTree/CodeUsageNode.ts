@@ -49,6 +49,20 @@ export class CodeUsageNode extends vscode.TreeItem {
           [],
           variable.status,
         ),
+        new CodeUsageNode(
+          key + ':createdAt',
+          `Created Date`,
+          'detail',
+          [],
+          variable.createdAt,
+        ),
+        new CodeUsageNode(
+          key + ':updatedAt',
+          `Updated Date`,
+          'detail',
+          [],
+          variable.updatedAt,
+        ),
         new CodeUsageNode(key + ':id', `ID`, 'detail', [], variable._id),
         new CodeUsageNode(
           key + ':feature',

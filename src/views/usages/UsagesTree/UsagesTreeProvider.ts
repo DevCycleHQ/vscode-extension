@@ -21,7 +21,9 @@ export class UsagesTreeProvider
     this._onDidChangeTreeData.event
   private flagsByFolder: Record<string, CodeUsageNode[]> = {}
   private isRefreshing: Record<string, boolean> = {}
+  sortKey: 'key' | 'createdAt' | 'updatedAt' = 'key'
 
+  
   constructor(
     private context: vscode.ExtensionContext,
   ) {
@@ -50,6 +52,28 @@ export class UsagesTreeProvider
     )
     hideBusyMessage()
     return result
+  }
+
+  sortData(): void {
+    Object.keys(this.flagsByFolder).forEach(folderName => {
+      this.flagsByFolder[folderName].sort(this.sortFunction);
+    });
+    this._onDidChangeTreeData.fire();
+  }
+
+  private sortFunction = (a: CodeUsageNode, b: CodeUsageNode): number => {
+    const getSortValue = (node: CodeUsageNode, criteria: string): string => {
+      if (criteria === 'key') {
+        return node.key
+      }
+      const detailNode = node.children[0].children.find(child => child.key.includes(`:${criteria}`));
+      return detailNode?.description || '';
+    };
+    
+    const aValue = getSortValue(a, this.sortKey);
+    const bValue = getSortValue(b, this.sortKey);
+
+    return aValue > bValue ? 1 : -1;
   }
 
   async refreshAll(): Promise<void> {
@@ -87,8 +111,7 @@ export class UsagesTreeProvider
           this.flagsByFolder[folder.name].push(await CodeUsageNode.flagFrom(match, folder, this.context))
           return
         }))
-        this.flagsByFolder[folder.name].sort((a, b) => (a.key > b.key ? 1 : -1))
-        this._onDidChangeTreeData.fire()
+        this.sortData()
       })
     this.isRefreshing[folder.name] = false
   }

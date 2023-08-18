@@ -13,7 +13,8 @@ import { registerUsagesViewProvider } from './views/usages'
 import {
   registerInitCommand,
   registerUsagesNodeClickedCommand,
-  registerOpenLinkCommand
+  registerOpenLinkCommand,
+  registerSortUsagesCommand
 } from './commands'
 import { registerLogoutCommand } from './commands/logout'
 import { executeRefreshUsagesCommand, registerRefreshUsagesCommand } from './commands/refreshUsages'
@@ -66,6 +67,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerOpenLinkCommand(context)
   await registerLogoutCommand(context)
   await registerRefreshUsagesCommand(context, usagesDataProvider)
+  await registerSortUsagesCommand(context, usagesDataProvider)
   await registerShowReferenceCommand(context)
 
   vscode.workspace.workspaceFolders?.forEach(async (folder) => {
