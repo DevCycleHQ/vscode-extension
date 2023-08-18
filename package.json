@@ -58,9 +58,9 @@
     },
     "submenus": [
       {
-          "id": "sortMenu",
-          "label": "Sort By",
-          "icon": "$(keybindings-sort)"
+        "id": "sortMenu",
+        "label": "Sort By",
+        "icon": "$(keybindings-sort)"
       }
     ],
     "menus": {
@@ -78,21 +78,23 @@
           "when": "view == devcycle-code-usages"
         }
       ],
-      "commandPalette": [{
-        "command": "devcycle-code-usages.sortMenu",
-        "when": "view == devcycle-code-usages.view",
-        "icon": "$(keybindings-sort)"
-      }],
+      "commandPalette": [
+        {
+          "command": "devcycle-code-usages.sortMenu",
+          "when": "view == devcycle-code-usages.view",
+          "icon": "$(keybindings-sort)"
+        }
+      ],
       "sortMenu": [
-          {
-              "command": "devcycle-code-usages.sortByKey"
-          },
-          {
-              "command": "devcycle-code-usages.sortByCreatedAt"
-          },
-          {
-              "command": "devcycle-code-usages.sortByUpdatedAt"
-          }
+        {
+          "command": "devcycle-code-usages.sortByKey"
+        },
+        {
+          "command": "devcycle-code-usages.sortByCreatedAt"
+        },
+        {
+          "command": "devcycle-code-usages.sortByUpdatedAt"
+        }
       ],
       "editor/context": [],
       "view/title": [
@@ -100,10 +102,15 @@
           "command": "devcycle-feature-flags.refresh-usages",
           "when": "view == devcycle-code-usages",
           "group": "navigation@1"
-        },{
+        },
+        {
           "submenu": "sortMenu",
           "when": "view == devcycle-code-usages",
           "group": "navigation@2"
+        },
+        {
+          "command": "devcycle-feature-flags.openSettings",
+          "group": "navigation@3"
         }
       ]
     },
@@ -153,7 +160,13 @@
         "title": "Sort By",
         "category": "DevCycle",
         "icon": "$(keybindings-sort)"
-    }
+      },
+      {
+        "command": "devcycle-feature-flags.openSettings",
+        "category": "DevCycle",
+        "title": "DevCycle Settings",
+        "icon": "$(gear)"
+      }
     ],
     "configuration": [
       {

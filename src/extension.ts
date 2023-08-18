@@ -20,6 +20,7 @@ import { registerLogoutCommand } from './commands/logout'
 import { executeRefreshUsagesCommand, registerRefreshUsagesCommand } from './commands/refreshUsages'
 import { registerShowReferenceCommand } from './commands/showReference'
 import cliUtils from './cli/utils'
+import { registerOpenSettingsCommand } from './commands/openSettings'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -72,6 +73,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerRefreshUsagesCommand(context, usagesDataProvider)
   await registerSortUsagesCommand(context, usagesDataProvider)
   await registerShowReferenceCommand(context)
+  await registerOpenSettingsCommand(context)
 
   vscode.workspace.workspaceFolders?.forEach(async (folder) => {
     if (autoLogin) {
