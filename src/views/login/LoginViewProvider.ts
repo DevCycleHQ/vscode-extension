@@ -148,8 +148,10 @@ export class LoginViewProvider implements vscode.WebviewViewProvider {
         
         </head>
         <body>
-        ${this.getBodyHtml(view)}
-        ${error ? this.getErrorHtml(error) : ''}
+          <main>
+            ${this.getBodyHtml(view)}
+            ${error ? this.getErrorHtml(error) : ''}
+          </main>
         </body>
         ${this.getButtonScript(view, nonce)}
         </html>`

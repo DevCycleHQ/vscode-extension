@@ -10,6 +10,6 @@ export async function registerHomeViewProvider(context: vscode.ExtensionContext)
         homeViewProvider
         ),
     )
-    
+ 
     return homeViewProvider
 }

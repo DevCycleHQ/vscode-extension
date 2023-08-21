@@ -424,6 +424,11 @@
   resolved "https://registry.npmjs.org/@ungap/promise-all-settled/-/promise-all-settled-1.1.2.tgz"
   integrity sha512-sL/cEvJWAnClXw0wHk85/2L0G6Sj8UB0Ctc1TEMbKSsmpRosqhwj9gWgFRZSrBr2f9tiXISwNhCPmlfqUqyb9Q==
 
+"@vscode/codicons@^0.0.33":
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/@vscode/codicons/-/codicons-0.0.33.tgz#a56243ab5492801fff04e53c0aab0d18a6521751"
+  integrity sha512-VdgpnD75swH9hpXjd34VBgQ2w2quK63WljodlUcOoJDPKiV+rPjHrcUc2sjLCNKxhl6oKqmsZgwOWcDAY2GKKQ==
+
 "@vscode/test-electron@^2.1.2":
   version "2.3.3"
   resolved "https://registry.npmjs.org/@vscode/test-electron/-/test-electron-2.3.3.tgz"
