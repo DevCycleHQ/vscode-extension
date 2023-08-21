@@ -9,7 +9,7 @@
 }
 
 body {
-  padding: 0 var(--container-paddding);
+  padding: unset;
   color: var(--vscode-foreground);
   font-size: var(--vscode-font-size);
   font-weight: var(--vscode-font-weight);
@@ -17,12 +17,17 @@ body {
   background-color: var(--vscode-editor-background);
 }
 
+main {
+  margin: 0 auto;
+  padding: 0 var(--container-paddding);
+}
+
 ol,
 ul {
   padding-left: var(--container-paddding);
 }
 
-body > *,
+main  > *,
 form > * {
   margin-block-start: var(--input-margin-vertical);
   margin-block-end: var(--input-margin-vertical);
@@ -33,12 +38,13 @@ form > * {
 }
 
 a {
-  color: var(--vscode-textLink-foreground);
+  color: var(--vscode-foreground);
+  text-decoration: none;
 }
 
-a:hover,
-a:active {
-  color: var(--vscode-textLink-activeForeground);
+a:hover {
+  color: var(--vscode-foreground);
+  text-decoration: none;
 }
 
 code {
@@ -101,20 +107,170 @@ textarea::placeholder {
   color: var(--vscode-input-placeholderForeground);
 }
 
+.view-heading {
+  filter: brightness(0.6);
+  margin: 0 0 5px;
+  font-weight: 300;
+}
+
 .icon-button {
-  display: inline-block;
-  margin-right: 10px;
-  padding: 5px 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  /* unset default button styles */
+  background: none;
+  border: none;
+  font: inherit;
+  outline: inherit;
+  /* icon button styles */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--vscode-foreground);
+  font-size: var(--vscode-font-size);
   text-decoration: none;
+  cursor: pointer;
+  width: fit-content;
+  border-radius: .3rem;
+  padding: .3rem;
+}
+
+.icon-button:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* Home section
+/* ------------------------------------------ */
+#home-nav {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  padding: 0 10px 5px;
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0;
+  background-color: var(--vscode-editor-background);
+}
+
+#home-nav.active {
+  box-shadow: hsla(0 0% 0% / 0.3) 0 0.5rem 1rem;
+  transition-duration: 400ms;
+}
+
+#home-nav-intercept {
+  margin: 0;
+  position: absolute;
+}
+
+#home-link-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.home-link-row-group {
+  display: flex;
+  align-items: center;
+}
+
+.icon-link {
+  text-decoration: none;
+  color: var(--vscode-foreground);
+  align-items: center;
+  border-radius: .3rem;
+  display: flex;
+  justify-content: center;
+  padding: .3rem;
+}
+
+.icon-link:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.logout-button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+input[type='checkbox'] {
+  display: none;
+}
+
+.lbl-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.collapsible-content {
+  max-height: 0px;
+  overflow: hidden;
+  padding-left: 1.2rem;
+}
+
+.toggle:checked + .lbl-toggle + .collapsible-content {
+  max-height: fit-content;
+  overflow: visible;
+}
+
+.toggle:checked + .lbl-toggle > i {
+  transform: rotate(90deg)
+}
+
+.toggle:checked + .lbl-toggle {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .form-container {
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px;
+}
+
+.form-container h3 {
+  margin: 0;
+}
+
+.form-container > * {
+  height: 25px;
 }
 
 .dropdown-container {
-  display: inline-block;
-  margin-right: 10px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 260px;
+}
+
+.dropdown-container label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vscode-foreground);
+  font-size: var(--vscode-font-size);
+  line-height: normal;
+}
+
+.edit-config-button {
+  padding: 0 .3rem;
+  margin-left: -0.3rem;
+}
+
+.edit-config:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* vscode-webview-ui-toolkit components
+/* ------------------------------------------ */
+vscode-dropdown {
+  width: 150px;
 }

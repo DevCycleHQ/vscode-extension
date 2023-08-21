@@ -49,11 +49,11 @@ export class OrganizationsCLIController extends BaseCLIController {
 
   public async selectOrganizationFromConfig() {
     const { org: orgFromConfig } = await getRepoConfig(this.folder)
-  
+
     if (orgFromConfig) {
       await this.execDvc('login again')
       StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, orgFromConfig)
-  
+
       const projectFromConfig = await this.projectController.selectProjectFromConfig()
       if (!projectFromConfig) {
         const projectMap = await this.projectController.getAllProjects() || {}
@@ -61,10 +61,10 @@ export class OrganizationsCLIController extends BaseCLIController {
         await this.projectController.selectProjectFromList(projectKeys)
       }
     }
-  
+
     return orgFromConfig
   }
-  
+
   public async selectOrganizationFromList(organizations: Organization[]) {
     const quickPickItems = organizations.map((org) => ({
       label: org.display_name,
@@ -77,13 +77,13 @@ export class OrganizationsCLIController extends BaseCLIController {
         title: `Select DevCycle Organization (${this.folder.name})`,
       })
     const selectedOrg = selectedItem?.value
-    
+
     if (!selectedOrg) {
       throw new Error('No organization selected')
     }
-  
+
     showBusyMessage('Logging into DevCycle organization')
-  
+
     await this.selectOrganization(selectedOrg).finally(hideBusyMessage)
     return selectedOrg
   }
@@ -98,14 +98,14 @@ export class OrganizationsCLIController extends BaseCLIController {
       )
       throw error
     }
-  
+
     if (typeof org === 'string') {
       const orgObject = (await this.getAllOrganizations()).find((o) => o.name === org)
       StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, orgObject)
     } else {
       StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, org)
     }
-  
+
     const projectFromConfig = await this.projectController.selectProjectFromConfig()
     if (!projectFromConfig && selectProjectFromList) {
       const projects = JSON.parse(output)

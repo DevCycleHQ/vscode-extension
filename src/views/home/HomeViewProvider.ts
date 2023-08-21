@@ -1,12 +1,14 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
 import { OrganizationsCLIController, ProjectsCLIController } from '../../cli'
+import { executeRefreshUsagesCommand } from '../../commands/refreshUsages'
+import path from 'path'
+import { COMMAND_LOGOUT } from '../../commands/logout'
 
-interface DropdownChangeEvent {
-  type: 'project' | 'organization',
-  value: string,
-  folderIndex: number
-}
+type HomeViewMessage =
+  | { type: 'project' | 'organization', value: string, folderIndex: number }
+  | { type: 'config', folderIndex: number }
+  | { type: 'logout' }
 
 export class HomeViewProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView
@@ -24,16 +26,31 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
 
-    webviewView.webview.onDidReceiveMessage(async (data: DropdownChangeEvent) => {
+    webviewView.webview.onDidReceiveMessage(async (data: HomeViewMessage) => {
+      if (data.type === 'logout') {
+        await vscode.commands.executeCommand(COMMAND_LOGOUT)
+        return
+      }
+
       const folder = vscode.workspace.workspaceFolders?.[data.folderIndex]
-      // TODO (home view) get switching org/ project working
-      if (folder && data.type === 'organization') {
+      if (!folder) { return }
+
+      // TODO When organization is changed, need to update project list and set empty state for usages
+      // DVC-8557
+      if (data.type === 'organization') {
         const organizationsController = new OrganizationsCLIController(folder)
         await organizationsController.selectOrganization(data.value, false)
-        webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview) // refresh view to get new projects
-      } else if (folder && data.type === 'project') {
+        webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
+      } else if (data.type === 'project') {
         const projectsController = new ProjectsCLIController(folder)
         await projectsController.selectProject(data.value)
+        await executeRefreshUsagesCommand(folder)
+      } else if (data.type === 'config') {
+        const folderPath = folder.uri.fsPath
+        const configPath = path.join(folderPath, '.devcycle', 'config.yml')
+        const configUri = vscode.Uri.file(configPath)
+        const document = await vscode.workspace.openTextDocument(configUri)
+        await vscode.window.showTextDocument(document, { preview: false })
       }
     })
   }
@@ -50,85 +67,74 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const organizations = await organizationsController.getAllOrganizations()
     const activeProjectKey = await projectsController.getActiveProject()
     const activeOrganizationName = (await organizationsController.getActiveOrganization())?.name
-    // TODO (home view) active project is sometimes undefined when have multiple folders open
 
     const projectId = `project${folder.index}`
     const organizationId = `organization${folder.index}`
 
-    return `
-      <div class="form-container">
-        ${showHeader ? `<h3>${folder.name}</h3>`: ''}
-        <div class="dropdown-container">
-          <label for="${organizationId}">Organization:</label>
-          <select id="${organizationId}" name="organization">
-            ${Object.values(organizations).map((organization) => 
-              `<option value="${organization.id}" ${organization.name === activeOrganizationName ? 'selected' : ''}>${organization.display_name || organization.name}</option>`
-            )}
-          </select>
-        </div>
-        <div class="dropdown-container">
-          <label for="${projectId}">Project:</label>
-          <select id="${projectId}" name="project">
-            ${Object.values(projectKeys).map((project) => `<option value="${project}" ${project === activeProjectKey ? 'selected' : ''}>${project}</option>`)}
-          </select>
-        </div>
-      </div>
-      <a>✎ Edit Config </a>
-      <vscode-dropdown>
-        <vscode-option value="option1">Option 1</vscode-option>
-        <vscode-option value="option2">Option 2</vscode-option>
-        <vscode-option value="option3">Option 3</vscode-option>
-      </vscode-dropdown>
-    ` // TODO (home view) add link to 'edit config' and add icons
-  }
-
-  private getDropdownScript(folder: vscode.WorkspaceFolder) : string {
-    const projectId = `project${folder.index}`
-    const organizationId = `organization${folder.index}`
+    const orgOptions = Object.values(organizations).map((organization) =>
+      `<vscode-option value="${organization.name}"${organization.name === activeOrganizationName ? ' selected' : '' }>${organization.display_name || organization.name}</vscode-option>`
+    )
+    const projectOptions = Object.values(projectKeys).map((project) =>
+      `<vscode-option value="${project}"${project === activeProjectKey ? ' selected' : ''}>${project}</vscode-option>`
+    )
 
     return `
-      element = document.querySelector('#${projectId}')
-      element?.addEventListener('change', (event) => {
-        vscode.postMessage({
-          type: 'project',
-          value: element?.value,
-          folderIndex: ${folder.index}
-        })
-      })
-
-      element = document.querySelector('#${organizationId}')
-      element?.addEventListener('change', (event) => {
-        vscode.postMessage({
-          type: 'organization',
-          value: element?.value,
-          folderIndex: ${folder.index}
-        })
-      })
-      \n
+      ${
+        showHeader ? `
+        <input id="collapsible${folder.index}" class="toggle" type="checkbox" checked>
+        <label for="collapsible${folder.index}" class="lbl-toggle">
+        <i class="codicon codicon-chevron-right"></i>
+        ${folder.name}
+        </label>
+        <div class="collapsible-content">
+        ` : ''
+      }
+        <div class="form-container">
+          <div class="dropdown-container">
+            <label>
+              <i class="codicon codicon-briefcase"></i>Organization
+            </label>
+            <vscode-dropdown id="${organizationId}" class="home-dropdown" data-folder="${folder.index}" data-type="organization">
+              ${orgOptions.join('')}
+            </vscode-dropdown>
+          </div>
+          <div class="dropdown-container">
+            <label>
+              <i class="codicon codicon-star-empty"></i>Project</label>
+            <vscode-dropdown id="${projectId}" class="home-dropdown" data-folder="${folder.index}" data-type="project">
+              ${projectOptions.join('')}
+            </vscode-dropdown>
+          </div>
+          <button id="edit-config-button" class="icon-button edit-config-button" data-folder="${folder.index}">
+            <i class="codicon codicon-edit"></i>Edit Config
+          </button>
+        </div>
+      ${ showHeader ? ` </div>` : '' }
     `
   }
 
-  private getButtonRow() { // TODO (home view) add real links, icons, and styling
+  private getLinkRow() {
     return `
-    <div>
-        <a href="https://www.example.com" class="icon-button">
-            <img src="icon1.png" alt="Documentation">
+    <div id="home-link-row">
+      <div class="home-link-row-group">
+        <a href="https://docs.devcycle.com/" class="icon-link">
+          <i class="codicon codicon-book"></i>
         </a>
-        <a href="https://www.example.com" class="icon-button">
-            <img src="icon2.png" alt="Announcements">
+        <a href="https://docs.devcycle.com/release-notes" class="icon-link">
+          <i class="codicon codicon-bell"></i>
         </a>
-        <a href="https://www.example.com" class="icon-button">
-            <img src="icon3.png" alt="Discord">
+        <a href="https://discord.gg/TQdnvcJH" class="icon-link">
+          <i class="codicon codicon-comment-discussion"></i>
         </a>
-        <a href="https://www.example.com" class="icon-button">
-            <img src="icon3.png" alt="Github">
+      </div>
+      <div class="home-link-row-group">
+        <a href="https://github.com/DevCycleHQ" class="icon-link">
+          <i class="codicon codicon-github"></i>
         </a>
-        <a href="https://www.example.com" class="icon-button">
-            <img src="icon4.png" alt="Twitter">
+        <a href="https://app.devcycle.com/" class="icon-link">
+          <i class="codicon codicon-globe"></i>
         </a>
-        <a href="https://www.example.com" class="icon-button">
-            <img src="icon5.png" alt="Dashboard">
-        </a>
+      </div>
     </div>
     `
   }
@@ -143,13 +149,15 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(this._extensionUri, 'out', 'webview.js'),
     )
 
+    const codiconsUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css')
+    )
+
     const nonce = getNonce()
     let body = ''
-    let script = ''
     const showFolderHeaders = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1
     for (const folder of vscode.workspace.workspaceFolders || []) {
       body += await this.getBodyHtml(folder, showFolderHeaders)
-      script += this.getDropdownScript(folder)
     }
 
     return `<!DOCTYPE html>
@@ -165,13 +173,25 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
           }; script-src 'nonce-${nonce}';">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <link href="${styleVSCodeUri}" rel="stylesheet">
+          <link href="${codiconsUri}" rel="stylesheet"/>
         </head>
         <body>
-          ${this.getButtonRow()}
-          ${body}
-          <script type="module" nonce="${nonce} src=${webViewUri}">
+          <div id="home-nav-intercept"></div>
+          <div id="home-nav">
+            ${this.getLinkRow()}
+            <div class="logout-button-container">
+              <button id="logout-button" class="icon-button">
+                <i class="codicon codicon-plug"></i>
+                Log out
+              </button>
+            </div>
+          </div>
+          <main>
+            <h4 class="view-heading">Repo Settings</h4>
+            ${body}
+          </main>
+          <script type="module" nonce="${nonce}" src="${webViewUri}">
             const vscode = acquireVsCodeApi()
-            ${script}
           </script>
         </body>
       </html>`
