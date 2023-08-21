@@ -47,7 +47,7 @@ export class VariablesCLIController extends BaseCLIController {
     if (variables) {
       return variables
     }
-    const { code, error, output } = await this.execDvc('variables get')
+    const { code, error, output } = await this.execDvc('variables get --per-page 1000')
     if (code !== 0) {
       vscode.window.showErrorMessage(
         `Retrieving variables failed: ${error?.message}}`,
