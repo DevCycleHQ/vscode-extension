@@ -1,14 +1,10 @@
 import * as vscode from 'vscode'
 import {
-  getCombinedVariableDetails,
-  EnvironmentsCLIController,
-  FeaturesCLIController,
   VariablesCLIController,
   UsagesCLIController,
 } from '../../../cli'
 
-import { showBusyMessage, hideBusyMessage } from '../../../components/statusBarItem'
-import { CodeUsageNode, VariableCodeReference } from './CodeUsageNode'
+import { CodeUsageNode } from './CodeUsageNode'
 import { FolderNode } from './FolderNode'
 
 export class UsagesTreeProvider
@@ -30,28 +26,6 @@ export class UsagesTreeProvider
     if (!vscode.workspace.workspaceFolders) {
       throw new Error('Must have a workspace to check for code usages')
     }
-  }
-
-  private async getCombinedAPIData(folder: vscode.WorkspaceFolder) {
-    showBusyMessage('Fetching DevCycle data')
-    const variablesCLIController = new VariablesCLIController(folder)
-    const featuresCLIController = new FeaturesCLIController(folder)
-    const environmentsCLIController = new EnvironmentsCLIController(folder)
-
-    const [variables] = await Promise.all([
-      variablesCLIController.getAllVariables(),
-      featuresCLIController.getAllFeatures(),
-      environmentsCLIController.getAllEnvironments()
-    ])
-    const result: Record<string, VariableCodeReference> = {}
-    await Promise.all(
-      Object.entries(variables).map(async ([key, variable]) => {
-        const data = await getCombinedVariableDetails(folder, variable, true)
-        result[key] = data
-      }),
-    )
-    hideBusyMessage()
-    return result
   }
 
   sortData(): void {
@@ -99,19 +73,20 @@ export class UsagesTreeProvider
       },
       async () => {
         const usagesCLIController = new UsagesCLIController(folder)
-        const variables = await this.getCombinedAPIData(folder)
+        const variablesCLIController = new VariablesCLIController(folder)
+
+        const variables = await variablesCLIController.getAllVariables()
         const matches = await usagesCLIController.usages()
-        matches.forEach((usage) => {
-          if (variables[usage.key]) {
-            variables[usage.key].references = usage.references
-          } else {
-            variables[usage.key] = usage
-          }
-        })
-        await Promise.all(Object.values(variables).map(async (match) => {
-          this.flagsByFolder[folder.name].push(await CodeUsageNode.flagFrom(match, folder, this.context))
-          return
-        }))
+
+        await Promise.all(
+          matches.map(async (match) => {
+            const variable = variables[match.key]
+            const populatedMatch = variable ? { ...match, variable } : match
+
+            const usageNode = await CodeUsageNode.flagFrom(populatedMatch, folder, this.context)
+            this.flagsByFolder[folder.name].push(usageNode)
+          })
+        )
         this.sortData()
       })
     this.isRefreshing[folder.name] = false
