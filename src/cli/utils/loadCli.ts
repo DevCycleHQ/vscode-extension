@@ -35,10 +35,17 @@ function getTarPath() {
 }
 
 function isCliLoaded() {
-  return (
-    fs.existsSync(CLI_EXEC) &&
-    fs.existsSync(path.join(CLI_ROOT, 'node_modules/@oclif/core/package.json'))
-  )
+  try {
+    const manifestPath = path.join(CLI_ROOT, 'oclif.manifest.json')
+    return (
+      fs.existsSync(CLI_EXEC) &&
+      fs.existsSync(path.join(CLI_ROOT, 'node_modules/@oclif/core/package.json')) &&
+      fs.existsSync(manifestPath) &&
+      JSON.parse(fs.readFileSync(manifestPath, 'utf8')).version === CLI_VERSION
+    )
+  } catch (err) {
+    return false
+  }
 }
 
 async function downloadCli() {
