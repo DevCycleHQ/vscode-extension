@@ -2,18 +2,14 @@ import * as vscode from 'vscode'
 import {
   JSONMatch,
   VariableReference,
-  CombinedVariableData,
   getOrganizationId,
+  Variable,
 } from '../../../cli'
 import path from 'path'
 
 import { KEYS, StateManager } from '../../../StateManager'
 
-export type VariableCodeReference =
-  | (CombinedVariableData & {
-      references?: VariableReference[]
-    })
-  | JSONMatch
+export type VariableCodeReference = JSONMatch & { variable?: Variable }
 
 const collapsedMap = {
   flag: vscode.TreeItemCollapsibleState.Collapsed,
@@ -29,18 +25,17 @@ export class CodeUsageNode extends vscode.TreeItem {
     context: vscode.ExtensionContext,
   ) {
     const children = []
-    let references: VariableReference[] | undefined = match.references
-    const key = 'key' in match ? match.key : match.variable.key
+    const { key, references, variable } = match
 
-    if ('variable' in match) {
-      const {
-        variable,
-        feature,
-        configurations,
-        references: variableReferences,
-      } = match
-      references = references || variableReferences
-
+    if (!variable) {
+      const notFoundNode = new CodeUsageNode(
+        key + ':not-found',
+        '',
+        'detail'
+      )
+      notFoundNode.description = 'VARIABLE NOT FOUND IN DEVCYCLE'
+      children.push(notFoundNode)
+    } else {
       const detailsChildNodes = [
         new CodeUsageNode(
           key + ':status',
@@ -63,17 +58,10 @@ export class CodeUsageNode extends vscode.TreeItem {
           [],
           variable.updatedAt,
         ),
-        new CodeUsageNode(key + ':id', `ID`, 'detail', [], variable._id),
-        new CodeUsageNode(
-          key + ':feature',
-          `Feature`,
-          'detail',
-          [],
-          feature?.name || feature?.key || 'Unassociated',
-        ),
+        new CodeUsageNode(key + ':id', `ID`, 'detail', [], variable._id)
       ]
 
-      if (variable.description?.length) {
+      if (variable.description) {
         detailsChildNodes.unshift(
           new CodeUsageNode(
             key + ':description',
@@ -84,26 +72,13 @@ export class CodeUsageNode extends vscode.TreeItem {
           ),
         )
       }
-      if (variable.name?.length) {
+      if (variable.name) {
         detailsChildNodes.unshift(
           new CodeUsageNode(key + ':name', `Name`, 'detail', [], variable.name),
         )
       }
-      if (configurations?.length) {
-        const activeEnvironments = configurations
-          .filter((config) => config.status === 'active')
-          .map((config) => config.envName)
+      
 
-        detailsChildNodes.push(
-          new CodeUsageNode(
-            key + ':targeting',
-            `Active Environments`,
-            'detail',
-            [],
-            activeEnvironments.length ? activeEnvironments.join(', ') : 'None',
-          ),
-        )
-      }
       const orgId = getOrganizationId(folder)
       const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
       if (orgId && projectId) {
@@ -130,29 +105,18 @@ export class CodeUsageNode extends vscode.TreeItem {
         detailsChildNodes,
       )
       children.push(variableDetailsRoot)
-    }
+    } 
 
-    if (!('variable' in match)) {
-      const notFoundNode = new CodeUsageNode(
-        key + ':not-found',
-        '',
-        'detail'
-      )
-      notFoundNode.description = 'VARIABLE NOT FOUND IN DEVCYCLE'
-      children.push(notFoundNode)
-    }
-    if (references) {
-      const usagesChildNodes = references?.map((reference) =>
-        this.usageFrom(match, reference, folder.uri.fsPath),
-      )
-      const usagesRoot = new CodeUsageNode(
-        key,
-        'Usages',
-        'header',
-        usagesChildNodes,
-      )
-      children.push(usagesRoot)
-    }
+    const usagesChildNodes = references.map((reference) =>
+      this.usageFrom(match, reference, folder.uri.fsPath),
+    )
+    const usagesRoot = new CodeUsageNode(
+      key,
+      'Usages',
+      'header',
+      usagesChildNodes,
+    )
+    children.push(usagesRoot)
 
     const instance = new CodeUsageNode(key, key, 'flag', children)
     instance.key = key
@@ -160,12 +124,12 @@ export class CodeUsageNode extends vscode.TreeItem {
       dark: vscode.Uri.joinPath(
         context.extensionUri,
         'media',
-        'variable' in match ? 'flag-filled-white.svg' : 'flag-filled-white-red-dot.svg',
+        variable ? 'flag-filled-white.svg' : 'flag-filled-white-red-dot.svg',
       ),
       light: vscode.Uri.joinPath(
         context.extensionUri,
         'media',
-        'variable' in match ? 'flag-filled.svg' : 'flag-filled-red-dot.svg',
+        variable ? 'flag-filled.svg' : 'flag-filled-red-dot.svg',
       ),
     }
     return instance
@@ -176,7 +140,7 @@ export class CodeUsageNode extends vscode.TreeItem {
     reference: VariableReference,
     folderPath: string,
   ): CodeUsageNode {
-    const key = 'key' in match ? match.key : match.variable.key
+    const { key } = match
     const start = reference.lineNumbers.start
     const end = reference.lineNumbers.end
     const label = path.basename(reference.fileName)

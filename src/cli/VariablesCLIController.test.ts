@@ -68,6 +68,20 @@ describe('VariablesCLIController', () => {
       }
       expect(result).to.deep.equal(expectedCLIResult)
     })
+
+    it('returns an empty map when CLI returns an error', async () => {
+      execDvcStub.restore()
+      execDvcStub = sinon.stub(variablesCLIController, 'execDvc').resolves({
+        code: 1,
+        output: '',
+        error: new Error(),
+      })
+
+      const result = await variablesCLIController.getAllVariables()
+
+      assert.isTrue(execDvcStub.calledWithExactly('variables get'))
+      expect(result).to.deep.equal({})
+    })
   })
 
   describe('getVariable', () => {
