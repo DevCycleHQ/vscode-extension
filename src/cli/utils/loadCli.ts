@@ -66,7 +66,7 @@ async function downloadCli() {
 
     writeStream.on('close', () => resolve())
   })
-  showDebugOutput('CLI Download complete!')
+  showDebugOutput('DevCycle CLI download complete!')
 }
 
 export async function loadCli() {
