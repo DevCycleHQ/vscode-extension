@@ -36,7 +36,7 @@ describe('ProjectsCLIController', () => {
 
     execDvcStub = sinon.stub(projectsCLIController, 'execDvc').resolves({
       code: 0,
-      output: JSON.stringify(mockCLIProjects),
+      output: JSON.stringify([mockCLIProjects[0].key]),
       error: null,
     })
   })
@@ -58,10 +58,8 @@ describe('ProjectsCLIController', () => {
     it('should use CLI to fetch projects if none cached', async () => {
       const result = await projectsCLIController.getAllProjects()
 
-      assert.isTrue(execDvcStub.calledWithExactly('projects get'))
-      const expectedCLIResult = {
-        'cli-project': mockCLIProjects[0],
-      }
+      assert.isTrue(execDvcStub.calledWithExactly('projects list'))
+      const expectedCLIResult = [mockCLIProjects[0].key]
       expect(result).to.deep.equal(expectedCLIResult)
     })
   })
