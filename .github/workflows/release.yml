@@ -51,11 +51,14 @@ jobs:
         run: |
           yarn version --${{ github.event.inputs.version-increment-type }} --no-git-tag-version
 
+      - name: Update Changelog
+        run: echo "${{ steps.prepare-release.outputs.changelog }}" > CHANGELOG.md
+
       - name: Commit version change
         run: |
           git config --global user.email "github-tracker-bot@taplytics.com"
           git config --global user.name "DevCycle Automation"
-          git add ./package.json
+          git add ./package.json ./CHANGELOG.md
           git commit -m "Release ${{ steps.prepare-release.outputs.next-release-tag }}"
 
       - name: Fill in Rudderstack Key
