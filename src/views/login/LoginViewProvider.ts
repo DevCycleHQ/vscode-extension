@@ -120,11 +120,11 @@ export class LoginViewProvider implements vscode.WebviewViewProvider {
     error?: ERRORS,
   ) {
     const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css'),
+      vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'reset.css'),
     )
 
     const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'),
+      vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'vscode.css'),
     )
 
     const scriptUri = this.getScriptUri(webview, view)

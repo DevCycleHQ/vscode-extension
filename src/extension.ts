@@ -10,6 +10,7 @@ import { getRepoConfig, loadRepoConfig } from './utils'
 import { registerStartupViewProvider } from './views/startup'
 import { registerLoginViewProvider } from './views/login'
 import { registerUsagesViewProvider } from './views/usages'
+import { registerResourcesViewProvider } from './views/resources'
 import {
   registerInitCommand,
   registerUsagesNodeClickedCommand,
@@ -61,6 +62,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerStartupViewProvider(context)
   await registerLoginViewProvider(context)
   const usagesDataProvider = await registerUsagesViewProvider(context)
+  await registerResourcesViewProvider(context)
 
   vscode.workspace.workspaceFolders?.forEach(async (folder) => {
     await loadRepoConfig(folder)

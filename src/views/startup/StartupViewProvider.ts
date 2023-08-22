@@ -66,11 +66,11 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
     view: STARTUP_VIEWS,
   ) {
     const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css'),
+      vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'reset.css'),
     )
 
     const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'),
+      vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'vscode.css'),
     )
 
     const scriptUri = this.getScriptUri(webview)
