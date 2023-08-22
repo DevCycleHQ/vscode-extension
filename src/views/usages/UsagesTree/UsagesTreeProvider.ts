@@ -19,7 +19,7 @@ export class UsagesTreeProvider
   private isRefreshing: Record<string, boolean> = {}
   sortKey: 'key' | 'createdAt' | 'updatedAt' = 'key'
   sortAsc: boolean = true
-  
+
   constructor(
     private context: vscode.ExtensionContext,
   ) {
@@ -43,7 +43,7 @@ export class UsagesTreeProvider
       const detailNode = node.children[0].children.find(child => child.key.includes(`:${criteria}`))
       return detailNode?.description || ''
     }
-    
+
     const aValue = getSortValue(a, this.sortKey)
     const bValue = getSortValue(b, this.sortKey)
 
@@ -118,5 +118,20 @@ export class UsagesTreeProvider
     }
 
     return []
+  }
+
+  // In order to use TreeView.reveal method, we need to implement getParent method
+  getParent(element: CodeUsageNode): vscode.ProviderResult<CodeUsageNode> {
+    return element
+  }
+
+  findElementByKeyInFolder(key: string, folder: vscode.WorkspaceFolder): CodeUsageNode | undefined {
+    const folderNodes = this.flagsByFolder[folder.name]
+    if (!folderNodes) {
+      return undefined
+    }
+
+    const foundNode = folderNodes.find(node => node.key === key)
+    return foundNode
   }
 }

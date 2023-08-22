@@ -3,8 +3,7 @@ import { CombinedVariableData, getCombinedVariableDetails } from '../cli'
 
 export const getHoverString = async (
   folder: vscode.WorkspaceFolder,
-  variableKey: string,
-  extensionUri: string,
+  variableKey: string
 ) => {
   const variableData = await getCombinedVariableDetails(folder, variableKey)
 
@@ -13,31 +12,35 @@ export const getHoverString = async (
   hoverString.supportHtml = true
 
   if (variableData) {
-    hoverString.appendMarkdown(getHTML(variableData, extensionUri))
+    hoverString.appendMarkdown(getHTML(variableData))
   }
   return hoverString
 }
 
-const getHTML = (variableData: CombinedVariableData, extensionUri: string) => {
-  const toggleOnIcon = `<img src="${extensionUri}/icons/toggleon.svg" alt="toggle">`
-  const toggleOffIcon = `<img src="${extensionUri}/icons/toggleoff.svg" alt="toggle">`
+const getHTML = (
+  variableData: CombinedVariableData
+) => {
+  const { variable, feature } = variableData
 
-  const { variable, feature, configurations } = variableData
+  const possibleValuesCommand = ''
+  const usagesCommand = 'command:devcycle-feature-flags.openUsagesView'
+  const detailsCommand = ''
 
-  const configs =
-    configurations?.map((config) => {
-      return `${config.envName}: ${
-        config.status === 'active' ? toggleOnIcon : toggleOffIcon
-      }`
-    }) || []
+  const possibleValuesLink = generateLinkToSidebar('codicon-preserve-case', 'Possible Values', possibleValuesCommand)
+  const usagesLink = generateLinkToSidebar('codicon-symbol-keyword', 'Usages', usagesCommand, { variableKey: variable.key })
+  const detailsLink = generateLinkToSidebar('codicon-search', 'Details', detailsCommand)
 
   return `
-Name: ${variable.name} \n
-Key: ${variable.key}\n
-${variable.description ? `Description: ${variable.description}` : ''} \n
-Status: ${variable.status} \n
-${feature ? `Feature: ${feature.name}` : `Unassociated`} \n 
+<b>DevCycle Variable:</b> ${variable.name} \n
+${feature && `From feature: ${feature.name}`} \n 
 --------
-${configs.join('<br/>')}
+${possibleValuesLink}${usagesLink}${detailsLink}
     `
+}
+
+const generateLinkToSidebar = (iconClass: string, label: string, command: string, param?: unknown) => {
+  const encodedParamString = param ? encodeURIComponent(JSON.stringify(param)) : ''
+  const composedCommand = encodedParamString ? `${command}?${encodedParamString}` : command
+
+  return command ? `<span class="codicon ${iconClass}"></span>&nbsp;[${label}](${composedCommand})&emsp;` : ''
 }
