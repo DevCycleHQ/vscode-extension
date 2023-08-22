@@ -44,15 +44,20 @@
         },
         {
           "type": "webview",
-          "id": "devcycle-sidebar",
+          "id": "devcycle-login",
           "name": "DevCycle",
           "when": "!devcycle-feature-flags.shouldShowWorkspaceView && !devcycle-feature-flags.hasCredentialsAndProject"
         },
         {
           "type": "tree",
           "id": "devcycle-code-usages",
-          "name": "Variables",
+          "name": "Variable Usages",
           "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
+        },
+        {
+          "type": "webview",
+          "id": "devcycle-resources",
+          "name": "DevCycle Resources"
         }
       ]
     },
@@ -235,6 +240,7 @@
     "@devcycle/js-client-sdk": "^1.13.2",
     "@types/js-yaml": "^4.0.5",
     "@types/vscode-webview": "^1.57.1",
+    "@vscode/codicons": "^0.0.33",
     "axios": "^0.26.0",
     "change-case": "^4.1.2",
     "js-yaml": "^4.1.0",

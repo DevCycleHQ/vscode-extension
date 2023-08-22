@@ -1,0 +1,34 @@
+body {
+    padding: 0;
+    background-color: unset;
+}
+
+.nav-list__item {
+    display: flex;
+    align-items: center;
+}
+
+i.codicon {
+    margin-right: 5px;
+}
+
+.nav-list__title {
+    text-transform: uppercase;
+    color: var(--vscode-foreground);
+    opacity: 0.5;
+    margin: 10px 0px;
+    padding: 0 var(--container-paddding);
+}
+
+.nav-list__item {
+    color: inherit;
+    padding: 3px var(--container-paddding);
+}
+.nav-list__item:hover {
+    color: var(---vscode-list-hoverForeground);
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+a {
+    text-decoration: none;
+}

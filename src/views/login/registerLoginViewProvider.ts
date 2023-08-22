@@ -5,7 +5,7 @@ export async function registerLoginViewProvider(context: vscode.ExtensionContext
   const loginViewProvider = new LoginViewProvider(context.extensionUri)
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
-      'devcycle-sidebar',
+      'devcycle-login',
       loginViewProvider
     ),
   )
