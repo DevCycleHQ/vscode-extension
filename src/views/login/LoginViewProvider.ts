@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
 import { AuthCLIController } from '../../cli'
-import { executeRefreshUsagesCommand } from '../../commands/refreshUsages'
+import { executeRefreshAllCommand } from '../../commands'
 
 const enum VIEWS {
   DEFAULT = 'default',
@@ -44,7 +44,7 @@ export class LoginViewProvider implements vscode.WebviewViewProvider {
             const cli = new AuthCLIController(folder)
             await cli.login()
           }
-          await executeRefreshUsagesCommand()
+          await executeRefreshAllCommand()
 
           await vscode.commands.executeCommand(
             'setContext',

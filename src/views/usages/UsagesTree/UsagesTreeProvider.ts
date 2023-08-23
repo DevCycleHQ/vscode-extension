@@ -5,7 +5,7 @@ import {
 } from '../../../cli'
 
 import { CodeUsageNode } from './CodeUsageNode'
-import { FolderNode } from './FolderNode'
+import { FolderNode } from '../../utils/tree/FolderNode'
 
 export class UsagesTreeProvider
   implements vscode.TreeDataProvider<CodeUsageNode>
@@ -62,6 +62,7 @@ export class UsagesTreeProvider
     if (this.isRefreshing[folder.name]) {
       return
     }
+
     this.isRefreshing[folder.name] = true
     this.flagsByFolder[folder.name] = []
     this._onDidChangeTreeData.fire(undefined)

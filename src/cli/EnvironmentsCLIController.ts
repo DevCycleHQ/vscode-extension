@@ -2,9 +2,22 @@ import * as vscode from 'vscode'
 import { KEYS, StateManager } from '../StateManager'
 import { BaseCLIController } from './BaseCLIController'
 
+export type SDKKey = {
+  key: string
+  compromised: boolean
+  createdAt: string
+}
+
 export type Environment = {
   name: string
   _id: string
+  key: string
+  type: 'development' | 'staging' | 'production' | 'disaster_recovery'
+  sdkKeys: {
+    mobile: SDKKey[]
+    client: SDKKey[]
+    server: SDKKey[]
+  }
 }
 
 export class EnvironmentsCLIController extends BaseCLIController {
