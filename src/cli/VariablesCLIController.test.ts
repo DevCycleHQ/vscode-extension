@@ -62,7 +62,7 @@ describe('VariablesCLIController', () => {
     it('should use CLI to fetch variables if none cached', async () => {
       const result = await variablesCLIController.getAllVariables()
 
-      assert.isTrue(execDvcStub.calledWithExactly('variables get'))
+      assert.isTrue(execDvcStub.calledWithExactly('variables get --per-page 1000'))
       const expectedCLIResult = {
         'cli-variable': mockCLIVariables[0],
       }
@@ -79,7 +79,7 @@ describe('VariablesCLIController', () => {
 
       const result = await variablesCLIController.getAllVariables()
 
-      assert.isTrue(execDvcStub.calledWithExactly('variables get'))
+      assert.isTrue(execDvcStub.calledWithExactly('variables get --per-page 1000'))
       expect(result).to.deep.equal({})
     })
   })
