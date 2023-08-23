@@ -21,6 +21,7 @@ import { registerShowReferenceCommand } from './commands/showReference'
 import cliUtils from './cli/utils'
 import { registerOpenSettingsCommand } from './commands/openSettings'
 import { registerHomeViewProvider } from './views/home'
+import { registerInspectorViewProvider } from './views/inspector/registerInspectorViewProvider'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -61,6 +62,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerStartupViewProvider(context)
   await registerLoginViewProvider(context)
   await registerHomeViewProvider(context)  // TODO (home view) feature flag this with show-home-view feature in vscode project 
+  await registerInspectorViewProvider(context)
 
   const usagesDataProvider = await registerUsagesViewProvider(context)
 

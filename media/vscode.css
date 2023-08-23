@@ -137,6 +137,96 @@ textarea::placeholder {
   background-color: var(--vscode-button-secondaryHoverBackground);
 }
 
+/* Home section
+/* ------------------------------------------ */
+#home-nav {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  padding: 0 10px 5px;
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0;
+  background-color: var(--vscode-editor-background);
+}
+
+#home-nav.active {
+  box-shadow: hsla(0 0% 0% / 0.3) 0 0.5rem 1rem;
+  transition-duration: 400ms;
+}
+
+#home-nav-intercept {
+  margin: 0;
+  position: absolute;
+}
+
+#home-link-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.home-link-row-group {
+  display: flex;
+  align-items: center;
+}
+
+.icon-link {
+  text-decoration: none;
+  color: var(--vscode-foreground);
+  align-items: center;
+  border-radius: .3rem;
+  display: flex;
+  justify-content: center;
+  padding: .3rem;
+}
+
+.icon-link:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.logout-button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+input[type='checkbox'] {
+  display: none;
+}
+
+.lbl-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  padding-top: 0.4rem;
+}
+
+.collapsible-content {
+  max-height: 0px;
+  overflow: hidden;
+  padding-left: 1.2rem;
+}
+
+.toggle:checked + .lbl-toggle + .collapsible-content {
+  max-height: fit-content;
+  overflow: visible;
+}
+
+.toggle:checked + .lbl-toggle > i {
+  transform: rotate(90deg)
+}
+
+.toggle:checked + .lbl-toggle {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
 .form-container {
   display: flex;
   flex-direction: column;
@@ -150,6 +240,12 @@ textarea::placeholder {
 
 .form-container > * {
   height: 25px;
+}
+
+.inspector-container {
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
 }
 
 .dropdown-container {
@@ -167,6 +263,34 @@ textarea::placeholder {
   color: var(--vscode-foreground);
   font-size: var(--vscode-font-size);
   line-height: normal;
+}
+
+.inspector-dropdown-container {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: right;
+  padding-right: 0.3rem;
+  align-items: center;
+}
+
+.inspector-dropdown {
+  margin-right: 0.1rem;
+}
+
+.details-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.details-container > * {
+  padding-top: 0.2rem;
+}
+
+.detail-entry {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .edit-config-button {
