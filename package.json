@@ -55,6 +55,12 @@
           "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
         },
         {
+          "type": "webview",
+          "id": "devcycle-inspector",
+          "name": "Inspector",
+          "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
+        },
+        {
           "type": "tree",
           "id": "devcycle-code-usages",
           "name": "Variables",

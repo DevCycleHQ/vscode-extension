@@ -28,9 +28,16 @@ function main() {
   });
 
   // Home section dropdowns
-  const homeSectionDropdowns = document.getElementsByClassName("home-dropdown") as HTMLCollectionOf<Dropdown>;
+  const homeSectionDropdowns = document.getElementsByClassName("home-dropdown") as HTMLCollectionOf<Dropdown>
   for (let i = 0; i < homeSectionDropdowns.length; i++) {
     const dropdown = homeSectionDropdowns[i];
+    dropdown.addEventListener('change', handleDropdownValueChange);
+  }
+
+  // Inspector dropdowns
+  const inspectorDropdowns = document.getElementsByClassName("inspector-dropdown") as HTMLCollectionOf<Dropdown>
+  for (let i = 0; i < inspectorDropdowns.length; i++) {
+    const dropdown = inspectorDropdowns[i];
     dropdown.addEventListener('change', handleDropdownValueChange);
   }
 
