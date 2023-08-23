@@ -179,7 +179,7 @@
         "properties": {
           "devcycle-feature-flags.loginOnWorkspaceOpen": {
             "type": "boolean",
-            "default": false,
+            "default": true,
             "description": "Automatically log in to DevCycle when a configured workspace is opened."
           },
           "devcycle-feature-flags.usagesOnWorkspaceOpen": {
