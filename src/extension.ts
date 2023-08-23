@@ -61,20 +61,11 @@ export const activate = async (context: vscode.ExtensionContext) => {
     await StateManager.setGlobalState(KEYS.EXTENSION_INSTALLED, true)
   }
 
-  const autoLogin = vscode.workspace
-    .getConfiguration('devcycle-feature-flags')
-    .get('loginOnWorkspaceOpen')
-  
   await registerStartupViewProvider(context)
   await registerLoginViewProvider(context)
   const usagesDataProvider = await registerUsagesViewProvider(context)
   const environmentsDataProvider = await registerEnvironmentsViewProvider(context)
   await registerResourcesViewProvider(context)
-
-  workspaceFolders.forEach(async (folder) => {
-    await loadRepoConfig(folder)
-  })
-
   await registerUsagesNodeClickedCommand(context)
   await registerInitCommand(context)
   await registerOpenLinkCommand(context)
@@ -87,10 +78,16 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerShowReferenceCommand(context)
   await registerOpenSettingsCommand(context)
 
-
-  if (autoLogin) {
-    await Promise.all(workspaceFolders.map(autoLoginIfHaveCredentials))
-    await executeRefreshAllCommand()
+  const autoLogin = vscode.workspace
+    .getConfiguration('devcycle-feature-flags')
+    .get('loginOnWorkspaceOpen')
+  
+  for (const folder of workspaceFolders) {
+    const repoConfig = await loadRepoConfig(folder)
+    if (autoLogin) {
+      await autoLoginIfHaveCredentials(folder, repoConfig)
+      await executeRefreshAllCommand(folder)
+    }
   }
 
   // On Hover
