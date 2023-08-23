@@ -8,6 +8,7 @@ import {
 import path from 'path'
 
 import { KEYS, StateManager } from '../../../StateManager'
+import { COMMAND_OPEN_LINK } from '../../../commands'
 
 export type VariableCodeReference = JSONMatch & { variable?: Variable }
 
@@ -91,7 +92,7 @@ export class CodeUsageNode extends vscode.TreeItem {
         )
         linkNode.command = {
           title: '',
-          command: 'devcycle-feature-flags.openLink',
+          command: COMMAND_OPEN_LINK,
           arguments: [link],
         }
         linkNode.tooltip = link

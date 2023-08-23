@@ -55,6 +55,12 @@
           "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
         },
         {
+          "type": "tree",
+          "id": "devcycle-environments",
+          "name": "Environments & Keys",
+          "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
+        },
+        {
           "type": "webview",
           "id": "devcycle-resources",
           "name": "DevCycle Resources"
@@ -81,6 +87,11 @@
         {
           "command": "devcycle-code-usages.sortByUpdatedAt",
           "when": "view == devcycle-code-usages"
+        },
+        {
+          "command": "devcycle-feature-flags.copyToClipboard",
+          "group": "inline",
+          "when": "viewItem == copyToClipboard"
         }
       ],
       "commandPalette": [
@@ -112,6 +123,11 @@
           "submenu": "sortMenu",
           "when": "view == devcycle-code-usages",
           "group": "navigation@2"
+        },
+        {
+          "command": "devcycle-feature-flags.refresh-environments",
+          "when": "view == devcycle-environments",
+          "group": "navigation@1"
         },
         {
           "command": "devcycle-feature-flags.openSettings",
@@ -146,6 +162,12 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "devcycle-feature-flags.refresh-environments",
+        "category": "DevCycle",
+        "title": "Refresh Environments",
+        "icon": "$(refresh)"
+      },
+      {
         "command": "devcycle-code-usages.sortByKey",
         "title": "Sort by Key",
         "category": "DevCycle Code Usages"
@@ -171,6 +193,11 @@
         "category": "DevCycle",
         "title": "DevCycle Settings",
         "icon": "$(gear)"
+      },
+      {
+        "command": "devcycle-feature-flags.copyToClipboard",
+        "title": "Copy to clipboard",
+        "icon": "$(copy)"
       }
     ],
     "configuration": [

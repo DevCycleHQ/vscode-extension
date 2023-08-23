@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
 import { setUpWorkspaceStartupView } from './utils/setUpViews'
+import { executeRefreshAllCommand } from '../../commands'
 
 export const enum STARTUP_VIEWS {
   WORKSPACE = 'workspace',
@@ -110,7 +111,7 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
     if (shouldShowWorkspaceView) {
       webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, STARTUP_VIEWS.WORKSPACE)
     } else {
-      await vscode.commands.executeCommand('devcycle-feature-flags.refresh-usages')
+      await executeRefreshAllCommand()
     }
   }
 }

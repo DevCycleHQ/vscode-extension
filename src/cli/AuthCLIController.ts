@@ -4,7 +4,7 @@ import { showBusyMessage, hideBusyMessage } from '../components/statusBarItem'
 import { Organization, OrganizationsCLIController } from './OrganizationsCLIController'
 import { loadRepoConfig, showDebugOutput } from '../utils'
 import { BaseCLIController } from './BaseCLIController'
-import { executeRefreshUsagesCommand } from '../commands/refreshUsages'
+import { executeRefreshAllCommand } from '../commands'
 
 export class AuthCLIController extends BaseCLIController {
   organizationsController: OrganizationsCLIController
@@ -23,7 +23,7 @@ export class AuthCLIController extends BaseCLIController {
     hideBusyMessage()
     const organizations = JSON.parse(output) as Organization[]
     await this.organizationsController.selectOrganizationFromList(organizations)
-    await executeRefreshUsagesCommand(this.folder)
+    await executeRefreshAllCommand(this.folder)
     vscode.window.showInformationMessage('DevCycle Configured')
   }
   

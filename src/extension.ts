@@ -10,18 +10,23 @@ import { getRepoConfig, loadRepoConfig } from './utils'
 import { registerStartupViewProvider } from './views/startup'
 import { registerLoginViewProvider } from './views/login'
 import { registerUsagesViewProvider } from './views/usages'
+import { registerEnvironmentsViewProvider } from './views/environments'
 import { registerResourcesViewProvider } from './views/resources'
 import {
+  executeRefreshAllCommand,
+  registerRefreshAllCommand,
   registerInitCommand,
   registerUsagesNodeClickedCommand,
   registerOpenLinkCommand,
-  registerSortUsagesCommand
+  registerCopyToClipboardCommand,
+  registerSortUsagesCommand,
+  registerLogoutCommand,
+  registerRefreshEnvironmentsCommand,
+  registerRefreshUsagesCommand,
+  registerShowReferenceCommand,
+  registerOpenSettingsCommand
 } from './commands'
-import { registerLogoutCommand } from './commands/logout'
-import { executeRefreshUsagesCommand, registerRefreshUsagesCommand } from './commands/refreshUsages'
-import { registerShowReferenceCommand } from './commands/showReference'
 import cliUtils from './cli/utils'
-import { registerOpenSettingsCommand } from './commands/openSettings'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -37,7 +42,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   await cliUtils.loadCli()
 
-  const [workspaceFolder] = vscode.workspace.workspaceFolders || []
+  const { workspaceFolders = [] } = vscode.workspace
+  const [workspaceFolder] = workspaceFolders
 
   if (!StateManager.getWorkspaceState(KEYS.SEND_METRICS_PROMPTED)) {
     const sendMetricsMessage = 
@@ -62,29 +68,30 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerStartupViewProvider(context)
   await registerLoginViewProvider(context)
   const usagesDataProvider = await registerUsagesViewProvider(context)
+  const environmentsDataProvider = await registerEnvironmentsViewProvider(context)
   await registerResourcesViewProvider(context)
 
-  vscode.workspace.workspaceFolders?.forEach(async (folder) => {
+  workspaceFolders.forEach(async (folder) => {
     await loadRepoConfig(folder)
   })
 
   await registerUsagesNodeClickedCommand(context)
   await registerInitCommand(context)
   await registerOpenLinkCommand(context)
+  await registerCopyToClipboardCommand(context)
   await registerLogoutCommand(context)
+  await registerRefreshAllCommand(context, [usagesDataProvider, environmentsDataProvider])
   await registerRefreshUsagesCommand(context, usagesDataProvider)
+  await registerRefreshEnvironmentsCommand(context, environmentsDataProvider)
   await registerSortUsagesCommand(context, usagesDataProvider)
   await registerShowReferenceCommand(context)
   await registerOpenSettingsCommand(context)
 
-  vscode.workspace.workspaceFolders?.forEach(async (folder) => {
-    if (autoLogin) {
-        const isLoggedIn = await autoLoginIfHaveCredentials(folder)
-        if (isLoggedIn) {
-          await executeRefreshUsagesCommand(folder)
-        }
-    }
-  })
+
+  if (autoLogin) {
+    await Promise.all(workspaceFolders.map(autoLoginIfHaveCredentials))
+    await executeRefreshAllCommand()
+  }
 
   // On Hover
   vscode.languages.registerHoverProvider(SCHEME_FILE, {
@@ -124,7 +131,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       const cli = new AuthCLIController(folder)
       await cli.login()
     }
-    await executeRefreshUsagesCommand()
+    await executeRefreshAllCommand()
   })
 }
 
