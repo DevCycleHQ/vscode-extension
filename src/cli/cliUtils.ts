@@ -2,7 +2,6 @@ import * as vscode from 'vscode'
 import { KEYS, StateManager } from '../StateManager'
 import { EnvironmentsCLIController } from './EnvironmentsCLIController'
 import {
-  Feature,
   FeatureConfiguration,
   FeaturesCLIController,
 } from './FeaturesCLIController'
@@ -10,6 +9,7 @@ import {
   Variable,
   VariablesCLIController,
 } from './VariablesCLIController'
+import { Feature } from '../../dvc/dist/api/schemas'
 
 export type FeatureConfigurationWithEnvNames = FeatureConfiguration & {
   envName: string

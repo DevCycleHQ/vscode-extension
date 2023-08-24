@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
-import { Environment, Feature, FeatureConfiguration, Organization, Project, Variable } from './cli'
+import { Environment, FeatureConfiguration, Organization, Project, Variable } from './cli'
 import { RepoConfig } from './utils'
+import { Feature } from '../dvc/dist/api/schemas'
 
 export const enum KEYS {
   REPO_CONFIG = 'repo_config',
