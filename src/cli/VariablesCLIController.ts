@@ -52,7 +52,7 @@ export class VariablesCLIController extends BaseCLIController {
       vscode.window.showErrorMessage(
         `Retrieving variables failed: ${error?.message}}`,
       )
-      return []
+      return {}
     } else {
       const variables = JSON.parse(output) as Variable[]
       const variableMap = variables.reduce((result, currentVariable) => {

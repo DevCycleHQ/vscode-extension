@@ -291,6 +291,12 @@ input[type='checkbox'] {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  padding-top: 0.4rem;
+}
+
+.details-value {
+  color: gray;
+  font-size: var(vscode-font-size - 2);
 }
 
 .edit-config-button {

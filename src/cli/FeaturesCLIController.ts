@@ -1,12 +1,7 @@
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from '../StateManager'
 import { BaseCLIController } from './BaseCLIController'
-
-export type Feature = {
-  key: string
-  _id: string
-  name: string
-}
+import { Feature } from '../../dvc/dist/api/schemas'
 
 export type FeatureConfiguration = {
   key: string
@@ -53,7 +48,7 @@ export class FeaturesCLIController extends BaseCLIController {
       vscode.window.showErrorMessage(
         `Retrieving features failed: ${error?.message}}`,
       )
-      return []
+      return {}
     } else {
       const features = JSON.parse(output) as Feature[]
       const featureMap = features.reduce((result, currentFeature) => {
