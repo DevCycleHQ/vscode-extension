@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
-import { OrganizationsCLIController, ProjectsCLIController } from '../../cli'
+import { BaseCLIController, OrganizationsCLIController, ProjectsCLIController } from '../../cli'
 import { executeRefreshUsagesCommand } from '../../commands/refreshUsages'
 import path from 'path'
 import { COMMAND_LOGOUT } from '../../commands/logout'
@@ -47,10 +47,18 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
         await executeRefreshUsagesCommand(folder)
       } else if (data.type === 'config') {
         const folderPath = folder.uri.fsPath
-        const configPath = path.join(folderPath, '.devcycle', 'config.yml')
+        const cli = new BaseCLIController(folder)
+        const { repoConfigPath } = await cli.status()
+        const configPath = path.join(folderPath, repoConfigPath)
         const configUri = vscode.Uri.file(configPath)
-        const document = await vscode.workspace.openTextDocument(configUri)
-        await vscode.window.showTextDocument(document, { preview: false })
+        try {
+          const document = await vscode.workspace.openTextDocument(configUri)
+          await vscode.window.showTextDocument(document, { preview: false })
+        } catch (_) {
+          vscode.window.showErrorMessage(
+            `DevCycle config does not exist or could not be opened.`,
+          )
+        }
       }
     })
   }
@@ -63,9 +71,10 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const organizationsController = new OrganizationsCLIController(folder)
     const projectsController = new ProjectsCLIController(folder)
 
-    const projectKeys = await projectsController.getAllProjects()
+    const projects = await projectsController.getAllProjects()
     const organizations = await organizationsController.getAllOrganizations()
     const activeProjectKey = await projectsController.getActiveProject()
+    console.error('activeProjectKey', activeProjectKey)
     const activeOrganizationName = (await organizationsController.getActiveOrganization())?.name
 
     const projectId = `project${folder.index}`
@@ -74,8 +83,8 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const orgOptions = Object.values(organizations).map((organization) =>
       `<vscode-option value="${organization.name}"${organization.name === activeOrganizationName ? ' selected' : '' }>${organization.display_name || organization.name}</vscode-option>`
     )
-    const projectOptions = Object.values(projectKeys).map((project) =>
-      `<vscode-option value="${project}"${project === activeProjectKey ? ' selected' : ''}>${project}</vscode-option>`
+    const projectOptions = Object.values(projects).map((project) =>
+      `<vscode-option value="${project.key}"${project.key === activeProjectKey ? ' selected' : ''}>${project.key}</vscode-option>`
     )
 
     return `
@@ -145,8 +154,11 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const styleVSCodeUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'),
     )
+    const homeViewStylesUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'media', 'homeView.css'),
+    )
     const webViewUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'out', 'webview.js'),
+      vscode.Uri.joinPath(this._extensionUri, 'out', 'homeView.js'),
     )
 
     const codiconsUri = webview.asWebviewUri(
@@ -173,6 +185,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
           }; script-src 'nonce-${nonce}';">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <link href="${styleVSCodeUri}" rel="stylesheet">
+          <link href="${homeViewStylesUri}" rel="stylesheet">
           <link href="${codiconsUri}" rel="stylesheet"/>
         </head>
         <body>
@@ -190,9 +203,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
             <h4 class="view-heading">Repo Settings</h4>
             ${body}
           </main>
-          <script type="module" nonce="${nonce}" src="${webViewUri}">
-            const vscode = acquireVsCodeApi()
-          </script>
+          <script type="module" nonce="${nonce}" src="${webViewUri}"></script>
         </body>
       </html>`
   }

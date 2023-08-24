@@ -13,12 +13,10 @@ export type Organization = {
 
 export class OrganizationsCLIController extends BaseCLIController {
   projectController: ProjectsCLIController
-  baseCLIController: BaseCLIController
 
   constructor(folder: vscode.WorkspaceFolder) {
     super(folder)
     this.projectController = new ProjectsCLIController(folder)
-    this.baseCLIController = new BaseCLIController(folder)
   }
 
   public async getActiveOrganization() {
@@ -26,24 +24,36 @@ export class OrganizationsCLIController extends BaseCLIController {
     if (stateOrg) {
       return stateOrg
     }
-    const orgName = (await this.baseCLIController.status()).organization
-    const orgObject = (await this.getAllOrganizations()).find((o) => o.name === orgName)
+    // dvc status returns org name from the repo config if it exists, otherwise it returns from user config
+    const orgName = (await this.status()).organization
+    const organizationsMap = await this.getAllOrganizations()
+    const orgObject = Object.values(organizationsMap).find((o) => o.name === orgName)
 
     StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, orgObject)
     return orgObject
   }
 
   public async getAllOrganizations() {
+    const organizations = StateManager.getFolderState(this.folder.name, KEYS.ORGANIZATIONS)
+    if (organizations) {
+      return organizations
+    }
     const { code, error, output } = await this.execDvc('organizations get')
 
     if (code === 0) {
       const organizations = JSON.parse(output) as Organization[]
-      return organizations  
+      const orgsMap = organizations.reduce((result, currentOrg) => {
+        result[currentOrg.id] = currentOrg
+        return result
+      }, {} as Record<string, Organization>)
+
+      StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATIONS, orgsMap)
+      return orgsMap
     } else {
       vscode.window.showErrorMessage(
         `Retrieving organizations failed: ${error?.message}}`,
       )
-      return []
+      return {}
     }
   }
 
@@ -84,14 +94,14 @@ export class OrganizationsCLIController extends BaseCLIController {
 
     showBusyMessage('Logging into DevCycle organization')
 
-    await this.selectOrganization(selectedOrg).finally(hideBusyMessage)
+    await this.selectOrganization(selectedOrg, true).finally(hideBusyMessage)
     return selectedOrg
   }
 
   public async selectOrganization(org: Organization | string, selectProjectFromList?: boolean) {
     const orgName = typeof org === 'string' ? org : org?.name
     const { code, error, output } = await this.execDvc(`organizations select --org=${orgName}`)
-  
+
     if (code !== 0) {
       vscode.window.showErrorMessage(
         `Organization login failed ${error?.message}}`,
@@ -100,7 +110,8 @@ export class OrganizationsCLIController extends BaseCLIController {
     }
 
     if (typeof org === 'string') {
-      const orgObject = (await this.getAllOrganizations()).find((o) => o.name === org)
+      const organizationsMap = await this.getAllOrganizations()
+      const orgObject = Object.values(organizationsMap).find((o) => o.name === org)
       StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, orgObject)
     } else {
       StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, org)

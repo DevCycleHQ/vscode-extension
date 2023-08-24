@@ -50,11 +50,13 @@ const extensionConfig = {
 const webviewConfig = {
     ...baseConfig,
     target: ["web", "es2020"],
-    entry: "./src/webview/main.ts",
+    entry: {
+        homeView: "./src/webview/homeView.ts",
+    },
     experiments: { outputModule: true },
     output: {
         path: path.resolve(__dirname, "out"),
-        filename: "webview.js",
+        filename: "[name].js",
         libraryTarget: "module",
         chunkFormat: "module",
     },
