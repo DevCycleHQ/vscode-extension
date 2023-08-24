@@ -119,6 +119,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             <span class="details-value">${possibleValue[1]}</span>
           </div>`
         }) || []
+      const variableKeysInFeature = this.selectedType === 'Feature' && this.features[this.selectedKey].variables?.map((variable) => (
+        `<div class="detail-entry">
+        <span class="details-value">${variable.key}</span>
+        </div>`
+      )) || []
   
       return `
           <div class="inspector-container">
@@ -167,6 +172,20 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             <div class="collapsible-content">
               <div class="details-container">
                 ${possibleValues.join('')}
+              </div>
+            </div>
+            ` : ''}
+            ${this.selectedType === 'Feature' ? 
+            `
+            <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
+            <label for="collapsible-possible=values" class="lbl-toggle">
+              <i class="codicon codicon-chevron-right"></i>
+              <i class="codicon codicon-preserve-case"></i>
+              Variables
+            </label>
+            <div class="collapsible-content">
+              <div class="details-container">
+                ${variableKeysInFeature.join('')}
               </div>
             </div>
             ` : ''}
