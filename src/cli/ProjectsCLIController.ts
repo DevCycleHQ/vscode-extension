@@ -13,22 +13,12 @@ export type Project = {
 }
 
 export class ProjectsCLIController extends BaseCLIController {
-  public async getActiveProject() {
-    const stateProject = StateManager.getFolderState(this.folder.name, KEYS.PROJECT_ID)
-    if (stateProject) {
-      return stateProject
-    }
-    const repoConfig = await getRepoConfig(this.folder)
-    StateManager.setFolderState(this.folder.name, KEYS.PROJECT_ID, repoConfig.project)
-    return repoConfig.project
-  }
-
   public async getAllProjects() {
     const projects = StateManager.getFolderState(this.folder.name, KEYS.PROJECTS)
     if (projects) {
       return projects
     }
-    const { code, error, output } = await this.execDvc('projects list')
+    const { code, error, output } = await this.execDvc('projects get')
     if (code !== 0) {
       vscode.window.showErrorMessage(
         `Retrieving projects failed: ${error?.message}}`,
