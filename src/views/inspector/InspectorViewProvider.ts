@@ -123,10 +123,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       return `
           <div class="inspector-container">
             <div class="inspector-dropdown-container">
-              <vscode-dropdown id="variableId" class="inspector-dropdown" data-folder="${folder.index}" data-type="variableOrFeature">
+              <i class="codicon codicon-eye"></i>
+              <vscode-dropdown id="typeId" class="inspector-dropdown-type" data-folder="${folder.index}" data-type="variableOrFeature">
                 ${inspectorOptions.join('')}
               </vscode-dropdown>
-              <vscode-dropdown id="dataId" class="inspector-dropdown" data-folder="${folder.index}" data-type="key">
+              <vscode-dropdown id="dataId" class="inspector-dropdown-value" data-folder="${folder.index}" data-type="key">
                 ${this.selectedType === 'Variable' ? variableOptions.join('') : featureOptions.join('')}
               </vscode-dropdown>
             </div>
@@ -180,7 +181,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
         vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'),
       )
       const webViewUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(this._extensionUri, 'out', 'webview.js'),
+        vscode.Uri.joinPath(this._extensionUri, 'out', 'inspectorView.js'),
       )
       const codiconsUri = webview.asWebviewUri(
         vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css')
