@@ -1,5 +1,4 @@
 import * as vscode from 'vscode'
-import * as cp from 'child_process'
 import { StateManager, KEYS } from '../StateManager'
 import cliUtils from './utils'
 
@@ -20,13 +19,13 @@ export class BaseCLIController {
   constructor(folder: vscode.WorkspaceFolder) {
     this.folder = folder
   }
-  
+
   public async status(): Promise<DevCycleStatus> {
     const { output, error } = await this.execDvc('status')
     if (error) throw error
     return JSON.parse(output) as DevCycleStatus
   }
-  
+
   public async addAlias(alias: string, variableKey: string) {
     const { code, error } = await this.execDvc(
       `alias add --alias=${alias} --variable=${variableKey}`,
@@ -35,7 +34,7 @@ export class BaseCLIController {
       vscode.window.showErrorMessage(`Adding alias failed: ${error?.message}}`)
     }
   }
-  
+
   public async execDvc(cmd: string) {
     const dvc = await cliUtils.getCliExec()
 

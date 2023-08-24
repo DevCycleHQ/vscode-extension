@@ -77,6 +77,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerShowReferenceCommand(context)
   await registerOpenSettingsCommand(context)
 
+  console.error('DevCycle Extension Activated')
+
   vscode.workspace.workspaceFolders?.forEach(async (folder) => {
     if (autoLogin) {
         const isLoggedIn = await autoLoginIfHaveCredentials(folder)
@@ -103,7 +105,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       variableKey = variableAliases[variableKey] || variableKey
 
       const variables = StateManager.getFolderState(currentFolder.name, KEYS.VARIABLES) || {}
-      const keyInAPIVariables = !!variables[variableKey]        
+      const keyInAPIVariables = !!variables[variableKey]
       const keyInCodeUsages = StateManager.getFolderState(currentFolder.name, KEYS.CODE_USAGE_KEYS)?.includes(variableKey)
 
       if (!keyInAPIVariables && !keyInCodeUsages) {

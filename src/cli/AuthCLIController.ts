@@ -44,7 +44,7 @@ export class AuthCLIController extends BaseCLIController {
 
         await this.organizationsController.selectOrganizationFromList(organizations)
       }
-  
+
       const cliStatus = await this.status()
       const auth0UserId = cliStatus.a0UserId
       StateManager.setWorkspaceState(KEYS.AUTH0_USER_ID, auth0UserId)

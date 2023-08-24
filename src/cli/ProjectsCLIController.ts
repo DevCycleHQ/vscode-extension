@@ -5,19 +5,21 @@ import { getRepoConfig } from '../utils'
 
 export type Project = {
   _id?: string
+  _organization: string
   name?: string
   key: string
+  updatedAt: string
+  createdAt: string
 }
 
 export class ProjectsCLIController extends BaseCLIController {
   public async getActiveProject() {
-    const stateProject = StateManager.getFolderState(this.folder.name, KEYS.PROJECT_ID)
-    if (stateProject) {
-      return stateProject
-    }
     const repoConfig = await getRepoConfig(this.folder)
-    StateManager.setFolderState(this.folder.name, KEYS.PROJECT_ID, repoConfig.project)
-    return repoConfig.project
+    if (repoConfig.project) {
+      StateManager.setFolderState(this.folder.name, KEYS.PROJECT_ID, repoConfig.project)
+      return repoConfig.project
+    }
+    return StateManager.getFolderState(this.folder.name, KEYS.PROJECT_ID)
   }
 
   public async getAllProjects() {
@@ -25,17 +27,21 @@ export class ProjectsCLIController extends BaseCLIController {
     if (projects) {
       return projects
     }
-    const { code, error, output } = await this.execDvc('projects list')
+    const { code, error, output } = await this.execDvc('projects get')
     if (code !== 0) {
       vscode.window.showErrorMessage(
         `Retrieving projects failed: ${error?.message}}`,
       )
-      return []
+      return {}
     } else {
-      const projects = JSON.parse(output) as string[]
-  
-      StateManager.setFolderState(this.folder.name, KEYS.PROJECTS, projects)
-      return projects
+      const projects = JSON.parse(output) as Project[]
+      const projectsMap = projects.reduce((result, currentProject) => {
+        result[currentProject.key] = currentProject
+        return result
+      }, {} as Record<string, Project>)
+
+      StateManager.setFolderState(this.folder.name, KEYS.PROJECTS, projectsMap)
+      return projectsMap
     }
   }
   
@@ -68,7 +74,7 @@ export class ProjectsCLIController extends BaseCLIController {
   public async selectProject(project: string) {
     const { code, error } = await this.execDvc(`projects select --project=${project}`)
     if (code === 0) {
-      StateManager.setFolderState(this.folder.name, KEYS.PROJECT_ID, project)
+      await StateManager.setFolderState(this.folder.name, KEYS.PROJECT_ID, project)
     } else {
       vscode.window.showErrorMessage(`Selecting project failed ${error?.message}}`)
       throw error

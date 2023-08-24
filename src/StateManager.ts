@@ -11,6 +11,7 @@ export const enum KEYS {
   FEATURE_CONFIGURATIONS = 'feature_configurations',
   ENVIRONMENTS = 'environments',
   ORGANIZATION = 'organization',
+  ORGANIZATIONS = 'organizations',
   SEND_METRICS_PROMPTED = 'send_metrics_prompted',
   CODE_USAGE_KEYS = 'code_usage_keys',
   EXTENSION_INSTALLED = 'extension_installed',
@@ -67,12 +68,13 @@ export class StateManager {
 
   static setFolderState(folder: string, key: KEYS.REPO_CONFIG, value: RepoConfig): Thenable<void>
   static setFolderState(folder: string, key: KEYS.PROJECT_ID, value: string | undefined): Thenable<void>
-  static setFolderState(folder: string, key: KEYS.PROJECTS, value: string[] | undefined): Thenable<void>
+  static setFolderState(folder: string, key: KEYS.PROJECTS, value: Record<string, Project> | undefined): Thenable<void>
   static setFolderState(folder: string, key: KEYS.FEATURES, value: Record<string, Feature> | undefined): Thenable<void>
   static setFolderState(folder: string, key: KEYS.VARIABLES, value: Record<string, Variable> | undefined): Thenable<void>
   static setFolderState(folder: string, key: KEYS.FEATURE_CONFIGURATIONS, value: Record<string, FeatureConfiguration[]> | undefined): Thenable<void>
   static setFolderState(folder: string, key: KEYS.ENVIRONMENTS, value: Record<string, Environment> | undefined): Thenable<void>
   static setFolderState(folder: string, key: KEYS.ORGANIZATION, value: Organization | undefined): Thenable<void>
+  static setFolderState(folder: string, key: KEYS.ORGANIZATIONS, value: Record<string, Organization> | undefined): Thenable<void>
   static setFolderState(folder: string, key: KEYS.CODE_USAGE_KEYS, value: string[] | undefined): Thenable<void>
   static setFolderState(folder: string, key: string, value: any) {
     return this.workspaceState.update(`${folder}.${key}`, value)
@@ -80,12 +82,13 @@ export class StateManager {
 
   static getFolderState(folder: string, key: KEYS.REPO_CONFIG): RepoConfig | undefined
   static getFolderState(folder: string, key: KEYS.PROJECT_ID): string | undefined
-  static getFolderState(folder: string, key: KEYS.PROJECTS): string[] | undefined
+  static getFolderState(folder: string, key: KEYS.PROJECTS): Record<string, Project> | undefined
   static getFolderState(folder: string, key: KEYS.FEATURES): Record<string, Feature> | undefined
   static getFolderState(folder: string, key: KEYS.VARIABLES): Record<string, Variable> | undefined
   static getFolderState(folder: string, key: KEYS.FEATURE_CONFIGURATIONS): Record<string, FeatureConfiguration[]> | undefined
   static getFolderState(folder: string, key: KEYS.ENVIRONMENTS): Record<string, Environment> | undefined
   static getFolderState(folder: string, key: KEYS.ORGANIZATION): Organization | undefined
+  static getFolderState(folder: string, key: KEYS.ORGANIZATIONS): Record<string, Organization> | undefined
   static getFolderState(folder: string, key: KEYS.SEND_METRICS_PROMPTED): boolean | undefined
   static getFolderState(folder: string, key: KEYS.CODE_USAGE_KEYS): string[] | undefined
   static getFolderState(folder: string, key: string) {
