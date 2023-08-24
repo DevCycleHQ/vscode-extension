@@ -218,7 +218,7 @@ input[type='checkbox'] {
   overflow: visible;
 }
 
-.toggle:checked + .lbl-toggle > i {
+.toggle:checked + .lbl-toggle > .codicon-chevron-right {
   transform: rotate(90deg)
 }
 
@@ -269,12 +269,22 @@ input[type='checkbox'] {
   box-sizing: border-box;
   display: flex;
   justify-content: right;
-  padding-right: 0.3rem;
   align-items: center;
 }
 
-.inspector-dropdown {
-  margin-right: 0.1rem;
+.inspector-dropdown-container i {
+  margin-right: 0.3rem;
+  font-size: large;
+}
+
+.inspector-dropdown-type {
+  margin-right: 0.3rem;
+  width: fit-content;
+}
+
+.inspector-dropdown-value {
+  margin-right: 0.3rem;
+  width: -webkit-fill-available;
 }
 
 .details-container {

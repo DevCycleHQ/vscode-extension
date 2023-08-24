@@ -39,13 +39,6 @@ function main() {
     const editConfigButton = document.getElementById("edit-config-button") as HTMLAnchorElement;
     editConfigButton.addEventListener('click', handleEditConfigClick);
   }
-
-  // Inspector dropdowns
-  const inspectorDropdowns = document.getElementsByClassName("inspector-dropdown") as HTMLCollectionOf<Dropdown>
-  for (let i = 0; i < inspectorDropdowns.length; i++) {
-    const dropdown = inspectorDropdowns[i];
-    dropdown.addEventListener('change', handleDropdownValueChange);
-  }
  }
 
 function handleDropdownValueChange(event: Event) {
