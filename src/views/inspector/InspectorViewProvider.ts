@@ -124,6 +124,13 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
         <span class="details-value">${variable.key}</span>
         </div>`
       )) || []
+      const organizationsController = new OrganizationsCLIController(folder)
+      const projectsController = new ProjectsCLIController(folder)
+      const projectId = await projectsController.getActiveProject()
+      const orgId = (await organizationsController.getActiveOrganization())?.id
+      const dashboardPath = this.selectedType === 'Variable' ? 
+        `variables/${this.variables[this.selectedKey].key}` : 
+        `features/${this.features[this.selectedKey].key}`
   
       return `
           <div class="inspector-container">
@@ -159,6 +166,12 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
                   </div>` :
                   ''
                 }
+                <div class="detail-entry">
+                  <a href="https://app.devcycle.com/o/${orgId}/p/${projectId}/${dashboardPath}" class="detail-link-row ">
+                    <i class="codicon codicon-globe"></i>
+                    View in Dashboard
+                  </a>
+                </div>
               </div>
             </div>
             ${this.selectedType === 'Variable' ? 

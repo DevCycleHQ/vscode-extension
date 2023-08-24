@@ -74,7 +74,6 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const projects = await projectsController.getAllProjects()
     const organizations = await organizationsController.getAllOrganizations()
     const activeProjectKey = await projectsController.getActiveProject()
-    console.error('activeProjectKey', activeProjectKey)
     const activeOrganizationName = (await organizationsController.getActiveOrganization())?.name
 
     const projectId = `project${folder.index}`

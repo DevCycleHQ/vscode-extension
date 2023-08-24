@@ -304,6 +304,15 @@ input[type='checkbox'] {
   padding-top: 0.4rem;
 }
 
+.detail-link-row {
+  display: flex;
+  align-items: center;
+}
+
+.detail-link-row > i {
+  margin-right: 0.3rem;
+}
+
 .details-value {
   color: gray;
   font-size: var(vscode-font-size - 2);
