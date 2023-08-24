@@ -24,11 +24,10 @@ export class StateManager {
   static clearState() {
     this.workspaceState.keys().forEach((key) => {
       if (
-          key !== KEYS.PROJECT_ID &&
-          key !== KEYS.ORGANIZATION &&
-          key !== KEYS.AUTH0_USER_ID &&
-          key !== KEYS.SEND_METRICS_PROMPTED &&
-          key !== KEYS.EXTENSION_INSTALLED
+          !(key.includes(KEYS.PROJECT_ID)||
+          key.includes(KEYS.ORGANIZATION)||
+          key.includes(KEYS.AUTH0_USER_ID)||
+          key.includes(KEYS.SEND_METRICS_PROMPTED))
         ) {
         this.workspaceState.update(key, undefined)
       }
@@ -37,7 +36,11 @@ export class StateManager {
 
   static clearFolderState(folder: string) {
     this.workspaceState.keys().forEach((key) => {
-      if (key.startsWith(`${folder}.`)) {
+      if (key.startsWith(`${folder}.`) && !(
+        key.includes(KEYS.PROJECT_ID)||
+        key.includes(KEYS.ORGANIZATION)||
+        key.includes(KEYS.AUTH0_USER_ID))
+        ) {
         this.workspaceState.update(key, undefined)
       }
     })
