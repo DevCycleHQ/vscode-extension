@@ -24,7 +24,8 @@ import {
   registerRefreshEnvironmentsCommand,
   registerRefreshUsagesCommand,
   registerShowReferenceCommand,
-  registerOpenSettingsCommand
+  registerOpenSettingsCommand,
+  registerOpenUsagesViewCommand
 } from './commands'
 import cliUtils from './cli/utils'
 
@@ -67,7 +68,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   
   await registerStartupViewProvider(context)
   await registerLoginViewProvider(context)
-  const usagesDataProvider = await registerUsagesViewProvider(context)
+  const { usagesDataProvider, usagesTreeView } = await registerUsagesViewProvider(context)
   const environmentsDataProvider = await registerEnvironmentsViewProvider(context)
   await registerResourcesViewProvider(context)
 
@@ -86,6 +87,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerSortUsagesCommand(context, usagesDataProvider)
   await registerShowReferenceCommand(context)
   await registerOpenSettingsCommand(context)
+  await registerOpenUsagesViewCommand(context, usagesTreeView, usagesDataProvider)
 
 
   if (autoLogin) {
@@ -120,7 +122,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
       const hoverString = await getHoverString(
         currentFolder,
         variableKey,
-        context.extensionUri.toString(),
       )
       return new vscode.Hover(hoverString || '')
     },

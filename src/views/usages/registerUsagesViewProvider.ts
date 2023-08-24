@@ -27,5 +27,5 @@ export async function registerUsagesViewProvider(context: vscode.ExtensionContex
     }
   })
 
-  return usagesDataProvider
+  return { usagesDataProvider, usagesTreeView }
 }

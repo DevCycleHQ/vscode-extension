@@ -1,0 +1,1 @@
+export const OPEN_USAGES_VIEW = 'devcycle-feature-flags.openUsagesView'
