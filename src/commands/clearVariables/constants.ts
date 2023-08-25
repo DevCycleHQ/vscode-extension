@@ -1,0 +1,1 @@
+export const COMMAND_CLEAR_VARIABLES = 'devcycle-feature-flags.clear-variables'
