@@ -137,6 +137,7 @@
         },
         {
           "command": "devcycle-feature-flags.openSettings",
+          "when": "view == devcycle-home",
           "group": "navigation@3"
         }
       ]
