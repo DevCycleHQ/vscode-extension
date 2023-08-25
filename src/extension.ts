@@ -2,10 +2,8 @@
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from './StateManager'
 import { AuthCLIController, getOrganizationId } from './cli'
-import { autoLoginIfHaveCredentials } from './utils/credentials'
 import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
-import { getRepoConfig, loadRepoConfig } from './utils'
 import { registerStartupViewProvider } from './views/startup'
 import { registerLoginViewProvider } from './views/login'
 import { registerUsagesViewProvider } from './views/usages'
@@ -28,6 +26,7 @@ import {
   registerOpenUsagesViewCommand
 } from './commands'
 import cliUtils from './cli/utils'
+import utils from './utils'
 import { SHOW_HOME_VIEW } from './constants'
 
 Object.defineProperty(exports, '__esModule', { value: true })
@@ -93,12 +92,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
     .getConfiguration('devcycle-feature-flags')
     .get('loginOnWorkspaceOpen')
   
-  for (const folder of workspaceFolders) {
-    const repoConfig = await loadRepoConfig(folder)
-    if (autoLogin) {
-      await autoLoginIfHaveCredentials(folder, repoConfig)
-      await executeRefreshAllCommand(folder)
-    }
+  if (autoLogin) {
+    utils.loginAndRefresh()
   }
 
   // On Hover
@@ -113,7 +108,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
         return
       }
 
-      const variableAliases = (await getRepoConfig(currentFolder)).codeInsights?.variableAliases || {}
+      const variableAliases = (await utils.getRepoConfig(currentFolder)).codeInsights?.variableAliases || {}
       let variableKey = document.getText(range)
       variableKey = variableAliases[variableKey] || variableKey
 

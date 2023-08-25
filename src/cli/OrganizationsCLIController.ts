@@ -3,7 +3,7 @@ import { BaseCLIController } from './BaseCLIController'
 import { ProjectsCLIController } from './ProjectsCLIController'
 import { KEYS, StateManager } from '../StateManager'
 import { hideBusyMessage, showBusyMessage } from '../components/statusBarItem'
-import { getRepoConfig } from '../utils'
+import utils from '../utils'
 
 export type Organization = {
   id: string
@@ -44,8 +44,8 @@ export class OrganizationsCLIController extends BaseCLIController {
   }
 
   public async selectOrganizationFromConfig() {
-    const { org: orgFromConfig } = await getRepoConfig(this.folder)
-
+    const { org: orgFromConfig } = await utils.getRepoConfig(this.folder)
+  
     if (orgFromConfig) {
       await this.execDvc('login again')
       StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, orgFromConfig)

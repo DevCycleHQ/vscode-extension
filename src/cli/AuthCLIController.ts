@@ -2,9 +2,8 @@ import * as vscode from 'vscode'
 import { StateManager, KEYS } from '../StateManager'
 import { showBusyMessage, hideBusyMessage } from '../components/statusBarItem'
 import { Organization, OrganizationsCLIController } from './OrganizationsCLIController'
-import { loadRepoConfig, showDebugOutput } from '../utils'
 import { BaseCLIController } from './BaseCLIController'
-import { executeRefreshAllCommand } from '../commands'
+import utils from '../utils'
 
 export class AuthCLIController extends BaseCLIController {
   organizationsController: OrganizationsCLIController
@@ -14,44 +13,47 @@ export class AuthCLIController extends BaseCLIController {
     this.organizationsController = new OrganizationsCLIController(folder)
   }
 
-  public async init() {
+  public async init(organization: Organization) {
     showBusyMessage('Initializing DevCycle')
-    const { code, error, output } = await this.execDvc('repo init')
+    const { code, error } = await this.execDvc(`repo init --org=${organization.name}`)
     if (code !== 0) {
-      vscode.window.showErrorMessage(`Login failed ${error?.message}}`)
+      throw error
     }
     hideBusyMessage()
-    const organizations = JSON.parse(output) as Organization[]
-    await this.organizationsController.selectOrganizationFromList(organizations)
-    await executeRefreshAllCommand(this.folder)
-    vscode.window.showInformationMessage('DevCycle Configured')
   }
   
   public async login() {
     showBusyMessage('Logging into DevCycle')
   
     try {
-      await loadRepoConfig(this.folder)
-      StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, undefined)
-      StateManager.setFolderState(this.folder.name, KEYS.PROJECT_ID, undefined)
+      await utils.loadRepoConfig(this.folder)
+      const isLoggedIn = await this.isLoggedIn()
 
-      const orgFromConfig = await this.organizationsController.selectOrganizationFromConfig()
+      if (!isLoggedIn) {
+        const orgFromConfig = await this.organizationsController.selectOrganizationFromConfig()
 
-      if (!orgFromConfig) {
-        const { error, output: orgResponse } = await this.execDvc('organizations get')
-        if (error) throw error
-        const organizations = JSON.parse(orgResponse) as Organization[]
+        if (!orgFromConfig) {
+          const { error, output: orgResponse } = await this.execDvc('organizations get')
+          if (error) throw error
+          const organizations = JSON.parse(orgResponse) as Organization[]
 
-        await this.organizationsController.selectOrganizationFromList(organizations)
+          await this.organizationsController.selectOrganizationFromList(organizations)
+        }
       }
 
-      const cliStatus = await this.status()
-      const auth0UserId = cliStatus.a0UserId
-      StateManager.setWorkspaceState(KEYS.AUTH0_USER_ID, auth0UserId)
-      vscode.window.showInformationMessage('Logged in to DevCycle')
+      const { repoConfigExists, a0UserId } = await this.status()
+      StateManager.setWorkspaceState(KEYS.AUTH0_USER_ID, a0UserId)
+
+      const initRepoOnLogin = vscode.workspace
+        .getConfiguration('devcycle-feature-flags')
+        .get('initRepoOnLogin')
+      const org = StateManager.getFolderState(this.folder.name, KEYS.ORGANIZATION)
+      if (!repoConfigExists && initRepoOnLogin && org) {
+        await this.init(org)
+      }
     } catch (e) {
       if (e instanceof Error) {
-        showDebugOutput(`Login failed ${e.message}`)
+        utils.showDebugOutput(`Login failed ${e.message}`)
         throw e
       }
     } finally {
@@ -66,5 +68,15 @@ export class AuthCLIController extends BaseCLIController {
     } else {
       vscode.window.showInformationMessage(`Logout failed ${error?.message}}`)
     }
+  }
+
+  public async isLoggedIn() {
+    const projectId = StateManager.getFolderState(this.folder.name, KEYS.PROJECT_ID)
+    const organization = StateManager.getFolderState(this.folder.name, KEYS.ORGANIZATION)
+
+    if (!projectId || !organization) return false
+
+    const { hasAccessToken } = await this.status()
+    return hasAccessToken
   }
 }

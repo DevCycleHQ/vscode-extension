@@ -5,11 +5,11 @@ import cliUtils from './utils'
 type DevCycleStatus = {
   version: string
   repoConfigPath: string
-  repoConfigExists: 'true' | 'false'
+  repoConfigExists: boolean
   userConfigPath: string
-  userConfigExists: 'true' | 'false'
+  userConfigExists: boolean
   authConfigPath: string
-  hasAccessToken: 'true' | 'false'
+  hasAccessToken: boolean
   organization?: string
   a0UserId: string
 }
