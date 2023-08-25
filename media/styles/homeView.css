@@ -5,7 +5,7 @@ body {
 
 #home-nav {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   padding: 5px 10px;
   position: sticky;
   z-index: 1;
@@ -13,7 +13,7 @@ body {
   width: 100%;
   box-sizing: border-box;
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   background-color: var(--vscode-editorWidget-background);
 }
 
@@ -27,14 +27,7 @@ body {
   position: absolute;
 }
 
-#home-link-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.home-link-row-group {
+.home-icon-link-group {
   display: flex;
   align-items: center;
 }
@@ -51,11 +44,6 @@ body {
 
 .icon-link:hover {
   background-color: var(--vscode-button-secondaryHoverBackground);
-}
-
-.logout-button-container {
-  display: flex;
-  justify-content: flex-end;
 }
 
 input[type='checkbox'] {
