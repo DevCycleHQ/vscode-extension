@@ -216,6 +216,11 @@
             "default": true,
             "description": "Automatically log in to DevCycle when a configured workspace is opened."
           },
+          "devcycle-feature-flags.initRepoOnLogin": {
+            "type": "boolean",
+            "default": true,
+            "description": "Initialize repository with a DevCycle configuration file on login."
+          },
           "devcycle-feature-flags.usagesOnWorkspaceOpen": {
             "type": "boolean",
             "default": true,

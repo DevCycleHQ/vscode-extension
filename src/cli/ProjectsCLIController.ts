@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { KEYS, StateManager } from '../StateManager'
 import { BaseCLIController } from './BaseCLIController'
-import { getRepoConfig } from '../utils'
+import utils from '../utils'
 
 export type Project = {
   _id?: string
@@ -37,7 +37,7 @@ export class ProjectsCLIController extends BaseCLIController {
   }
   
   public async selectProjectFromConfig() {
-    const { project: projFromConfig } = await getRepoConfig(this.folder)
+    const { project: projFromConfig } = await utils.getRepoConfig(this.folder)
   
     if (projFromConfig) {
       await this.selectProject(projFromConfig)
