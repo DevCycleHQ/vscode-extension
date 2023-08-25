@@ -12,13 +12,6 @@ i.codicon {
     margin-right: 5px;
 }
 
-.nav-list__title {
-    text-transform: uppercase;
-    color: var(--vscode-foreground);
-    opacity: 0.5;
-    margin: 10px 0px;
-}
-
 .nav-list__item {
     color: inherit;
     padding: 3px 0;
