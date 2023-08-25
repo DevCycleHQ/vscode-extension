@@ -4,9 +4,12 @@ import { BaseCLIController } from './BaseCLIController'
 import { getRepoConfig } from '../utils'
 
 export type Project = {
-  _id: string
-  name: string
+  _id?: string
+  _organization: string
+  name?: string
   key: string
+  updatedAt: string
+  createdAt: string
 }
 
 export class ProjectsCLIController extends BaseCLIController {
@@ -20,14 +23,14 @@ export class ProjectsCLIController extends BaseCLIController {
       vscode.window.showErrorMessage(
         `Retrieving projects failed: ${error?.message}}`,
       )
-      return []
+      return {}
     } else {
       const projects = JSON.parse(output) as Project[]
       const projectsMap = projects.reduce((result, currentProject) => {
         result[currentProject.key] = currentProject
         return result
       }, {} as Record<string, Project>)
-  
+
       StateManager.setFolderState(this.folder.name, KEYS.PROJECTS, projectsMap)
       return projectsMap
     }
@@ -59,10 +62,10 @@ export class ProjectsCLIController extends BaseCLIController {
     return project
   }
   
-  protected async selectProject(project: string) {
+  public async selectProject(project: string) {
     const { code, error } = await this.execDvc(`projects select --project=${project}`)
     if (code === 0) {
-      StateManager.setFolderState(this.folder.name, KEYS.PROJECT_ID, project)
+      await StateManager.setFolderState(this.folder.name, KEYS.PROJECT_ID, project)
     } else {
       vscode.window.showErrorMessage(`Selecting project failed ${error?.message}}`)
       throw error

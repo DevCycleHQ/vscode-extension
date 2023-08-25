@@ -94,7 +94,9 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
         
         </head>
         <body>
-        ${this.getBodyHtml(view)}
+          <main>
+          ${this.getBodyHtml(view)}
+          </main>
         </body>
         <script nonce="${nonce}" src="${scriptUri}"></script>
         </html>`

@@ -13,10 +13,12 @@ export async function registerRefreshUsagesCommand(
       async ({ folder }: { folder?: vscode.WorkspaceFolder } = {}) => {
         if (folder) {
           StateManager.setFolderState(folder.name, KEYS.CODE_USAGE_KEYS, undefined)
+          StateManager.setFolderState(folder.name, KEYS.VARIABLES, undefined)
           await usagesDataProvider.refresh(folder)
         } else {
           vscode.workspace.workspaceFolders?.forEach(({ name }) => {
             StateManager.setFolderState(name, KEYS.CODE_USAGE_KEYS, undefined)
+            StateManager.setFolderState(name, KEYS.VARIABLES, undefined)
           })
           await usagesDataProvider.refreshAll()
         }
