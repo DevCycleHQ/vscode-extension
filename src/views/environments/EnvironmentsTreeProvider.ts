@@ -4,6 +4,13 @@ import { FolderNode } from '../utils/tree/FolderNode'
 import { EnvironmentsCLIController } from '../../cli'
 import { EnvironmentNode, KeyListNode } from './nodes'
 
+const ENV_ORDER = {
+  development: 0,
+  staging: 1,
+  production: 2,
+  disaster_recovery: 3,
+}
+
 export class EnvironmentsTreeProvider
   implements vscode.TreeDataProvider<vscode.TreeItem>
 {
@@ -13,8 +20,8 @@ export class EnvironmentsTreeProvider
   readonly onDidChangeTreeData: vscode.Event<undefined | void> =
     this._onDidChangeTreeData.event
 
-  private envsByFolder: Record<string, vscode.TreeItem[]> = {}
-  private isRefreshing: Record<string, boolean> = {}
+  envsByFolder: Record<string, EnvironmentNode[]> = {}
+  isRefreshing: Record<string, boolean> = {}
 
   async refreshAll(): Promise<void> {
     const folders = vscode.workspace.workspaceFolders || []
@@ -48,6 +55,7 @@ export class EnvironmentsTreeProvider
             this.envsByFolder[folder.name].push(node)
           })
         )
+        this.envsByFolder[folder.name].sort((a, b) => ENV_ORDER[a.type] - ENV_ORDER[b.type])
       })
     this._onDidChangeTreeData.fire();
     this.isRefreshing[folder.name] = false

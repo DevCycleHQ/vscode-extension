@@ -5,12 +5,14 @@ import { COMMAND_COPY_TO_CLIPBOARD, COMMAND_OPEN_LINK, CopyableNode } from '../.
 export class EnvironmentNode extends vscode.TreeItem {
   keys: KeyListNode
   link: LinkNode
+  type: Environment['type']
 
   constructor(folder: vscode.WorkspaceFolder, environment: Environment) {
     super(environment.name, vscode.TreeItemCollapsibleState.Collapsed)
     const orgId = getOrganizationId(folder)
     this.keys = new KeyListNode(environment)
     this.link = new LinkNode(orgId)
+    this.type = environment.type
   }
 }
 
