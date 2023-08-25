@@ -150,7 +150,8 @@
         "icon": {
           "light": "media/togglebot.svg",
           "dark": "media/togglebot-white.svg"
-        }
+        },
+        "enablement": "devcycle-feature-flags.hasCredentialsAndProject == true"
       },
       {
         "command": "devcycle-feature-flags.logout",

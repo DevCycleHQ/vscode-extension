@@ -13,9 +13,9 @@ export class AuthCLIController extends BaseCLIController {
     this.organizationsController = new OrganizationsCLIController(folder)
   }
 
-  public async init(organization?: Organization) {
+  public async init(organization: Organization) {
     showBusyMessage('Initializing DevCycle')
-    const { code, error } = await this.execDvc(`repo init --org=${organization?.name}`)
+    const { code, error } = await this.execDvc(`repo init --org=${organization.name}`)
     if (code !== 0) {
       throw error
     }
@@ -47,8 +47,8 @@ export class AuthCLIController extends BaseCLIController {
       const initRepoOnLogin = vscode.workspace
         .getConfiguration('devcycle-feature-flags')
         .get('initRepoOnLogin')
-      if (!repoConfigExists && initRepoOnLogin) {
-        const org = StateManager.getFolderState(this.folder.name, KEYS.ORGANIZATION)
+      const org = StateManager.getFolderState(this.folder.name, KEYS.ORGANIZATION)
+      if (!repoConfigExists && initRepoOnLogin && org) {
         await this.init(org)
       }
     } catch (e) {
