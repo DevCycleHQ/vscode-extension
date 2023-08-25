@@ -27,7 +27,8 @@ import {
 } from './commands'
 import cliUtils from './cli/utils'
 import utils from './utils'
-import { SHOW_HOME_VIEW } from './constants'
+import { SHOW_HOME_VIEW, SHOW_INSPECTOR_VIEW } from './constants'
+import { registerInspectorViewProvider } from './views/inspector'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -42,6 +43,13 @@ vscode.commands.executeCommand(
   'setContext',
   'devcycle-feature-flags.shouldShowHomeView',
   SHOW_HOME_VIEW,
+)
+
+// Hide inspector view until development is done
+vscode.commands.executeCommand(
+  'setContext',
+  'devcycle-feature-flags.shouldShowInspectorView',
+  SHOW_INSPECTOR_VIEW,
 )
 
 export const activate = async (context: vscode.ExtensionContext) => {
@@ -75,6 +83,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const environmentsDataProvider = await registerEnvironmentsViewProvider(context)
   await registerResourcesViewProvider(context)
   if (SHOW_HOME_VIEW) { await registerHomeViewProvider(context) }
+  if (SHOW_INSPECTOR_VIEW) { await registerInspectorViewProvider(context) }
   await registerUsagesNodeClickedCommand(context)
   await registerInitCommand(context)
   await registerOpenLinkCommand(context)

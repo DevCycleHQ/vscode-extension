@@ -1,0 +1,113 @@
+input[type='checkbox'] {
+  display: none;
+}
+
+.lbl-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  padding-top: 0.4rem;
+}
+
+.collapsible-content {
+  max-height: 0px;
+  overflow: hidden;
+  padding-left: 1.2rem;
+}
+
+.toggle:checked + .lbl-toggle + .collapsible-content {
+  max-height: fit-content;
+  overflow: visible;
+}
+
+.toggle:checked + .lbl-toggle > .codicon-chevron-right {
+  transform: rotate(90deg)
+}
+
+.toggle:checked + .lbl-toggle {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.inspector-container {
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+}
+
+.dropdown-container {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 260px;
+}
+
+.dropdown-container label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vscode-foreground);
+  font-size: var(--vscode-font-size);
+  line-height: normal;
+}
+
+.inspector-dropdown-container {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+
+.inspector-dropdown-container img {
+  margin-right: 0.3rem;
+}
+
+.inspector-dropdown-type {
+  margin-right: 0.3rem;
+  width: fit-content;
+}
+
+.inspector-dropdown-value {
+  margin-right: 0.3rem;
+  width: -webkit-fill-available;
+}
+
+.details-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.details-container > * {
+  padding-top: 0.2rem;
+}
+
+.detail-entry {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-top: 0.4rem;
+}
+
+.details-value {
+  color: gray;
+  font-size: var(vscode-font-size - 2);
+}
+
+.edit-config-button {
+  padding: 0 .3rem;
+  margin-left: -0.3rem;
+}
+
+.edit-config:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* vscode-webview-ui-toolkit components
+/* ------------------------------------------ */
+vscode-dropdown {
+  width: 150px;
+}
