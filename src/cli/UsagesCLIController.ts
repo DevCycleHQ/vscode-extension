@@ -34,4 +34,8 @@ export class UsagesCLIController extends BaseCLIController {
     StateManager.setFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS, matches.map((match) => match.key))
     return matches
   }
+
+  public async clearFolderUsages() {
+    await StateManager.setFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS, undefined)
+  }
 }

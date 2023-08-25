@@ -25,7 +25,8 @@ import {
   registerRefreshUsagesCommand,
   registerShowReferenceCommand,
   registerOpenSettingsCommand,
-  registerOpenUsagesViewCommand
+  registerOpenUsagesViewCommand,
+  registerClearVariablesCommand
 } from './commands'
 import cliUtils from './cli/utils'
 import { SHOW_HOME_VIEW } from './constants'
@@ -83,6 +84,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerLogoutCommand(context)
   await registerRefreshAllCommand(context, [usagesDataProvider, environmentsDataProvider])
   await registerRefreshUsagesCommand(context, usagesDataProvider)
+  await registerClearVariablesCommand(context, usagesDataProvider)
   await registerRefreshEnvironmentsCommand(context, environmentsDataProvider)
   await registerSortUsagesCommand(context, usagesDataProvider)
   await registerShowReferenceCommand(context)
