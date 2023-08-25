@@ -123,7 +123,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       return `
           <div class="inspector-container">
             <div class="inspector-dropdown-container">
-              <i class="codicon codicon-eye"></i>
+              <img src="${this._view?.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'inspector.svg'))}">
               <vscode-dropdown id="typeId" class="inspector-dropdown-type" data-folder="${folder.index}" data-type="variableOrFeature">
                 ${inspectorOptions.join('')}
               </vscode-dropdown>

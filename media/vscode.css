@@ -272,9 +272,8 @@ input[type='checkbox'] {
   align-items: center;
 }
 
-.inspector-dropdown-container i {
+.inspector-dropdown-container img {
   margin-right: 0.3rem;
-  font-size: large;
 }
 
 .inspector-dropdown-type {
