@@ -194,7 +194,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
             </button>
           </div>
           <main>
-            <h4 class="view-heading">Repo Settings</h4>
+            <h5 class="view-subheader">Repo Settings</h5>
             ${body}
           </main>
           <script type="module" nonce="${nonce}" src="${webViewUri}"></script>

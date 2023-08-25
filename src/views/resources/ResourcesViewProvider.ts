@@ -56,13 +56,13 @@ export class ResourcesViewProvider implements vscode.WebviewViewProvider {
         <body class="home preload" data-placement="#{placement}">
           <main id="main">
             <nav class="nav-list">
-              <h5 class="nav-list__title">Documentation</h5>
+              <h5 class="view-subheader">Documentation</h5>
               ${this._getHtmlForLink('Documentation', 'book', 'https://docs.devcycle.com/')}
               ${this._getHtmlForLink('Guides', 'repo-clone', 'https://docs.devcycle.com/best-practices/')}
               ${this._getHtmlForLink('Management API Reference', 'library', 'https://docs.devcycle.com/management-api/')}
               ${this._getHtmlForLink('Bucketing API Reference', 'clippy', 'https://docs.devcycle.com/bucketing-api/')}
 
-              <h5 class="nav-list__title">Useful Links</h5>
+              <h5 class="view-subheader">Useful Links</h5>
               ${this._getHtmlForLink('DevCycle Dashboard', 'globe', 'https://app.devcycle.com/')}
               ${this._getHtmlForLink('Changelog', 'bell', 'https://github.com/DevCycleHQ/vscode-extension/releases')}
               ${this._getHtmlForLink('Roadmap', 'flame', 'https://docs.devcycle.com/product-roadmap')}

@@ -107,10 +107,11 @@ textarea::placeholder {
   color: var(--vscode-input-placeholderForeground);
 }
 
-.view-heading {
-  opacity: 0.5; 
-  margin: 0 0 5px;
-  font-weight: 300;
+.view-subheader {
+  text-transform: uppercase;
+  color: var(--vscode-foreground);
+  opacity: 0.5;
+  margin: 10px 0px;
 }
 
 .icon-button {
