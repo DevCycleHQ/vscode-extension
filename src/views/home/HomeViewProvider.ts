@@ -124,26 +124,22 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
 
   private getLinkRow() {
     return `
-    <div id="home-link-row">
-      <div class="home-link-row-group">
-        <a href="https://docs.devcycle.com/" class="icon-link">
-          <i class="codicon codicon-book"></i>
-        </a>
-        <a href="https://docs.devcycle.com/release-notes" class="icon-link">
-          <i class="codicon codicon-bell"></i>
-        </a>
-        <a href="https://discord.gg/TQdnvcJH" class="icon-link">
-          <i class="codicon codicon-comment-discussion"></i>
-        </a>
-      </div>
-      <div class="home-link-row-group">
-        <a href="https://github.com/DevCycleHQ" class="icon-link">
-          <i class="codicon codicon-github"></i>
-        </a>
-        <a href="https://app.devcycle.com/" class="icon-link">
-          <i class="codicon codicon-globe"></i>
-        </a>
-      </div>
+    <div class="home-icon-link-group">
+      <a href="https://docs.devcycle.com/" class="icon-link">
+        <i class="codicon codicon-book"></i>
+      </a>
+      <a href="https://docs.devcycle.com/release-notes" class="icon-link">
+        <i class="codicon codicon-bell"></i>
+      </a>
+      <a href="https://discord.gg/TQdnvcJH" class="icon-link">
+        <i class="codicon codicon-comment-discussion"></i>
+      </a>
+      <a href="https://github.com/DevCycleHQ" class="icon-link">
+        <i class="codicon codicon-github"></i>
+      </a>
+      <a href="https://app.devcycle.com/" class="icon-link">
+        <i class="codicon codicon-globe"></i>
+      </a>
     </div>
     `
   }
@@ -192,12 +188,10 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
           <div id="home-nav-intercept"></div>
           <div id="home-nav">
             ${this.getLinkRow()}
-            <div class="logout-button-container">
-              <button id="logout-button" class="icon-button">
-                <i class="codicon codicon-plug"></i>
-                Log out
-              </button>
-            </div>
+            <button id="logout-button" class="icon-button">
+              <i class="codicon codicon-plug"></i>
+              Log out
+            </button>
           </div>
           <main>
             <h4 class="view-heading">Repo Settings</h4>
