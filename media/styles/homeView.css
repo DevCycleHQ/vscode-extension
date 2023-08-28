@@ -3,10 +3,14 @@ body {
   background-color: unset;
 }
 
+#home-view-main:hover .collaspsible-content-indent {
+  border-left: 1px solid var(--vscode-tree-inactiveIndentGuidesStroke);
+}
+
 #home-nav {
   display: flex;
   justify-content: space-between;
-  padding: 5px 10px;
+  padding: 5px;
   position: sticky;
   z-index: 1;
   top: 0;
@@ -54,16 +58,29 @@ input[type='checkbox'] {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: bold;
   text-transform: uppercase;
   cursor: pointer;
 }
 
 .collapsible-content {
+  display: flex;
   max-height: 0px;
   overflow: hidden;
   padding-left: 1.2rem;
+  position: relative;
+}
+
+.collaspsible-content-indent {
+  height: 100%;
+  position: absolute;
+  left: 6px;
+  width: 0;
+  border: none;
+  box-sizing: border-box;
+  border-color: transparent;
+  transition: border-color .1s linear;
 }
 
 .toggle:checked + .lbl-toggle + .collapsible-content {
