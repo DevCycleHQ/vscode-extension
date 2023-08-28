@@ -6,6 +6,7 @@ export type Feature = {
   key: string
   _id: string
   name: string
+  variations: Record<string, any>[]
 }
 
 export type FeatureConfiguration = {
@@ -53,7 +54,7 @@ export class FeaturesCLIController extends BaseCLIController {
       vscode.window.showErrorMessage(
         `Retrieving features failed: ${error?.message}}`,
       )
-      return []
+      return {}
     } else {
       const features = JSON.parse(output) as Feature[]
       const featureMap = features.reduce((result, currentFeature) => {
