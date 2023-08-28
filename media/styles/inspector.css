@@ -34,7 +34,7 @@ input[type='checkbox'] {
 .inspector-container {
   display: flex;
   flex-direction: column;
-  padding: 5px;
+  padding: 5px 0 0;
 }
 
 .dropdown-container {

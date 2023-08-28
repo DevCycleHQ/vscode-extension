@@ -1,5 +1,5 @@
 :root {
-  --container-paddding: 20px;
+  --container-paddding: 11px;
   --input-padding-vertical: 6px;
   --input-padding-horizontal: 4px;
   --input-margin-vertical: 4px;
@@ -141,7 +141,6 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  padding: 5px;
 }
 
 .form-container h3 {
@@ -155,6 +154,7 @@ textarea::placeholder {
 .dropdown-container {
   box-sizing: border-box;
   display: flex;
+  gap: 5px;
   justify-content: space-between;
   align-items: center;
   max-width: 260px;

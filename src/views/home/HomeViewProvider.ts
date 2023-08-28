@@ -96,6 +96,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
         ${folder.name}
         </label>
         <div class="collapsible-content">
+        <div class="collaspsible-content-indent"></div>
         ` : ''
       }
         <div class="form-container">
@@ -193,7 +194,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
               Log out
             </button>
           </div>
-          <main>
+          <main id="home-view-main">
             <h5 class="view-subheader">Repo Settings</h5>
             ${body}
           </main>
