@@ -6,8 +6,8 @@ export async function registerInspectorViewProvider(context: vscode.ExtensionCon
     const inspectorViewProvider = new InspectorViewProvider(context.extensionUri)
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(
-        'devcycle-inspector',
-        inspectorViewProvider
+            'devcycle-inspector',
+            inspectorViewProvider,
         ),
     )
  
