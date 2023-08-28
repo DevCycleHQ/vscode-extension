@@ -7,6 +7,7 @@ export type Feature = {
   _id: string
   name: string
   variations: Record<string, any>[]
+  variables: Record<string, any>[]
 }
 
 export type FeatureConfiguration = {
