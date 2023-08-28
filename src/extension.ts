@@ -1,7 +1,8 @@
 ;('use strict')
 import * as vscode from 'vscode'
+import * as path from 'path'
 import { KEYS, StateManager } from './StateManager'
-import { AuthCLIController, getOrganizationId } from './cli'
+import { AuthCLIController, BaseCLIController, getOrganizationId } from './cli'
 import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
 import { registerStartupViewProvider } from './views/startup'
@@ -29,6 +30,7 @@ import cliUtils from './cli/utils'
 import utils from './utils'
 import { SHOW_HOME_VIEW, SHOW_INSPECTOR_VIEW } from './constants'
 import { registerInspectorViewProvider } from './views/inspector'
+import { loadRepoConfig } from './utils/loadRepoConfig'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -135,6 +137,19 @@ export const activate = async (context: vscode.ExtensionContext) => {
       )
       return new vscode.Hover(hoverString || '')
     },
+  })
+
+  vscode.workspace.onDidSaveTextDocument(async (document) => {
+    const filePath = document.uri.path
+    const folder = vscode.workspace.getWorkspaceFolder(document.uri)
+    if (!folder) { return }
+
+    const cli = new BaseCLIController(folder)
+    const { repoConfigPath } = await cli.status()
+
+    if (filePath === path.join(folder.uri.path, repoConfigPath)) {
+      await loadRepoConfig(folder)
+    }
   })
 
   vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
