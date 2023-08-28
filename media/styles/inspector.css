@@ -106,6 +106,23 @@ input[type='checkbox'] {
   background-color: var(--vscode-button-secondaryHoverBackground);
 }
 
+.detail-link-row {
+  display: flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.detail-link-row:hover {
+  color: inherit;
+  text-decoration: none; 
+  cursor: pointer;  
+}
+
+.detail-link-row > i {
+  margin-right: 0.3rem;
+}
+
 /* vscode-webview-ui-toolkit components
 /* ------------------------------------------ */
 vscode-dropdown {

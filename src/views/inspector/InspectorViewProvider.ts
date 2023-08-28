@@ -1,6 +1,9 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
-import { Feature, FeaturesCLIController, OrganizationsCLIController, ProjectsCLIController, Variable, VariablesCLIController } from '../../cli'
+import { Feature, FeaturesCLIController, OrganizationsCLIController, ProjectsCLIController, Variable, VariablesCLIController, getOrganizationId } from '../../cli'
+import { KEYS, StateManager } from '../../StateManager'
+import { OPEN_USAGES_VIEW } from '../../commands'
+import { OPEN_DVC_SETTINGS } from '../../commands/openSettings/constants'
 
 type InspectorViewMessage =
   | { type: 'variableOrFeature', value: 'Variable' | 'Feature', folderIndex: number }
@@ -47,7 +50,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.options = {
       enableScripts: true,
-
+      enableCommandUris: true,
       localResourceRoots: [this._extensionUri],
     }
 
@@ -82,11 +85,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       `<vscode-option value="${option}"${option === this.selectedType ? ' selected' : '' }>${option}</vscode-option>`
     ))
 
-    const variableOptions = this.variables && Object.keys(this.variables).map((variable) => (
+    const variableOptions = this.variables && Object.keys(this.variables).sort().map((variable) => (
       `<vscode-option value="${variable}"${variable === this.selectedKey ? ' selected' : '' }>${variable}</vscode-option>`
     )) || []
 
-    const featureOptions = this.features && Object.values(this.features).map((feature) => (
+    const featureOptions = this.features && Object.values(this.features).sort().map((feature) => (
       `<vscode-option value="${feature._id}"${feature._id === this.selectedKey ? ' selected' : '' }>${feature.key}</vscode-option>`
     )) || []
 
@@ -125,6 +128,13 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       </div>`
     )) || []
 
+    const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
+    const orgId = getOrganizationId(folder)
+    const dashboardPath = this.selectedType === 'Variable' ? 
+    `variables/${this.variables[this.selectedKey].key}` : 
+    `features/${this.features[this.selectedKey].key}`
+    const usagesCommand = `command:${OPEN_USAGES_VIEW}?${encodeURIComponent(JSON.stringify({ variableKey: this.selectedKey }))}`
+
     return `
         <div class="inspector-container">
           <div class="inspector-dropdown-container">
@@ -159,6 +169,21 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
                 </div>` :
                 ''
               }
+              <div class="detail-entry">
+              ${this.selectedType === 'Variable' ? 
+              `
+                <a href="${vscode.Uri.parse(usagesCommand)}" class="detail-link-row">
+                  <i class="codicon codicon-symbol-keyword"></i>
+                  View Usages
+                </a>
+              ` : ''}
+              </div>
+              <div class="detail-entry">
+                <a href="https://app.devcycle.com/o/${orgId}/p/${projectId}/${dashboardPath}" class="detail-link-row">
+                  <i class="codicon codicon-globe"></i>
+                  View in Dashboard
+                </a>
+              </div>
             </div>
           </div>
           ${this.selectedType === 'Variable' ? 
