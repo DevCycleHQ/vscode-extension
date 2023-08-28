@@ -2,8 +2,7 @@ import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
 import { Feature, FeaturesCLIController, OrganizationsCLIController, ProjectsCLIController, Variable, VariablesCLIController, getOrganizationId } from '../../cli'
 import { KEYS, StateManager } from '../../StateManager'
-import { OPEN_USAGES_VIEW } from '../../commands'
-import { OPEN_DVC_SETTINGS } from '../../commands/openSettings/constants'
+import { OPEN_USAGES_VIEW } from '../../commands/openCodeUsagesView'
 
 type InspectorViewMessage =
   | { type: 'variableOrFeature', value: 'Variable' | 'Feature', folderIndex: number }
@@ -93,47 +92,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       `<vscode-option value="${feature._id}"${feature._id === this.selectedKey ? ' selected' : '' }>${feature.key}</vscode-option>`
     )) || []
 
-    const name = this.selectedType === 'Variable' ? 
-      this.variables[this.selectedKey]?.name : 
-      this.features[this.selectedKey]?.name
-    const key = this.selectedType === 'Variable' ? 
-      this.variables[this.selectedKey]?.key : 
-      this.features[this.selectedKey]?.key
-    const featureName = this.selectedType === 'Variable' &&
-      Object.values(this.features).find((feature) => feature._id === (this.variables[this.selectedKey] as Variable)?._feature)?.name
-
-    const getAllPossibleValuesForVariable = (variable: Variable) => {
-      const variableVariationValueMap: Record<string, unknown> = {}
-      const feature = this.features[variable._feature]
-      if (!feature) {
-        return {}
-      }
-      for (const variation of feature.variations || []) {
-        variableVariationValueMap[variation.name] = variation.variables?.[variable.key]
-      }
-      return variableVariationValueMap
-    }
-    const possibleValues = this.selectedType === 'Variable' && 
-      Object.entries(getAllPossibleValuesForVariable(this.variables[this.selectedKey])).map((possibleValue) => {
-        const variationName = possibleValue[0]
-        return `<div class="detail-entry">
-          <span>${variationName}</span>
-          <span class="details-value">${possibleValue[1]}</span>
-        </div>`
-      }) || []
-    const variableKeysInFeature = this.selectedType === 'Feature' && this.features[this.selectedKey].variables?.map((variable) => (
-      `
-      <div class="detail-entry">
-        <span>${variable.key}</span>
-      </div>`
-    )) || []
-
-    const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
-    const orgId = getOrganizationId(folder)
-    const dashboardPath = this.selectedType === 'Variable' ? 
-    `variables/${this.variables[this.selectedKey].key}` : 
-    `features/${this.features[this.selectedKey].key}`
-    const usagesCommand = `command:${OPEN_USAGES_VIEW}?${encodeURIComponent(JSON.stringify({ variableKey: this.selectedKey }))}`
+    const possibleValues = this.getPossibleValuesHTML()
+    const variableKeysInFeature = this.getVariableKeysInFeatureHTML()
 
     return `
         <div class="inspector-container">
@@ -152,68 +112,35 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             <i class="codicon codicon-info"></i>
             Details
           </label>
-          <div class="collapsible-content">
-            <div class="details-container">
-              <div class="detail-entry">
-                <span>Name</span>
-                <span class="details-value">${name || '(No Name)'}</span>
-              </div>
-              <div class="detail-entry">
-                <span>Key</span>
-                <span class="details-value">${key}</span>
-              </div>
-              ${featureName ?
-                `<div class="detail-entry">
-                  <span>Feature</span>
-                  <span class="details-value">${featureName}</span>
-                </div>` :
-                ''
-              }
-              <div class="detail-entry">
-              ${this.selectedType === 'Variable' ? 
-              `
-                <a href="${vscode.Uri.parse(usagesCommand)}" class="detail-link-row">
-                  <i class="codicon codicon-symbol-keyword"></i>
-                  View Usages
-                </a>
-              ` : ''}
-              </div>
-              <div class="detail-entry">
-                <a href="https://app.devcycle.com/o/${orgId}/p/${projectId}/${dashboardPath}" class="detail-link-row">
-                  <i class="codicon codicon-globe"></i>
-                  View in Dashboard
-                </a>
+          ${this.getDetailsHTML(folder)}
+          ${this.selectedType === 'Variable' ? `
+            <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
+            <label for="collapsible-possible=values" class="lbl-toggle">
+              <i class="codicon codicon-chevron-right"></i>
+              <i class="codicon codicon-preserve-case"></i>
+              Possible Values
+            </label>
+            <div class="collapsible-content">
+              <div class="details-container">
+                ${possibleValues.join('')}
               </div>
             </div>
-          </div>
-          ${this.selectedType === 'Variable' ? 
-          `
-          <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
-          <label for="collapsible-possible=values" class="lbl-toggle">
-            <i class="codicon codicon-chevron-right"></i>
-            <i class="codicon codicon-preserve-case"></i>
-            Possible Values
-          </label>
-          <div class="collapsible-content">
-            <div class="details-container">
-              ${possibleValues.join('')}
+            ` : ''
+          }
+          ${this.selectedType === 'Feature' ? `
+            <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
+            <label for="collapsible-possible=values" class="lbl-toggle">
+              <i class="codicon codicon-chevron-right"></i>
+              <i class="codicon codicon-preserve-case"></i>
+              Variables
+            </label>
+            <div class="collapsible-content">
+              <div class="details-container">
+                ${variableKeysInFeature.join('')}
+              </div>
             </div>
-          </div>
-          ` : ''}
-          ${this.selectedType === 'Feature' ? 
-          `
-          <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
-          <label for="collapsible-possible=values" class="lbl-toggle">
-            <i class="codicon codicon-chevron-right"></i>
-            <i class="codicon codicon-preserve-case"></i>
-            Variables
-          </label>
-          <div class="collapsible-content">
-            <div class="details-container">
-              ${variableKeysInFeature.join('')}
-            </div>
-          </div>
-          ` : ''}
+            ` : ''
+          }
         </div>
     `
   }
@@ -259,5 +186,90 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           <script type="module" nonce="${nonce}" src="${webViewUri}"></script>
         </body>
       </html>`
+  }
+
+  private getDetailsHTML(folder: vscode.WorkspaceFolder) {
+    const name = this.selectedType === 'Variable' ? 
+      this.variables[this.selectedKey]?.name : 
+      this.features[this.selectedKey]?.name
+    const key = this.selectedType === 'Variable' ? 
+      this.variables[this.selectedKey]?.key : 
+      this.features[this.selectedKey]?.key
+    const featureName = this.selectedType === 'Variable' &&
+      Object.values(this.features).find((feature) => feature._id === (this.variables[this.selectedKey] as Variable)?._feature)?.name
+
+    const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
+    const orgId = getOrganizationId(folder)
+    const dashboardPath = this.selectedType === 'Variable' ? 
+      `variables/${this.variables[this.selectedKey].key}` : 
+      `features/${this.features[this.selectedKey].key}`
+    const usagesCommand = `command:${OPEN_USAGES_VIEW}?${encodeURIComponent(JSON.stringify({ variableKey: this.selectedKey }))}`
+    return `
+      <div class="collapsible-content">
+        <div class="details-container">
+          <div class="detail-entry">
+            <span>Name</span>
+            <span class="details-value">${name || '(No Name)'}</span>
+          </div>
+          <div class="detail-entry">
+            <span>Key</span>
+            <span class="details-value">${key}</span>
+          </div>
+          ${featureName ?
+            `<div class="detail-entry">
+              <span>Feature</span>
+              <span class="details-value">${featureName}</span>
+            </div>` :
+            ''
+          }
+          <div class="detail-entry">
+          ${this.selectedType === 'Variable' ? `
+            <a href="${vscode.Uri.parse(usagesCommand)}" class="detail-link-row">
+              <i class="codicon codicon-symbol-keyword"></i>
+              View Usages
+            </a>` : ''
+          }
+          </div>
+          <div class="detail-entry">
+            <a href="https://app.devcycle.com/o/${orgId}/p/${projectId}/${dashboardPath}" class="detail-link-row">
+              <i class="codicon codicon-globe"></i>
+              View in Dashboard
+            </a>
+          </div>
+        </div>
+      </div>`
+  }
+
+  private getPossibleValuesHTML() {
+    const getAllPossibleValuesForVariable = (variable: Variable) => {
+      const variableVariationValueMap: Record<string, unknown> = {}
+      const feature = this.features[variable._feature]
+      if (!feature) {
+        return {}
+      }
+      for (const variation of feature.variations || []) {
+        variableVariationValueMap[variation.name] = variation.variables?.[variable.key]
+      }
+      return variableVariationValueMap
+    }
+
+    return this.selectedType === 'Variable' && 
+      Object.entries(getAllPossibleValuesForVariable(this.variables[this.selectedKey])).map((possibleValue) => {
+        const variationName = possibleValue[0]
+        return `<div class="detail-entry">
+          <span>${variationName}</span>
+          <span class="details-value">${possibleValue[1]}</span>
+        </div>`
+      }) || []
+  }
+
+  private getVariableKeysInFeatureHTML() {
+    return this.selectedType === 'Feature' && this.features[this.selectedKey].variables?.map((variable) => (
+      `
+      <div class="detail-entry">
+        <span>${variable.key}</span>
+      </div>`
+    )) || []
+
   }
 }
