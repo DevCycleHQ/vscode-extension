@@ -79,7 +79,7 @@ export class StateManager {
   static setFolderState(folder: string, key: KEYS.FEATURE_CONFIGURATIONS, value: Record<string, FeatureConfiguration[]> | undefined): Thenable<void>
   static setFolderState(folder: string, key: KEYS.ENVIRONMENTS, value: Record<string, Environment> | undefined): Thenable<void>
   static setFolderState(folder: string, key: KEYS.ORGANIZATION, value: Organization | undefined): Thenable<void>
-  static setFolderState(folder: string, key: KEYS.CODE_USAGE_KEYS, value: string[] | undefined): Thenable<void>
+  static setFolderState(folder: string, key: KEYS.CODE_USAGE_KEYS, value: Record<string, boolean> | undefined): Thenable<void>
   static setFolderState(folder: string, key: string, value: any) {
     return this.workspaceState.update(`${folder}.${key}`, value)
   }
@@ -93,7 +93,7 @@ export class StateManager {
   static getFolderState(folder: string, key: KEYS.ENVIRONMENTS): Record<string, Environment> | undefined
   static getFolderState(folder: string, key: KEYS.ORGANIZATION): Organization | undefined
   static getFolderState(folder: string, key: KEYS.SEND_METRICS_PROMPTED): boolean | undefined
-  static getFolderState(folder: string, key: KEYS.CODE_USAGE_KEYS): string[] | undefined
+  static getFolderState(folder: string, key: KEYS.CODE_USAGE_KEYS): Record<string, boolean> | undefined
   static getFolderState(folder: string, key: string) {
     return this.workspaceState.get(`${folder}.${key}`)
   }

@@ -58,14 +58,16 @@ export class UsagesTreeProvider
     )
   }
 
-  async refresh(folder: vscode.WorkspaceFolder): Promise<void> {
+  async refresh(folder: vscode.WorkspaceFolder, showLoading: boolean = true): Promise<void> {
     if (this.isRefreshing[folder.name]) {
       return
     }
 
     this.isRefreshing[folder.name] = true
     this.flagsByFolder[folder.name] = []
-    this._onDidChangeTreeData.fire(undefined)
+    if (showLoading) {
+      this._onDidChangeTreeData.fire(undefined)
+    }
 
     // Use withProgress to show a progress indicator
     await vscode.window.withProgress(
