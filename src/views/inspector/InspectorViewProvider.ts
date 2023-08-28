@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
-import { Feature, FeaturesCLIController, OrganizationsCLIController, ProjectsCLIController, Variable, VariablesCLIController, getOrganizationId } from '../../cli'
+import { Feature, FeaturesCLIController, JSONMatch, OrganizationsCLIController, ProjectsCLIController, UsagesCLIController, Variable, VariablesCLIController, getOrganizationId } from '../../cli'
 import { KEYS, StateManager } from '../../StateManager'
 import { OPEN_USAGES_VIEW } from '../../commands/openCodeUsagesView'
 
@@ -17,9 +17,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
 
     variables: Record<string, Variable> = {}
     features: Record<string, Feature> = {}
-
-    variablesCLIController?: VariablesCLIController
-    featuresCLIController?: FeaturesCLIController
+    matches: Record<string, JSONMatch> = {}
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this.selectedType = 'Variable'
@@ -29,18 +27,26 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     if (!folder) {
       return
     }
-    this.variablesCLIController = new VariablesCLIController(folder)
-    this.featuresCLIController = new FeaturesCLIController(folder)
+    const variablesCLIController = new VariablesCLIController(folder)
+    const featuresCLIController = new FeaturesCLIController(folder)
+    const usagesCLIController = new UsagesCLIController(folder)
 
-    this.variablesCLIController.getAllVariables().then((variables) => {
+    variablesCLIController.getAllVariables().then((variables) => {
       this.variables = variables
       if (Object.values(this.variables).length) {
         this.selectedKey = Object.values(this.variables)[0].key
       }
     })
 
-    this.featuresCLIController.getAllFeatures().then((features) => {
+    featuresCLIController.getAllFeatures().then((features) => {
       this.features = features
+    })
+
+    usagesCLIController.usages().then((matches) => {
+      this.matches = matches.reduce((result, match) => {
+        result[match.key] = match
+        return result
+      }, {} as Record<string, JSONMatch>)
     })
   }
 
@@ -97,6 +103,13 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
 
     return `
         <div class="inspector-container">
+          <div class="multiple-folder-container">
+            <i class="codicon codicon-debug-breakpoint-log"></i>
+            <span>${folder.name}</span>
+            <vscode-dropdown id="folderId" class="inspector-folder-dropdown-type" data-folder="${folder.index}" data-type="folderName">
+              ${inspectorOptions.join('')}
+            </vscode-dropdown>
+          </div>
           <div class="inspector-dropdown-container">
             <img src="${this._view?.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'inspector.svg'))}">
             <vscode-dropdown id="typeId" class="inspector-dropdown-type" data-folder="${folder.index}" data-type="variableOrFeature">
@@ -223,7 +236,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             ''
           }
           <div class="detail-entry">
-          ${this.selectedType === 'Variable' ? `
+          ${this.selectedType === 'Variable' && this.matches[this.selectedKey] ? `
             <a href="${vscode.Uri.parse(usagesCommand)}" class="detail-link-row">
               <i class="codicon codicon-symbol-keyword"></i>
               View Usages

@@ -37,27 +37,27 @@ input[type='checkbox'] {
   padding: 5px 0 0;
 }
 
-.dropdown-container {
+.multiple-folder-container {
   box-sizing: border-box;
   display: flex;
-  justify-content: space-between;
+  justify-content: left;
   align-items: center;
-  max-width: 260px;
 }
 
-.dropdown-container label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--vscode-foreground);
-  font-size: var(--vscode-font-size);
-  line-height: normal;
+.multiple-folder-container i, span {
+  margin-right: 0.5rem;
+}
+
+.inspector-folder-dropdown-type {
+  margin-right: 0.3rem;
+  width: auto;
+  flex-grow: 1;
 }
 
 .inspector-dropdown-container {
+  margin-top: 0.3rem;
   box-sizing: border-box;
   display: flex;
-  justify-content: right;
   align-items: center;
 }
 
