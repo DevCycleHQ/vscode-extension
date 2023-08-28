@@ -3,10 +3,11 @@ import { COMMAND_REFRESH_ALL } from './constants'
 import { StateManager } from '../../StateManager'
 import { UsagesTreeProvider } from '../../views/usages'
 import { EnvironmentsTreeProvider } from '../../views/environments'
+import { InspectorViewProvider } from '../../views/inspector'
 
 export async function registerRefreshAllCommand(
   context: vscode.ExtensionContext,
-  providers: (UsagesTreeProvider | EnvironmentsTreeProvider)[]
+  providers: (UsagesTreeProvider | EnvironmentsTreeProvider | InspectorViewProvider)[]
 ) {
   context.subscriptions.push(
     vscode.commands.registerCommand(

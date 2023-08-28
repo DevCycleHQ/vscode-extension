@@ -7,17 +7,22 @@ const vscode = acquireVsCodeApi();
 window.addEventListener("load", main);
 
 function main() {
+  const addDropdownValueChangeListenersToDropdowns = (dropdowns: string[]) => {
+    for (const dropdown of dropdowns) {
+      const dropdownElements = document.getElementsByClassName(dropdown) as HTMLCollectionOf<Dropdown>
+      for (let i = 0; i < dropdownElements.length; i++) {
+        const dropdownElement = dropdownElements[i];
+        dropdownElement.addEventListener('change', handleDropdownValueChange)
+      }
+    }
+  }
   // Inspector dropdowns
-  const inspectorDropdownType = document.getElementsByClassName("inspector-dropdown-type") as HTMLCollectionOf<Dropdown>
-  const inspectorDropdownValue = document.getElementsByClassName("inspector-dropdown-value") as HTMLCollectionOf<Dropdown>  
-  for (let i = 0; i < inspectorDropdownType.length; i++) {
-    const dropdown = inspectorDropdownType[i];
-    dropdown.addEventListener('change', handleDropdownValueChange);
-  }
-  for (let i = 0; i < inspectorDropdownValue.length; i++) {
-    const dropdown = inspectorDropdownValue[i];
-    dropdown.addEventListener('change', handleDropdownValueChange);
-  }
+  addDropdownValueChangeListenersToDropdowns([
+    'inspector-dropdown-folder',
+    'inspector-dropdown-type',
+    'inspector-dropdown-value'
+  ])
+
  }
 
 function handleDropdownValueChange(event: Event) {

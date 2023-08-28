@@ -7,8 +7,8 @@ import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
 import { registerStartupViewProvider } from './views/startup'
 import { registerLoginViewProvider } from './views/login'
-import { registerUsagesViewProvider } from './views/usages'
-import { registerEnvironmentsViewProvider } from './views/environments'
+import { UsagesTreeProvider, registerUsagesViewProvider } from './views/usages'
+import { EnvironmentsTreeProvider, registerEnvironmentsViewProvider } from './views/environments'
 import { registerResourcesViewProvider } from './views/resources'
 import { registerHomeViewProvider } from './views/home'
 import {
@@ -29,8 +29,9 @@ import {
 import cliUtils from './cli/utils'
 import utils from './utils'
 import { SHOW_HOME_VIEW, SHOW_INSPECTOR_VIEW } from './constants'
-import { registerInspectorViewProvider } from './views/inspector'
+import { InspectorViewProvider, registerInspectorViewProvider } from './views/inspector'
 import { loadRepoConfig } from './utils/loadRepoConfig'
+import { registerRefreshInspectorCommand } from './commands/refreshInspector'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -83,15 +84,25 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerLoginViewProvider(context)
   const { usagesDataProvider, usagesTreeView } = await registerUsagesViewProvider(context)
   const environmentsDataProvider = await registerEnvironmentsViewProvider(context)
+  const refreshProviders: (UsagesTreeProvider | EnvironmentsTreeProvider | InspectorViewProvider)[] = [
+    usagesDataProvider, 
+    environmentsDataProvider
+  ]
+
   await registerResourcesViewProvider(context)
   if (SHOW_HOME_VIEW) { await registerHomeViewProvider(context) }
-  if (SHOW_INSPECTOR_VIEW) { await registerInspectorViewProvider(context) }
+  if (SHOW_INSPECTOR_VIEW) { 
+    const inspectorViewProvider = await registerInspectorViewProvider(context)
+    refreshProviders.push(inspectorViewProvider) 
+    await registerRefreshInspectorCommand(context, inspectorViewProvider)
+  }
+
   await registerUsagesNodeClickedCommand(context)
   await registerInitCommand(context)
   await registerOpenLinkCommand(context)
   await registerCopyToClipboardCommand(context)
   await registerLogoutCommand(context)
-  await registerRefreshAllCommand(context, [usagesDataProvider, environmentsDataProvider])
+  await registerRefreshAllCommand(context, refreshProviders)
   await registerRefreshUsagesCommand(context, usagesDataProvider)
   await registerRefreshEnvironmentsCommand(context, environmentsDataProvider)
   await registerSortUsagesCommand(context, usagesDataProvider)

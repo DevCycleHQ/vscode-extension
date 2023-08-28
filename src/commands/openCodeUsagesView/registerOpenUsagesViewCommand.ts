@@ -11,9 +11,9 @@ export async function registerOpenUsagesViewCommand(
     context.subscriptions.push(
         vscode.commands.registerCommand(
             OPEN_USAGES_VIEW,
-            async ({ variableKey }: { variableKey: string }) => {
+            async ({ variableKey, folderUri }: { variableKey: string, folderUri?: string }) => {
                 try {
-                    const activeDocumentUri = vscode.window.activeTextEditor?.document.uri
+                    const activeDocumentUri = (folderUri && vscode.Uri.parse(folderUri)) || vscode.window.activeTextEditor?.document.uri
                     const currentFolder = activeDocumentUri ? vscode.workspace.getWorkspaceFolder(activeDocumentUri) : undefined
                 
                     if (!currentFolder) {

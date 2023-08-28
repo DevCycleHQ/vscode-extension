@@ -25,6 +25,16 @@ export type Range = {
 }
 
 export class UsagesCLIController extends BaseCLIController {
+  
+  public async usagesKeys() {
+    const usagesKeys = StateManager.getFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS)
+    if (usagesKeys) {
+      return usagesKeys
+    }
+    await this.usages()
+    return StateManager.getFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS) || {}
+  }
+
   public async usages(): Promise<JSONMatch[]> {
     showBusyMessage('Finding Devcycle code usages')
     const { output } = await this.execDvc('usages --format=json')

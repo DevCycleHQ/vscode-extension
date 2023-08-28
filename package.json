@@ -145,6 +145,11 @@
           "command": "devcycle-feature-flags.openSettings",
           "when": "view == devcycle-home",
           "group": "navigation@3"
+        },
+        {
+          "command": "devcycle-feature-flags.refresh-inspector",
+          "when": "view == devcycle-inspector",
+          "group": "navigation@1"
         }
       ]
     },
@@ -212,6 +217,12 @@
         "command": "devcycle-feature-flags.copyToClipboard",
         "title": "Copy to clipboard",
         "icon": "$(copy)"
+      },
+      {
+        "command": "devcycle-feature-flags.refresh-inspector",
+        "category": "DevCycle",
+        "title": "Refresh Inspector",
+        "icon": "$(refresh)"
       }
     ],
     "configuration": [
