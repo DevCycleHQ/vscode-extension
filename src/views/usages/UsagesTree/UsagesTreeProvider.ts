@@ -8,6 +8,7 @@ import {
 
 import { CodeUsageNode } from './CodeUsageNode'
 import { FolderNode } from '../../utils/tree/FolderNode'
+import { KEYS, StateManager } from '../../../StateManager'
 
 export class UsagesTreeProvider
   implements vscode.TreeDataProvider<CodeUsageNode>
@@ -60,14 +61,6 @@ export class UsagesTreeProvider
     )
   }
 
-  async clearVariables(folder: vscode.WorkspaceFolder) {
-    this.flagsByFolder[folder.name] = []
-    const usagesCLIController = new UsagesCLIController(folder)
-    const matches = await usagesCLIController.usages()
-    await this.populateCodeUsagesNodes(matches, {}, folder)
-    this._onDidChangeTreeData.fire()
-  }
-
   async refresh(folder: vscode.WorkspaceFolder): Promise<void> {
     if (this.isRefreshing[folder.name]) {
       return
@@ -86,10 +79,14 @@ export class UsagesTreeProvider
         const usagesCLIController = new UsagesCLIController(folder)
         const variablesCLIController = new VariablesCLIController(folder)
 
-        const variables = await variablesCLIController.getAllVariables()
+        let variables: Record<string, Variable> | undefined = undefined
+        // when current org is changed, project is undefined
+        if (StateManager.getFolderState(folder.name, KEYS.PROJECTS)) {
+          variables = await variablesCLIController.getAllVariables()
+        }
         const matches = await usagesCLIController.usages()
 
-        await this.populateCodeUsagesNodes(matches, variables, folder)
+        await this.populateCodeUsagesNodes(matches, variables || {}, folder)
       })
     this.isRefreshing[folder.name] = false
   }

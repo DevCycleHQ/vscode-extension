@@ -4,7 +4,7 @@ import { BaseCLIController } from '../cli'
 import { KEYS, StateManager } from '../StateManager'
 
 export type RepoConfig = {
-  project?: string
+  project?: string | null
   org?: {
     id: string
     name: string

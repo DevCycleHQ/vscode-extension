@@ -2,10 +2,10 @@ import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
 import { BaseCLIController, OrganizationsCLIController, ProjectsCLIController } from '../../cli'
 import { executeRefreshUsagesCommand } from '../../commands/refreshUsages'
-import { executeClearVariablesCommand } from '../../commands/clearVariables'
 import path from 'path'
 import { COMMAND_LOGOUT } from '../../commands/logout'
 import { KEYS, StateManager } from '../../StateManager'
+import { updateRepoConfig } from '../../utils/updateRepoConfigProject'
 
 type HomeViewMessage =
   | { type: 'project' | 'organization', value: string, folderIndex: number }
@@ -44,11 +44,12 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
             location: { viewId: 'devcycle-home' },
           },
           async () => {
+          StateManager.clearFolderState(folder.name)
           await StateManager.setFolderState(folder.name, KEYS.PROJECT_ID, undefined)
-          await executeClearVariablesCommand(folder)
-          await StateManager.clearFolderState(folder.name)
+          await updateRepoConfig(folder, { project: null })
           const organizationsController = new OrganizationsCLIController(folder)
           await organizationsController.selectOrganization(data.value, false)
+          await executeRefreshUsagesCommand(folder)
           webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
         })
       } else if (data.type === 'project') {
@@ -95,7 +96,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
       `<vscode-option value="${project.key}"${project.key === activeProjectKey ? ' selected' : ''}>${project.key}</vscode-option>`
     )
     if (!activeProjectKey) {
-      projectOptions.unshift(`<vscode-option>Select a project</vscode-option>`)
+      projectOptions.unshift(`<vscode-option class="placeholder" selected>Select a project...</vscode-option>`)
     }
 
     return `
