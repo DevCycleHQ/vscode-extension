@@ -159,9 +159,9 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     )
 
     const codiconsUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css')
+      vscode.Uri.joinPath(this._extensionUri, 'out','codicon.css')
     )
-
+  
     const nonce = getNonce()
     let body = ''
     const showFolderHeaders = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1
