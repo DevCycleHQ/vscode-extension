@@ -17,6 +17,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     selectedKey: string
 
     variables: Record<string, Variable> = {}
+    orderedVariables: Variable[] = []
     features: Record<string, Feature> = {}
     matches: Record<string, boolean> = {}
 
@@ -28,22 +29,24 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     if (!folder) {
       return
     }
+
+    this.matches = StateManager.getFolderState(folder.name, KEYS.CODE_USAGE_KEYS) || {}
+    
     const variablesCLIController = new VariablesCLIController(folder)
     const featuresCLIController = new FeaturesCLIController(folder)
-    const usagesCLIController = new UsagesCLIController(folder)
 
     variablesCLIController.getAllVariables().then((variables) => {
       this.variables = variables
+      this.orderedVariables = Object.values(this.variables).sort((a: Variable, b: Variable) => a.name.localeCompare(b.name))
+      // default to the alphabetically first variable in variable list
       if (Object.values(this.variables).length) {
-        this.selectedKey = Object.values(this.variables)[0].key
+        this.selectedKey = this.orderedVariables[0].key
       }
     })
 
     featuresCLIController.getAllFeatures().then((features) => {
       this.features = features
     })
-
-    this.matches = StateManager.getFolderState(folder.name, KEYS.CODE_USAGE_KEYS) || {}
   }
 
   public async resolveWebviewView(webviewView: vscode.WebviewView) {
@@ -86,11 +89,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       `<vscode-option value="${option}"${option === this.selectedType ? ' selected' : '' }>${option}</vscode-option>`
     ))
 
-    const variableOptions = this.variables && Object.keys(this.variables).sort().map((variable) => (
-      `<vscode-option value="${variable}"${variable === this.selectedKey ? ' selected' : '' }>${variable}</vscode-option>`
+    const variableOptions = this.orderedVariables.map((variable) => (
+      `<vscode-option value="${variable.key}"${variable.key === this.selectedKey ? ' selected' : '' }>${variable.key}</vscode-option>`
     )) || []
 
-    const featureOptions = this.features && Object.values(this.features).sort().map((feature) => (
+    const featureOptions = Object.values(this.features).sort().map((feature) => (
       `<vscode-option value="${feature._id}"${feature._id === this.selectedKey ? ' selected' : '' }>${feature.key}</vscode-option>`
     )) || []
 
@@ -103,12 +106,12 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     const featureName = this.selectedType === 'Variable' &&
       Object.values(this.features).find((feature) => feature._id === (this.variables[this.selectedKey] as Variable)?._feature)?.name
 
-    const getAllPossibleValuesForVariable = (variable: Variable) => {
-      const variableVariationValueMap: Record<string, unknown> = {}
-      const feature = this.features[variable._feature]
-      if (!feature) {
+    const getAllPossibleValuesForVariable = (variable?: Variable) => {
+      if (!variable || !this.features[variable._feature]) {
         return {}
       }
+      const variableVariationValueMap: Record<string, unknown> = {}
+      const feature = this.features[variable._feature]
       for (const variation of feature.variations || []) {
         variableVariationValueMap[variation.name] = variation.variables?.[variable.key]
       }
@@ -122,7 +125,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           <span class="details-value">${possibleValue[1]}</span>
         </div>`
       }) || []
-    const variableKeysInFeature = this.selectedType === 'Feature' && this.features[this.selectedKey].variables?.map((variable) => (
+    const variableKeysInFeature = this.selectedType === 'Feature' && this.features[this.selectedKey]?.variables?.map((variable) => (
       `
       <div class="detail-entry">
         <span>${variable.key}</span>
@@ -132,8 +135,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
     const orgId = getOrganizationId(folder)
     const dashboardPath = this.selectedType === 'Variable' ? 
-    `variables/${this.variables[this.selectedKey].key}` : 
-    `features/${this.features[this.selectedKey].key}`
+    `variables/${this.variables[this.selectedKey]?.key}` : 
+    `features/${this.features[this.selectedKey]?.key}`
     const usagesCommand = `command:${OPEN_USAGES_VIEW}?${encodeURIComponent(JSON.stringify({ variableKey: this.selectedKey }))}`
 
     return `
