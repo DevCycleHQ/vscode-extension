@@ -31,7 +31,11 @@ export class UsagesCLIController extends BaseCLIController {
     
     const matches = JSON.parse(output) as JSONMatch[]
     hideBusyMessage()
-    StateManager.setFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS, matches.map((match) => match.key))
+    const codeUsageKeys = matches.reduce((map, match) => {
+      map[match.key] = true
+      return map
+    }, {} as Record<string, boolean>)
+    StateManager.setFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS, codeUsageKeys)
     return matches
   }
 }

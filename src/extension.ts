@@ -99,11 +99,9 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerOpenSettingsCommand(context)
   await registerOpenUsagesViewCommand(context, usagesTreeView, usagesDataProvider)
 
-  const autoLogin = vscode.workspace
-    .getConfiguration('devcycle-feature-flags')
-    .get('loginOnWorkspaceOpen')
+  const settingsConfig = vscode.workspace.getConfiguration('devcycle-feature-flags')
   
-  if (autoLogin) {
+  if (settingsConfig.get('loginOnWorkspaceOpen')) {
     utils.loginAndRefresh()
   }
 
@@ -115,27 +113,18 @@ export const activate = async (context: vscode.ExtensionContext) => {
       if (!currentFolder) { return }
       const range = document.getWordRangeAtPosition(position, REGEX)
 
-      if (!range) {
-        return
-      }
+      if (!range) { return }
 
       const variableAliases = (await utils.getRepoConfig(currentFolder)).codeInsights?.variableAliases || {}
       let variableKey = document.getText(range)
       variableKey = variableAliases[variableKey] || variableKey
 
-      const variables = StateManager.getFolderState(currentFolder.name, KEYS.VARIABLES) || {}
-      const keyInAPIVariables = !!variables[variableKey]
-      const keyInCodeUsages = StateManager.getFolderState(currentFolder.name, KEYS.CODE_USAGE_KEYS)?.includes(variableKey)
+      const codeUsages = StateManager.getFolderState(currentFolder.name, KEYS.CODE_USAGE_KEYS) || {}
 
-      if (!keyInAPIVariables && !keyInCodeUsages) {
-        return
-      }
+      if (!codeUsages[variableKey]) { return }
 
-      const hoverString = await getHoverString(
-        currentFolder,
-        variableKey,
-      )
-      return new vscode.Hover(hoverString || '')
+      const hoverString = await getHoverString(currentFolder, variableKey)
+      return new vscode.Hover(hoverString)
     },
   })
 
@@ -149,6 +138,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
     if (filePath === path.join(folder.uri.path, repoConfigPath)) {
       await loadRepoConfig(folder)
+    } else if (settingsConfig.get('refreshUsagesOnSave')) {
+      await usagesDataProvider.refresh(folder, false)
     }
   })
 

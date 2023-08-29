@@ -228,10 +228,10 @@
             "default": true,
             "description": "Initialize repository with a DevCycle configuration file on login."
           },
-          "devcycle-feature-flags.usagesOnWorkspaceOpen": {
+          "devcycle-feature-flags.refreshUsagesOnSave": {
             "type": "boolean",
             "default": true,
-            "description": "Automatically check for code usages when a configured workspace is opened."
+            "description": "Automatically check for code usages when a file is saved."
           },
           "devcycle-feature-flags.debug": {
             "type": "boolean",

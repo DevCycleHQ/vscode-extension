@@ -42,7 +42,7 @@ describe('UsagesCLIController', () => {
 
       assert.isTrue(execDvcStub.calledWithExactly('usages --format=json'))
       expect(result).to.deep.equal(mockCodeUsages)
-      sinon.assert.calledWith(mockSetState, 'test-folder', 'code_usage_keys', ['cli-variable'])
+      sinon.assert.calledWith(mockSetState, 'test-folder', 'code_usage_keys', { 'cli-variable': true })
     })
   })
 })
