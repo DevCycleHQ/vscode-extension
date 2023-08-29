@@ -8,6 +8,13 @@
     "rootDir": "src",
     "skipLibCheck": true,
     "esModuleInterop": true,
+    // "types": [
+    //   "node",
+    //   "@wdio/mocha-framework",
+    //   "expect-webdriverio",
+    //   "wdio-vscode-service"
+    // ],
+    "moduleResolution": "node",
     "strict": true /* enable all strict type-checking options */
     /* Additional Checks */
     // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
