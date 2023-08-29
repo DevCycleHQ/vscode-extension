@@ -17,7 +17,7 @@ export type RepoConfig = {
 
 export const loadRepoConfig = async (folder: vscode.WorkspaceFolder): Promise<RepoConfig> => {
   const rootPath = folder.uri.fsPath
-  let configFileJson = {}
+  let configFileJson: RepoConfig = {}
   try {
     const cli = new BaseCLIController(folder)
     const { repoConfigPath } = await cli.status()
@@ -26,6 +26,9 @@ export const loadRepoConfig = async (folder: vscode.WorkspaceFolder): Promise<Re
     )
     const configFileString = new TextDecoder().decode(configFileByteArray)
     configFileJson = yaml.load(configFileString) as RepoConfig
+    const { project, org } = configFileJson
+    if (project) StateManager.setFolderState(folder.name, KEYS.PROJECT_ID, project)
+    if (org) StateManager.setFolderState(folder.name, KEYS.ORGANIZATION, org)
   } catch (e) {}
   StateManager.setFolderState(folder.name, KEYS.REPO_CONFIG, configFileJson)
   return configFileJson
