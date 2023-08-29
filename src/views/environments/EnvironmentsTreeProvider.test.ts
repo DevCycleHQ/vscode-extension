@@ -183,7 +183,7 @@ describe('EnvironmentsTreeProvider', () => {
 
       const keyListNode = children?.[0]
       expect(keyListNode).to.be.instanceOf(KeyListNode)
-      expect(keyListNode).to.have.property('label', 'Keys')
+      expect(keyListNode).to.have.property('label', 'SDK Keys')
 
       const linkNode = children?.[1]
       expect(linkNode).to.be.instanceOf(LinkNode)
