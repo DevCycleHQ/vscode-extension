@@ -41,7 +41,7 @@ export class ResourcesViewProvider implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'resources.css')
     )
     const codiconsUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css')
+      vscode.Uri.joinPath(this._extensionUri, 'out','codicon.css')
     )
 
     return `<!DOCTYPE html>
