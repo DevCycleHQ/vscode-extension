@@ -19,7 +19,7 @@ export class EnvironmentNode extends vscode.TreeItem {
 export class KeyListNode extends vscode.TreeItem {
   children: vscode.TreeItem[]
   constructor(environment: Environment) {
-    super('Keys', vscode.TreeItemCollapsibleState.Collapsed)
+    super('SDK Keys', vscode.TreeItemCollapsibleState.Collapsed)
     const { sdkKeys, name } = environment
     this.iconPath = new vscode.ThemeIcon('key')
     this.children = [
