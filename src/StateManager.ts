@@ -27,8 +27,7 @@ export class StateManager {
       if (
           !(key.includes(KEYS.PROJECT_ID)||
           key.includes(KEYS.ORGANIZATION)||
-          key.includes(KEYS.AUTH0_USER_ID)||
-          key.includes(KEYS.SEND_METRICS_PROMPTED))
+          key.includes(KEYS.AUTH0_USER_ID))
         ) {
         this.workspaceState.update(key, undefined)
       }
@@ -48,23 +47,23 @@ export class StateManager {
   }
 
   static setGlobalState(key: KEYS.EXTENSION_INSTALLED, value: boolean | undefined): Thenable<void>
+  static setGlobalState(key: KEYS.SEND_METRICS_PROMPTED, value: boolean | undefined): Thenable<void>
   static setGlobalState(key: string, value: any) {
     return this.globalState.update(key, value)
   }
 
   static getGlobalState(key: KEYS.EXTENSION_INSTALLED): boolean | undefined
+  static getGlobalState(key: KEYS.SEND_METRICS_PROMPTED): boolean | undefined
   static getGlobalState(key: string) {
     return this.globalState.get(key)
   }
 
-  static setWorkspaceState(key: KEYS.SEND_METRICS_PROMPTED, value: boolean | undefined): Thenable<void>
   static setWorkspaceState(key: KEYS.AUTH0_USER_ID, value: string | undefined): Thenable<void>
   static setWorkspaceState(key: KEYS.ORGANIZATIONS, value: Record<string, Organization> | undefined): Thenable<void>
   static setWorkspaceState(key: string, value: any) {
     return this.workspaceState.update(key, value)
   }
 
-  static getWorkspaceState(key: KEYS.SEND_METRICS_PROMPTED): boolean | undefined
   static getWorkspaceState(key: KEYS.AUTH0_USER_ID): string | undefined
   static getWorkspaceState(key: KEYS.ORGANIZATIONS): Record<string, Organization> | undefined
   static getWorkspaceState(key: string) {

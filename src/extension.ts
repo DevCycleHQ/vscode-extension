@@ -64,13 +64,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const { workspaceFolders = [] } = vscode.workspace
   const [workspaceFolder] = workspaceFolders
 
-  if (!StateManager.getWorkspaceState(KEYS.SEND_METRICS_PROMPTED)) {
+  if (!StateManager.getGlobalState(KEYS.SEND_METRICS_PROMPTED)) {
     const sendMetricsMessage = 
       `DevCycle collects usage metrics to gather information on feature adoption, usage, and frequency. 
       By clicking "Accept", you consent to the collection of this data. Would you like to opt-in?`
     vscode.window.showInformationMessage(sendMetricsMessage, 'Accept', 'Decline').then((selection) => {
       vscode.workspace.getConfiguration('devcycle-feature-flags').update('sendMetrics', selection === 'Accept')
-      StateManager.setWorkspaceState(KEYS.SEND_METRICS_PROMPTED, true)
+      StateManager.setGlobalState(KEYS.SEND_METRICS_PROMPTED, true)
     })
   }
 
