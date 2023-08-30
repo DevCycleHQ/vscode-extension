@@ -27,16 +27,12 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     this.selectedType = 'Variable'
     this.selectedKey = ''
     this.selectedFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0]
+  }
 
-    const folder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0]
+  private async initializeFeaturesAndVariables(folder?: vscode.WorkspaceFolder) {
     if (!folder) {
       return
     }
-    
-    this.initializeFeaturesAndVariables(folder)
-  }
-
-  private async initializeFeaturesAndVariables(folder: vscode.WorkspaceFolder) {
     try {
       const variablesCLIController = new VariablesCLIController(folder)
       const featuresCLIController = new FeaturesCLIController(folder)
@@ -67,6 +63,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [this._extensionUri],
     }
 
+    await this.initializeFeaturesAndVariables(this.selectedFolder)
     webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
 
     webviewView.webview.onDidReceiveMessage(async (data: InspectorViewMessage) => {
@@ -102,12 +99,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
         location: { viewId: 'devcycle-inspector' },
       },
       async () => {
-        const folder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0]
-        if (!folder || !this._view) {
+        this.selectedFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0]
+        if (!this._view) {
           return
         }
-        this.selectedFolder = folder
-        await this.initializeFeaturesAndVariables(folder)
+        await this.initializeFeaturesAndVariables(this.selectedFolder)
         this._view.webview.html = await this._getHtmlForWebview(this._view.webview)
       }
     )
