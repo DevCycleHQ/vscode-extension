@@ -2,10 +2,13 @@ import * as vscode from 'vscode'
 import {
   VariablesCLIController,
   UsagesCLIController,
+  JSONMatch,
+  Variable
 } from '../../../cli'
 
 import { CodeUsageNode } from './CodeUsageNode'
 import { FolderNode } from '../../utils/tree/FolderNode'
+import { KEYS, StateManager } from '../../../StateManager'
 
 export class UsagesTreeProvider
   implements vscode.TreeDataProvider<CodeUsageNode>
@@ -78,23 +81,30 @@ export class UsagesTreeProvider
         const usagesCLIController = new UsagesCLIController(folder)
         const variablesCLIController = new VariablesCLIController(folder)
 
-        const variables = await variablesCLIController.getAllVariables()
+        let variables: Record<string, Variable> | undefined = undefined
+        // when current org is changed, project is undefined
+        if (StateManager.getFolderState(folder.name, KEYS.PROJECTS)) {
+          variables = await variablesCLIController.getAllVariables()
+        }
         const matches = await usagesCLIController.usages()
 
-        await Promise.all(
-          matches.map(async (match) => {
-            const variable = variables[match.key]
-            const populatedMatch = variable ? { ...match, variable } : match
-
-            const usageNode = await CodeUsageNode.flagFrom(populatedMatch, folder, this.context)
-            this.flagsByFolder[folder.name].push(usageNode)
-          })
-        )
-        this.sortData()
+        await this.populateCodeUsagesNodes(matches, variables || {}, folder)
       })
     this.isRefreshing[folder.name] = false
   }
 
+  private async populateCodeUsagesNodes(matches: JSONMatch[], variables: Record<string, Variable>, folder: vscode.WorkspaceFolder) {
+    await Promise.all(
+      matches.map(async (match) => {
+        const variable = variables[match.key]
+        const populatedMatch = variable ? { ...match, variable } : match
+
+        const usageNode = await CodeUsageNode.flagFrom(populatedMatch, folder, this.context)
+        this.flagsByFolder[folder.name].push(usageNode)
+      })
+    )
+    this.sortData()
+  }
   getTreeItem(element: CodeUsageNode): vscode.TreeItem {
     return element
   }

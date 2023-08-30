@@ -40,7 +40,7 @@ export class BaseCLIController {
 
     const projectId = StateManager.getFolderState(this.folder.name, KEYS.PROJECT_ID)
     let shellCommand = `${dvc} ${cmd} --headless --caller vscode_extension`
-    if (projectId) shellCommand += ` --project ${projectId}`
+    if (projectId && !shellCommand.includes('projects select')) shellCommand += ` --project ${projectId}`
     return cliUtils.execShell(shellCommand, this.folder.uri.fsPath)
   }
 }

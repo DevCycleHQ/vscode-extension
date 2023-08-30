@@ -37,7 +37,7 @@ function main() {
   // Edit config button
   const editConfigButton = document.getElementById("edit-config-button") as HTMLAnchorElement;
   editConfigButton.addEventListener('click', handleEditConfigClick);
- }
+}
 
 function handleDropdownValueChange(event: Event) {
   if (!event.target) {
@@ -45,6 +45,13 @@ function handleDropdownValueChange(event: Event) {
   }
 
   const dropdownElement = event.target as HTMLSelectElement;
+
+  if (dropdownElement.id.includes('project')) {
+    const placeholderOption = document.querySelector('.placeholder') as HTMLElement;
+    if (placeholderOption) {
+      placeholderOption.hidden = true;
+    }
+  }
 
   vscode.postMessage({
     type: dropdownElement.dataset.type,

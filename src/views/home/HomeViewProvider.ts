@@ -5,6 +5,7 @@ import { executeRefreshUsagesCommand } from '../../commands/refreshUsages'
 import path from 'path'
 import { COMMAND_LOGOUT } from '../../commands/logout'
 import { KEYS, StateManager } from '../../StateManager'
+import { updateRepoConfig } from '../../utils/updateRepoConfigProject'
 
 type HomeViewMessage =
   | { type: 'project' | 'organization', value: string, folderIndex: number }
@@ -36,12 +37,21 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
       const folder = vscode.workspace.workspaceFolders?.[data.folderIndex]
       if (!folder) { return }
 
-      // TODO When organization is changed, need to update project list and set empty state for usages
-      // DVC-8557
       if (data.type === 'organization') {
-        const organizationsController = new OrganizationsCLIController(folder)
-        await organizationsController.selectOrganization(data.value, false)
-        webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
+        // TODO Add a generic loading state for sidebars that we can use while the organization is being fetched
+        await vscode.window.withProgress(
+          {
+            location: { viewId: 'devcycle-home' },
+          },
+          async () => {
+          StateManager.clearFolderState(folder.name)
+          await StateManager.setFolderState(folder.name, KEYS.PROJECT_ID, undefined)
+          await updateRepoConfig(folder, { project: null })
+          const organizationsController = new OrganizationsCLIController(folder)
+          await organizationsController.selectOrganization(data.value, false)
+          await executeRefreshUsagesCommand(folder)
+          webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
+        })
       } else if (data.type === 'project') {
         const projectsController = new ProjectsCLIController(folder)
         await projectsController.selectProject(data.value)
@@ -71,10 +81,9 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
   private async getBodyHtml(folder: vscode.WorkspaceFolder, showHeader?: boolean): Promise<string> {
     const organizationsController = new OrganizationsCLIController(folder)
     const projectsController = new ProjectsCLIController(folder)
-
+    const activeProjectKey = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
     const projects = await projectsController.getAllProjects()
     const organizations = await organizationsController.getAllOrganizations()
-    const activeProjectKey =  StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
     const activeOrganizationName = StateManager.getFolderState(folder.name, KEYS.ORGANIZATION)?.name
 
     const projectId = `project${folder.index}`
@@ -86,6 +95,9 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const projectOptions = Object.values(projects).map((project) =>
       `<vscode-option value="${project.key}"${project.key === activeProjectKey ? ' selected' : ''}>${project.key}</vscode-option>`
     )
+    if (!activeProjectKey) {
+      projectOptions.unshift(`<vscode-option class="placeholder" selected>Select a project...</vscode-option>`)
+    }
 
     return `
       ${

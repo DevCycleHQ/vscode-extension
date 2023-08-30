@@ -84,7 +84,7 @@ export class OrganizationsCLIController extends BaseCLIController {
     return selectedOrg
   }
 
-  public async selectOrganization(org: Organization | string, selectProjectFromList?: boolean) {
+  public async selectOrganization(org: Organization | string, selectProject?: boolean) {
     const orgName = typeof org === 'string' ? org : org?.name
     const { code, error, output } = await this.execDvc(`organizations select --org=${orgName}`)
 
@@ -103,10 +103,12 @@ export class OrganizationsCLIController extends BaseCLIController {
       StateManager.setFolderState(this.folder.name, KEYS.ORGANIZATION, org)
     }
 
-    const projectFromConfig = await this.projectController.selectProjectFromConfig()
-    if (!projectFromConfig && selectProjectFromList) {
-      const projects = JSON.parse(output)
-      await this.projectController.selectProjectFromList(projects)
+    if (selectProject) {
+      const projectFromConfig = await this.projectController.selectProjectFromConfig()
+      if (!projectFromConfig) {
+        const projects = JSON.parse(output)
+        await this.projectController.selectProjectFromList(projects)
+      }
     }
   }
 }

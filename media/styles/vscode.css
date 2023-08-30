@@ -169,6 +169,11 @@ textarea::placeholder {
   line-height: normal;
 }
 
+.placeholder {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .edit-config-button {
   padding: 0 .3rem;
   margin-left: -0.3rem;
