@@ -17,13 +17,13 @@ describe('EnvironmentsTreeProvider', () => {
     type: 'development',
     sdkKeys: {
       mobile: [
-        { key: 'mobile-key-1', createdAt: '2021-01-01T12:00:00.000Z', compromised: false },
+        { key: 'mobile-66610b47-4c1e-0b52-4f38-9f8e37c197b2', createdAt: '2021-01-01T12:00:00.000Z', compromised: false },
       ],
       client: [
-        { key: 'client-key-1', createdAt: '2021-01-01T12:00:00.000Z', compromised: false },
+        { key: 'client-ec2ddb10-336b-dcb5-359a-4e6c59a2b587', createdAt: '2021-01-01T12:00:00.000Z', compromised: false },
       ],
       server: [
-        { key: 'server-key-1', createdAt: '2021-01-01T12:00:00.000Z', compromised: false },
+        { key: 'server-c9217c43-1dd6-2869-da5a-68a6adf10bef', createdAt: '2021-01-01T12:00:00.000Z', compromised: false },
       ],
     },
   }
@@ -200,23 +200,23 @@ describe('EnvironmentsTreeProvider', () => {
 
       const [mobileKeyNode, clientKeyNode, serverKeyNode] = children || []
       expect(mobileKeyNode).to.be.instanceOf(KeyNode)
-      expect(mobileKeyNode).to.have.property('label', 'Mobile Key')
-      expect(mobileKeyNode).to.have.property('value', 'mobile-key-1')
+      expect(mobileKeyNode).to.have.property('label', 'Mobile: mobile-666******7b2')
+      expect(mobileKeyNode).to.have.property('value', 'mobile-66610b47-4c1e-0b52-4f38-9f8e37c197b2')
 
       expect(clientKeyNode).to.be.instanceOf(KeyNode)
-      expect(clientKeyNode).to.have.property('label', 'Client Key')
-      expect(clientKeyNode).to.have.property('value', 'client-key-1')
+      expect(clientKeyNode).to.have.property('label', 'Client: client-ec2******587')
+      expect(clientKeyNode).to.have.property('value', 'client-ec2ddb10-336b-dcb5-359a-4e6c59a2b587')
 
       expect(serverKeyNode).to.be.instanceOf(KeyNode)
-      expect(serverKeyNode).to.have.property('label', 'Server Key')
-      expect(serverKeyNode).to.have.property('value', 'server-key-1')
+      expect(serverKeyNode).to.have.property('label', 'Server: server-c92******bef')
+      expect(serverKeyNode).to.have.property('value', 'server-c9217c43-1dd6-2869-da5a-68a6adf10bef')
     })
 
     it('adds date to label if multiple keys exist for a platform', async () => {
       const treeProvder = new EnvironmentsTreeProvider()
       const multiKeyEnv = Object.assign({}, environment)
       multiKeyEnv.sdkKeys.mobile.push(
-        { key: 'mobile-key-2', createdAt: '2022-01-01T12:00:00.000Z', compromised: false }
+        { key: 'mobile-8553493c-8c4c-ba16-e9aa-742ae744e4ea', createdAt: '2022-01-01T12:00:00.000Z', compromised: false }
       )
       const keyListNode = new KeyListNode(multiKeyEnv)
 
@@ -226,12 +226,12 @@ describe('EnvironmentsTreeProvider', () => {
 
       const [mobileKeyNode1, mobileKeyNode2] = children || []
       expect(mobileKeyNode1).to.be.instanceOf(KeyNode)
-      expect(mobileKeyNode1).to.have.property('label', 'Mobile Key 01/01/21')
-      expect(mobileKeyNode1).to.have.property('value', 'mobile-key-1')
+      expect(mobileKeyNode1).to.have.property('label', 'Mobile: mobile-666******7b2 01/01/21')
+      expect(mobileKeyNode1).to.have.property('value', 'mobile-66610b47-4c1e-0b52-4f38-9f8e37c197b2')
 
       expect(mobileKeyNode2).to.be.instanceOf(KeyNode)
-      expect(mobileKeyNode2).to.have.property('label', 'Mobile Key 01/01/22')
-      expect(mobileKeyNode2).to.have.property('value', 'mobile-key-2')
+      expect(mobileKeyNode2).to.have.property('label', 'Mobile: mobile-855******4ea 01/01/22')
+      expect(mobileKeyNode2).to.have.property('value', 'mobile-8553493c-8c4c-ba16-e9aa-742ae744e4ea')
     })
   })
 })

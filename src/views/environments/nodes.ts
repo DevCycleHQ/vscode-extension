@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { Environment, SDKKey, getOrganizationId } from '../../cli'
 import { COMMAND_COPY_TO_CLIPBOARD, COMMAND_OPEN_LINK, CopyableNode } from '../../commands'
+import { redactSdkKey } from '../../utils/redactSdkKey'
 
 export class EnvironmentNode extends vscode.TreeItem {
   keys: KeyListNode
@@ -23,9 +24,9 @@ export class KeyListNode extends vscode.TreeItem {
     const { sdkKeys, name } = environment
     this.iconPath = new vscode.ThemeIcon('key')
     this.children = [
-      ...KeyNode.fromKeys(name, sdkKeys.mobile, 'Mobile Key'),
-      ...KeyNode.fromKeys(name, sdkKeys.client, 'Client Key'),
-      ...KeyNode.fromKeys(name, sdkKeys.server, 'Server Key'),
+      ...KeyNode.fromKeys(name, sdkKeys.mobile, 'Mobile'),
+      ...KeyNode.fromKeys(name, sdkKeys.client, 'Client'),
+      ...KeyNode.fromKeys(name, sdkKeys.server, 'Server'),
     ]
   }
 }
@@ -42,7 +43,7 @@ export class KeyNode extends CopyableNode {
     }
   }
 
-  static fromKeys(envName: string, keys: SDKKey[], label: string) {
+  static fromKeys(envName: string, keys: SDKKey[], labelPrefix: string) {
     return keys.map(({ key, createdAt }) => {
       const dateFormatter = new Intl.DateTimeFormat('en-US', {
         year: '2-digit',
@@ -50,6 +51,8 @@ export class KeyNode extends CopyableNode {
         day: '2-digit'
       })
       const date = dateFormatter.format(new Date(createdAt))
+      const redactedKey = redactSdkKey(key)
+      const label = `${labelPrefix}: ${redactedKey}`
       const nodeLabel = keys.length > 1 ? `${label} ${date}` : label
       return new KeyNode(envName, nodeLabel, key)
     })
