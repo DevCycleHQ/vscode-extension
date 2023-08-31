@@ -81,14 +81,10 @@ export class UsagesTreeProvider
         const usagesCLIController = new UsagesCLIController(folder)
         const variablesCLIController = new VariablesCLIController(folder)
 
-        let variables: Record<string, Variable> | undefined = undefined
-        // when current org is changed, project is undefined
-        if (StateManager.getFolderState(folder.name, KEYS.PROJECTS)) {
-          variables = await variablesCLIController.getAllVariables()
-        }
+        const variables = await variablesCLIController.getAllVariables()
         const matches = await usagesCLIController.usages()
 
-        await this.populateCodeUsagesNodes(matches, variables || {}, folder)
+        await this.populateCodeUsagesNodes(matches, variables, folder)
       })
     this.isRefreshing[folder.name] = false
   }

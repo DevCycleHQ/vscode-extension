@@ -43,6 +43,10 @@ export class VariablesCLIController extends BaseCLIController {
   }
   
   public async getAllVariables() {
+    // when the current organization is changed in the Home View, current project is undefined until a new one is selected
+    if (!StateManager.getFolderState(this.folder.name, KEYS.PROJECT_ID)) {
+      return {}
+    }
     const variables = StateManager.getFolderState(this.folder.name, KEYS.VARIABLES)
     if (variables) {
       return variables
