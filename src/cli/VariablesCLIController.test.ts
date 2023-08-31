@@ -3,7 +3,7 @@ import { assert, expect } from 'chai'
 import { describe, it, beforeEach, afterEach } from 'mocha'
 import sinon from 'sinon'
 import { VariablesCLIController } from './VariablesCLIController'
-import { StateManager } from '../StateManager'
+import { KEYS, StateManager } from '../StateManager'
 
 const mockCachedVariables = {
   'cached-variable': {
@@ -37,6 +37,7 @@ describe('VariablesCLIController', () => {
     StateManager.getFolderState = mockGetState
     StateManager.setFolderState = mockSetState
     mockGetState.returns(null)
+    mockGetState.withArgs('test-folder', KEYS.PROJECT_ID).returns('test-project')
 
     execDvcStub = sinon.stub(variablesCLIController, 'execDvc').resolves({
       code: 0,
