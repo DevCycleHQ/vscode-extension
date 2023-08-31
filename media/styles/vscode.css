@@ -37,13 +37,11 @@ form > * {
 }
 
 a {
-  color: var(--vscode-foreground);
-  text-decoration: none;
+  color: var(--vscode-textLink-foreground);
 }
-
-a:hover {
-  color: var(--vscode-foreground);
-  text-decoration: none;
+a:hover,
+a:active {
+  color: var(--vscode-textLink-activeForeground);
 }
 
 code {
