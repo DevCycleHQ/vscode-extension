@@ -60,7 +60,8 @@ exports.config = {
             // optional VS Code settings
             userSettings: {
                 "editor.fontSize": 14
-            }
+            },
+            vscodeArgs: { disableExtensions: false }
         }
     }],
     //
@@ -207,8 +208,9 @@ exports.config = {
      * Hook that gets executed before the suite starts
      * @param {object} suite suite details
      */
-    // beforeSuite: function (suite) {
-    // },
+    beforeSuite: async function (suite) {
+        await browser.executeWorkbench()
+    },
     /**
      * Function to be executed before a test (in Mocha/Jasmine) starts.
      */

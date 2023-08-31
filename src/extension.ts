@@ -61,7 +61,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   await utils.checkForWorkspaceFolders()
 
-  await cliUtils.loadCli()
+  void cliUtils.loadCli()
 
   if (!StateManager.getGlobalState(KEYS.SEND_METRICS_PROMPTED)) {
     const sendMetricsMessage = 
