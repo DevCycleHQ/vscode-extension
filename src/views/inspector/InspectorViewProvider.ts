@@ -66,6 +66,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     await this.initializeFeaturesAndVariables(this.selectedFolder)
     webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
 
+    // change image icons when theme is changed
+    vscode.window.onDidChangeActiveColorTheme(async () => {
+      webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
+    })
+
     webviewView.webview.onDidReceiveMessage(async (data: InspectorViewMessage) => {
       if (data.type === 'variableOrFeature') {
         this.selectedType = data.value
@@ -137,11 +142,14 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       return ''
     }
 
+    const isDarkTheme = vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark
+      || vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.HighContrast
+
     return `
         <div class="inspector-container">
           ${this.getSelectedFolderContainerHTML(this.selectedFolder)}
           <div class="inspector-dropdown-container">
-            <img src="${this._view?.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'inspector.svg'))}">
+            <img src="${this._view?.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', `inspector${isDarkTheme ? '-white' : ''}.svg`))}">
             <vscode-dropdown id="typeId" class="inspector-dropdown-type" data-type="variableOrFeature">
               ${inspectorOptions.join('')}
             </vscode-dropdown>
