@@ -1,7 +1,9 @@
-import { browser, $ } from '@wdio/globals'
+import { browser } from '@wdio/globals'
+import * as path from 'path'
 import { Key } from 'webdriverio'
 
-export const WORKSPACE_FOLDER_PATH = `${__dirname}/../../../../src/test/fixtures/testWorkspace`
+const ROOT = path.resolve(__dirname, '../../../../')
+export const WORKSPACE_FOLDER_PATH = `${ROOT}/src/test/fixtures/testWorkspace/`
 
 export const openWorkspaceFolder = async () => {
     await browser.executeWorkbench((vscode: any) => {
