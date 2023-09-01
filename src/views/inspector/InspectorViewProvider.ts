@@ -141,7 +141,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
         <div class="inspector-container">
           ${this.getSelectedFolderContainerHTML(this.selectedFolder)}
           <div class="inspector-dropdown-container">
-            <img src="${this._view?.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'inspector.svg'))}">
+            <div class="inspector-svg-container">${this.inspectorSvg()}</div>
             <vscode-dropdown id="typeId" class="inspector-dropdown-type" data-type="variableOrFeature">
               ${inspectorOptions.join('')}
             </vscode-dropdown>
@@ -241,7 +241,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     return `
       <div class="multiple-folder-container">
         <i class="codicon codicon-debug-breakpoint-log"></i>
-        <span>${folder.name}</span>
+        <label>${folder.name}</label>
         <vscode-dropdown id="folderId" class="inspector-dropdown-folder" data-type="folder">
           ${folderOptions.join('')}
         </vscode-dropdown>
@@ -275,17 +275,17 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       <div class="collapsible-content">
         <div class="details-container">
           <div class="detail-entry">
-            <span>Name</span>
-            <span class="details-value">${name || '(No Name)'}</span>
+            <label>Name</label>
+            <label class="details-value">${name || '(No Name)'}</label>
           </div>
           <div class="detail-entry">
-            <span>Key</span>
-            <span class="details-value">${key}</span>
+            <label>Key</label>
+            <label class="details-value">${key}</label>
           </div>
           ${featureName ?
             `<div class="detail-entry">
-              <span>Feature</span>
-              <span class="details-value">${featureName}</span>
+              <label>Feature</label>
+              <label class="details-value">${featureName}</label>
             </div>` :
             ''
           }
@@ -330,8 +330,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       Object.entries(getAllPossibleValuesForVariable(this.variables[this.selectedKey])).map((possibleValue) => {
         const variationName = possibleValue[0]
         return `<div class="detail-entry">
-          <span>${variationName}</span>
-          <span class="details-value">${possibleValue[1]}</span>
+          <label>${variationName}</label>
+          <label class="details-value">${possibleValue[1]}</label>
         </div>`
       }) || []
   }
@@ -340,9 +340,22 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     return this.selectedType === 'Feature' && this.features[this.selectedKey].variables?.map((variable) => (
       `
       <div class="detail-entry">
-        <span>${variable.key}</span>
+        <label>${variable.key}</label>
       </div>`
     )) || []
 
+  }
+
+  private inspectorSvg() {
+    return `
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M6 10.052C6 7.81416 7.81416 6 10.052 6C12.2899 6 14.1041 7.81416 14.1041 10.052C14.1041 10.995 13.7818 11.8631 13.2415 12.5516L16.8571 16.1672C17.0476 16.3577 17.0476 16.6666 16.8571 16.8571C16.6666 17.0476 16.3577 17.0476 16.1672 16.8571L12.5516 13.2415C11.8631 13.7818 10.995 14.1041 10.052 14.1041C7.81416 14.1041 6 12.2899 6 10.052ZM10.052 6.97563C8.35299 6.97563 6.97563 8.35299 6.97563 10.052C6.97563 11.7511 8.35299 13.1284 10.052 13.1284C11.7511 13.1284 13.1284 11.7511 13.1284 10.052C13.1284 8.35299 11.7511 6.97563 10.052 6.97563Z" fill="var(--vscode-foreground)"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M13 1.75H1V1H13V1.75Z" fill="var(--vscode-foreground)"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M10 3.75H1V3H10V3.75Z" fill="var(--vscode-foreground)"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M6.25 5.75H1V5H6.25V5.75Z" fill="var(--vscode-foreground)"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M4 7.75H1V7H4V7.75Z" fill="var(--vscode-foreground)"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M2.5 9.75H1V9H2.5V9.75Z" fill="var(--vscode-foreground)"/>
+    </svg>
+    `
   }
 }
