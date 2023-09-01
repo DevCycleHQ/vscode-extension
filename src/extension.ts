@@ -24,14 +24,14 @@ import {
   registerRefreshUsagesCommand,
   registerShowReferenceCommand,
   registerOpenSettingsCommand,
-  registerOpenUsagesViewCommand
+  registerOpenUsagesViewCommand,
+  registerRefreshInspectorCommand
 } from './commands'
 import cliUtils from './cli/utils'
 import utils from './utils'
 import { SHOW_HOME_VIEW, SHOW_INSPECTOR_VIEW } from './constants'
 import { InspectorViewProvider, registerInspectorViewProvider } from './views/inspector'
 import { loadRepoConfig } from './utils/loadRepoConfig'
-import { registerRefreshInspectorCommand } from './commands/refreshInspector'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -59,10 +59,9 @@ export const activate = async (context: vscode.ExtensionContext) => {
   StateManager.globalState = context.globalState
   StateManager.workspaceState = context.workspaceState
 
-  await cliUtils.loadCli()
+  await utils.checkForWorkspaceFolders()
 
-  const { workspaceFolders = [] } = vscode.workspace
-  const [workspaceFolder] = workspaceFolders
+  void cliUtils.loadCli()
 
   if (!StateManager.getGlobalState(KEYS.SEND_METRICS_PROMPTED)) {
     const sendMetricsMessage = 
@@ -75,7 +74,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
   }
 
   if (!StateManager.getGlobalState(KEYS.EXTENSION_INSTALLED)) {
-    const orgId = getOrganizationId(workspaceFolder)
+    const [workspaceFolder] = vscode.workspace.workspaceFolders || []
+    const orgId = workspaceFolder && getOrganizationId(workspaceFolder)
     trackRudderstackEvent('Extension Installed', orgId)
     await StateManager.setGlobalState(KEYS.EXTENSION_INSTALLED, true)
   }
@@ -155,6 +155,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   })
 
   vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
+    utils.checkForWorkspaceFolders()
     for (const folder of event.added) {
       const cli = new AuthCLIController(folder)
       await cli.login()

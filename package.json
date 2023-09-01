@@ -40,42 +40,43 @@
           "type": "webview",
           "id": "devcycle-startup",
           "name": "DevCycle",
-          "when": "devcycle-feature-flags.shouldShowWorkspaceView"
+          "when": "!devcycle-feature-flags.hasWorkspaceFolders"
         },
         {
           "type": "webview",
           "id": "devcycle-login",
           "name": "DevCycle",
-          "when": "!devcycle-feature-flags.shouldShowWorkspaceView && !devcycle-feature-flags.hasCredentialsAndProject"
+          "when": "devcycle-feature-flags.hasWorkspaceFolders && !devcycle-feature-flags.hasCredentialsAndProject"
         },
         {
           "type": "webview",
           "id": "devcycle-home",
           "name": "Home",
-          "when": "devcycle-feature-flags.hasCredentialsAndProject == true && devcycle-feature-flags.shouldShowHomeView == true"
+          "when": "devcycle-feature-flags.hasCredentialsAndProject && devcycle-feature-flags.shouldShowHomeView"
         },
         {
           "type": "webview",
           "id": "devcycle-inspector",
           "name": "Inspector",
-          "when": "devcycle-feature-flags.hasCredentialsAndProject == true && devcycle-feature-flags.shouldShowInspectorView == true"
+          "when": "devcycle-feature-flags.hasWorkspaceFolders && devcycle-feature-flags.hasCredentialsAndProject && devcycle-feature-flags.shouldShowInspectorView"
         },
         {
           "type": "tree",
           "id": "devcycle-code-usages",
           "name": "Variable Usages",
-          "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
+          "when": "devcycle-feature-flags.hasWorkspaceFolders && devcycle-feature-flags.hasCredentialsAndProject"
         },
         {
           "type": "tree",
           "id": "devcycle-environments",
           "name": "Environments & Keys",
-          "when": "devcycle-feature-flags.hasCredentialsAndProject == true"
+          "when": "devcycle-feature-flags.hasWorkspaceFolders && devcycle-feature-flags.hasCredentialsAndProject"
         },
         {
           "type": "webview",
           "id": "devcycle-resources",
-          "name": "DevCycle Resources"
+          "name": "DevCycle Resources",
+          "when": "devcycle-feature-flags.hasWorkspaceFolders && devcycle-feature-flags.hasCredentialsAndProject"
         }
       ]
     },
@@ -264,11 +265,13 @@
     "build:test": "tsc -p ./",
     "watch": "yarn run webpack --watch",
     "pretest": "yarn create-analytics-file && yarn run build:test && yarn run lint",
+    "pretest:integration": "yarn pretest",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "publish": "vsce publish",
     "package": "vsce package",
-    "create-analytics-file": "test -f ./src/analytics.ts || echo 'export const RUDDERSTACK_KEY = \"\";' > ./src/analytics.ts"
+    "create-analytics-file": "test -f ./src/analytics.ts || echo 'export const RUDDERSTACK_KEY = \"\";' > ./src/analytics.ts",
+    "test:integration": "wdio run ./wdio.conf.js"
   },
   "devDependencies": {
     "@types/chai": "^4.3.5",
@@ -282,6 +285,11 @@
     "@typescript-eslint/parser": "^5.12.1",
     "@vscode/test-electron": "^2.1.2",
     "@vscode/vsce": "^2.20.1",
+    "@wdio/browser-runner": "^8.15.10",
+    "@wdio/cli": "8.13.14",
+    "@wdio/local-runner": "^8.15.4",
+    "@wdio/mocha-framework": "^8.15.4",
+    "@wdio/spec-reporter": "^8.15.0",
     "chai": "^4.3.7",
     "copy-webpack-plugin": "^11.0.0",
     "eslint": "^8.9.0",
@@ -291,6 +299,9 @@
     "sinon": "^15.2.0",
     "ts-loader": "^9.4.4",
     "typescript": "^4.5.5",
+    "wdio-mochawesome-reporter": "^4.0.0",
+    "wdio-vscode-service": "^5.2.1",
+    "wdio-wait-for": "^3.0.6",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   },

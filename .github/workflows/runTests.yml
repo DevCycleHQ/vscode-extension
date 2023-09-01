@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Run Tests
     runs-on: ubuntu-latest
     env:
       DISPLAY: ':99.0'
@@ -31,5 +31,8 @@ jobs:
       - name: Lint Project
         run: yarn lint
 
-      - name: Test Project
+      - name: Unit Tests
         run: yarn test
+
+      - name: Integration Tests
+        run: yarn test:integration

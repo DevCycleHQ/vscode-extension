@@ -1,7 +1,5 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
-import { setUpWorkspaceStartupView } from './utils/setUpViews'
-import { executeRefreshAllCommand } from '../../commands'
 
 export const enum STARTUP_VIEWS {
   WORKSPACE = 'workspace',
@@ -31,7 +29,6 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
       if (data.btnType === BUTTON_TYPES.WORKSPACE) {
         await vscode.commands.executeCommand('vscode.openFolder')
       }
-      this.refreshStartupView(webviewView)
     })
   }
 
@@ -94,26 +91,11 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
         
         </head>
         <body>
-          <main>
+          <main id="devcycle-startup">
           ${this.getBodyHtml(view)}
           </main>
         </body>
         <script nonce="${nonce}" src="${scriptUri}"></script>
         </html>`
-  }
-
-  private async checkView() {
-    return {
-      shouldShowWorkspaceView: setUpWorkspaceStartupView()
-    }
-  }
-
-  private async refreshStartupView(webviewView: vscode.WebviewView) {
-    const { shouldShowWorkspaceView } = await this.checkView()
-    if (shouldShowWorkspaceView) {
-      webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, STARTUP_VIEWS.WORKSPACE)
-    } else {
-      await executeRefreshAllCommand()
-    }
   }
 }

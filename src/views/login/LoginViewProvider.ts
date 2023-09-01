@@ -84,7 +84,7 @@ export class LoginViewProvider implements vscode.WebviewViewProvider {
         
         </head>
         <body>
-        <main>
+        <main id="devcycle-login">
           <h3>Login to DevCycle:</h3>
           <button id="loginBtn">Login</button>
           ${error ? this.getErrorHtml(error) : ''}
