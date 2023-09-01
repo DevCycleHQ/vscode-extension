@@ -192,6 +192,9 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     webview: vscode.Webview,
   ) {
     const styleVSCodeUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'vscode.css'),
+    )
+    const inspectorStylesUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'inspector.css'),
     )
     const webViewUri = webview.asWebviewUri(
@@ -215,6 +218,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           }; script-src 'nonce-${nonce}';">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <link href="${styleVSCodeUri}" rel="stylesheet">
+          <link href="${inspectorStylesUri}" rel="stylesheet">
           <link href="${codiconsUri}" rel="stylesheet"/>
         </head>
         <body>

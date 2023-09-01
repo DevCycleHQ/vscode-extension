@@ -111,22 +111,18 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
         <div class="collaspsible-content-indent"></div>
         ` : ''
       }
-        <div class="form-container">
-          <div class="dropdown-container">
-            <label>
+        <div class="home-view-form-container">
+            <label class="home-view-dropdown-label">
               <i class="codicon codicon-briefcase"></i>Organization
             </label>
             <vscode-dropdown id="${organizationId}" class="home-dropdown" data-folder="${folder.index}" data-type="organization">
               ${orgOptions.join('')}
             </vscode-dropdown>
-          </div>
-          <div class="dropdown-container">
-            <label>
+            <label class="home-view-dropdown-label">
               <i class="codicon codicon-star-empty"></i>Project</label>
             <vscode-dropdown id="${projectId}" class="home-dropdown" data-folder="${folder.index}" data-type="project">
               ${projectOptions.join('')}
             </vscode-dropdown>
-          </div>
           <button id="edit-config-button" class="icon-button edit-config-button" data-folder="${folder.index}">
             <i class="codicon codicon-edit"></i>Edit Config
           </button>
