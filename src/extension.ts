@@ -25,7 +25,6 @@ import {
   registerShowReferenceCommand,
   registerOpenSettingsCommand,
   registerOpenUsagesViewCommand,
-  registerRefreshInspectorCommand,
   registerOpenInspectorViewCommand
 } from './commands'
 import cliUtils from './cli/utils'
@@ -96,7 +95,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   if (SHOW_INSPECTOR_VIEW) { 
     inspectorViewProvider = await registerInspectorViewProvider(context)
     refreshProviders.push(inspectorViewProvider) 
-    await registerRefreshInspectorCommand(context, inspectorViewProvider)
     await registerOpenInspectorViewCommand(context, inspectorViewProvider)
   }
 

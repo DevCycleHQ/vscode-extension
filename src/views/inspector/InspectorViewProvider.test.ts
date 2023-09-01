@@ -3,8 +3,10 @@ import { expect } from 'chai'
 import { describe, it, beforeEach, afterEach } from 'mocha'
 import sinon from 'sinon'
 import { InspectorViewProvider } from './InspectorViewProvider'
-import { FolderNode } from '../utils/tree/FolderNode'
 import { Feature, FeaturesCLIController, UsagesCLIController, Variable, VariablesCLIController } from '../../cli'
+import { StateManager } from '../../StateManager'
+
+const mockGetState = sinon.stub()
 
 describe('InspectorViewProvider', () => {
   const folder = { name: 'test-folder', uri: vscode.Uri.parse('file:///test-folder'), index: 0 }
@@ -54,9 +56,12 @@ describe('InspectorViewProvider', () => {
   let usagesKeys: sinon.SinonStub
 
   beforeEach(() => {
+    sinon.stub(vscode.workspace, 'workspaceFolders').value([folder, folder2])
     getAllVariables = sinon.stub(VariablesCLIController.prototype, 'getAllVariables').resolves(variables)
     getAllFeatures = sinon.stub(FeaturesCLIController.prototype, 'getAllFeatures').resolves(features)
     usagesKeys = sinon.stub(UsagesCLIController.prototype, 'usagesKeys').resolves(usagesForFolder1)
+    StateManager.getFolderState = mockGetState
+    mockGetState.returns("test-project-key")
   })
 
   afterEach(() => {
@@ -72,6 +77,15 @@ describe('InspectorViewProvider', () => {
       await inspectorViewProvider.refresh(folder)
       
       sinon.assert.called(refreshAllStub)
+    })
+
+    it('prompts to select a project if none selected', async () => {
+      const withProgressStub = sinon.stub(vscode.window, 'withProgress')
+      mockGetState.returns(undefined)
+      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      await inspectorViewProvider.refreshAll()
+
+      sinon.assert.notCalled(withProgressStub)
     })
 
     it('shows progress bar on environments view', async () => {

@@ -11,6 +11,16 @@ type InspectorViewMessage =
   | { type: 'folder', value: number }
   | { type: 'command', value: 'removeClass' }
 
+
+const selectAProjectHtml = `<!DOCTYPE html>
+<html lang="en">
+  <body>
+    <main>
+      <p>Please select a project to view the inspector.</p>
+    </main>
+  </body>
+</html>`
+
 export class InspectorViewProvider implements vscode.WebviewViewProvider {
     _view?: vscode.WebviewView
     _doc?: vscode.TextDocument
@@ -42,7 +52,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       const usagesCLIController = new UsagesCLIController(folder)
       
       this.variables = await variablesCLIController.getAllVariables()
-      this.orderedVariables = Object.values(this.variables).sort((a: Variable, b: Variable) => a.name.localeCompare(b.name))
+      this.orderedVariables = Object.values(this.variables).sort((a: Variable, b: Variable) => (a.name || a.key).localeCompare(b.name || a.key))
       this.features = await featuresCLIController.getAllFeatures()
       this.matches = await usagesCLIController.usagesKeys()
       
@@ -100,6 +110,14 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       return
     }
 
+    const activeProjectKey = this.selectedFolder ? StateManager.getFolderState(this.selectedFolder.name, KEYS.PROJECT_ID) : undefined
+    if (!activeProjectKey) {
+      if (this._view) {
+        this._view.webview.html = selectAProjectHtml
+      }
+      return
+    }
+
     this.isRefreshing = true
 
     // Use withProgress to show a progress indicator
@@ -140,7 +158,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       `<vscode-option value="${variable.key}"${variable.key === this.selectedKey ? ' selected' : '' }>${variable.key}</vscode-option>`
     )) || []
 
-    const featureOptions = this.features && Object.values(this.features).sort((a, b) =>  a.name.localeCompare(b.name)).map((feature) => (
+    const featureOptions = this.features && Object.values(this.features).sort((a, b) =>  (a.name || a.key).localeCompare(b.name || b.key)).map((feature) => (
       `<vscode-option value="${feature._id}"${feature._id === this.selectedKey ? ' selected' : '' }>${feature.key}</vscode-option>`
     )) || []
 

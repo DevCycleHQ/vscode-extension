@@ -1,11 +1,11 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
 import { BaseCLIController, OrganizationsCLIController, ProjectsCLIController } from '../../cli'
-import { executeRefreshUsagesCommand } from '../../commands/refreshUsages'
 import path from 'path'
 import { COMMAND_LOGOUT } from '../../commands/logout'
 import { KEYS, StateManager } from '../../StateManager'
 import { updateRepoConfig } from '../../utils/updateRepoConfigProject'
+import { executeRefreshAllCommand } from '../../commands'
 
 type HomeViewMessage =
   | { type: 'project' | 'organization', value: string, folderIndex: number }
@@ -49,13 +49,13 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
           await updateRepoConfig(folder, { project: null })
           const organizationsController = new OrganizationsCLIController(folder)
           await organizationsController.selectOrganization(data.value, false)
-          await executeRefreshUsagesCommand(folder)
+          await executeRefreshAllCommand()
           webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
         })
       } else if (data.type === 'project') {
         const projectsController = new ProjectsCLIController(folder)
         await projectsController.selectProject(data.value)
-        await executeRefreshUsagesCommand(folder)
+        await executeRefreshAllCommand()
       } else if (data.type === 'config') {
         const folderPath = folder.uri.fsPath
         const cli = new BaseCLIController(folder)
