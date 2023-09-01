@@ -237,7 +237,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     return `
       <div class="multiple-folder-container">
         <i class="codicon codicon-debug-breakpoint-log"></i>
-        <span>${folder.name}</span>
+        <label>${folder.name}</label>
         <vscode-dropdown id="folderId" class="inspector-dropdown-folder" data-type="folder">
           ${folderOptions.join('')}
         </vscode-dropdown>
@@ -271,17 +271,17 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       <div class="collapsible-content">
         <div class="details-container">
           <div class="detail-entry">
-            <span>Name</span>
-            <span class="details-value">${name || '(No Name)'}</span>
+            <label>Name</label>
+            <label class="details-value">${name || '(No Name)'}</label>
           </div>
           <div class="detail-entry">
-            <span>Key</span>
-            <span class="details-value">${key}</span>
+            <label>Key</label>
+            <label class="details-value">${key}</label>
           </div>
           ${featureName ?
             `<div class="detail-entry">
-              <span>Feature</span>
-              <span class="details-value">${featureName}</span>
+              <label>Feature</label>
+              <label class="details-value">${featureName}</label>
             </div>` :
             ''
           }
@@ -326,8 +326,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       Object.entries(getAllPossibleValuesForVariable(this.variables[this.selectedKey])).map((possibleValue) => {
         const variationName = possibleValue[0]
         return `<div class="detail-entry">
-          <span>${variationName}</span>
-          <span class="details-value">${possibleValue[1]}</span>
+          <label>${variationName}</label>
+          <label class="details-value">${possibleValue[1]}</label>
         </div>`
       }) || []
   }
@@ -336,7 +336,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     return this.selectedType === 'Feature' && this.features[this.selectedKey].variables?.map((variable) => (
       `
       <div class="detail-entry">
-        <span>${variable.key}</span>
+        <label>${variable.key}</label>
       </div>`
     )) || []
 

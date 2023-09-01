@@ -44,8 +44,9 @@ input[type='checkbox'] {
   align-items: center;
 }
 
-.multiple-folder-container i, span {
+.multiple-folder-container i, label {
   margin-right: 0.5rem;
+  color: var(--vscode-foreground);
 }
 
 .inspector-dropdown-folder {
@@ -63,6 +64,11 @@ input[type='checkbox'] {
 
 .inspector-dropdown-container img {
   margin-right: 0.3rem;
+}
+
+.inspector-dropdown-container label {
+  color: var(--vscode-foreground);
+  font-size: var(--vscode-font-size);
 }
 
 .inspector-dropdown-type {
@@ -109,7 +115,8 @@ input[type='checkbox'] {
 .detail-link-row {
   display: flex;
   align-items: center;
-  color: inherit;
+  color: var(--vscode-foreground);
+  font-size: var(--vscode-font-size);
   text-decoration: none;
 }
 
