@@ -49,7 +49,6 @@ input[type='checkbox'] {
 }
 
 .inspector-dropdown-folder {
-  margin-right: 0.3rem;
   width: auto;
   flex-grow: 1;
 }
@@ -71,7 +70,6 @@ input[type='checkbox'] {
 }
 
 .inspector-dropdown-value {
-  margin-right: 0.3rem;
   width: -webkit-fill-available;
 }
 
@@ -97,15 +95,6 @@ input[type='checkbox'] {
   font-size: var(vscode-font-size - 2);
 }
 
-.edit-config-button {
-  padding: 0 .3rem;
-  margin-left: -0.3rem;
-}
-
-.edit-config:hover {
-  background-color: var(--vscode-button-secondaryHoverBackground);
-}
-
 .detail-link-row {
   display: flex;
   align-items: center;
@@ -121,10 +110,4 @@ input[type='checkbox'] {
 
 .detail-link-row > i {
   margin-right: 0.3rem;
-}
-
-/* vscode-webview-ui-toolkit components
-/* ------------------------------------------ */
-vscode-dropdown {
-  width: 150px;
 }

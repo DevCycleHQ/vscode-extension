@@ -135,54 +135,7 @@ textarea::placeholder {
   background-color: var(--vscode-button-secondaryHoverBackground);
 }
 
-.form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.form-container h3 {
-  margin: 0;
-}
-
-.form-container > * {
-  height: 25px;
-}
-
-.dropdown-container {
-  box-sizing: border-box;
-  display: flex;
-  gap: 5px;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 260px;
-}
-
-.dropdown-container label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--vscode-foreground);
-  font-size: var(--vscode-font-size);
-  line-height: normal;
-}
-
 .placeholder {
   opacity: 0.4;
   cursor: not-allowed;
-}
-
-.edit-config-button {
-  padding: 0 .3rem;
-  margin-left: -0.3rem;
-}
-
-.edit-config:hover {
-  background-color: var(--vscode-button-secondaryHoverBackground);
-}
-
-/* vscode-webview-ui-toolkit components
-/* ------------------------------------------ */
-vscode-dropdown {
-  width: 150px;
 }

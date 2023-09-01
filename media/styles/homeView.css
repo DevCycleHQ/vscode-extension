@@ -85,6 +85,26 @@ input[type='checkbox'] {
   transition: border-color .1s linear;
 }
 
+.home-view-form-container {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  row-gap: 5px;
+  column-gap: 16px;
+  width: 100%;
+}
+
+.home-view-form-container > * {
+  height: 25px;
+}
+
+.home-view-dropdown-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vscode-foreground);
+  font-size: var(--vscode-font-size);
+}
+
 .toggle:checked + .lbl-toggle + .collapsible-content {
   max-height: fit-content;
   overflow: visible;
@@ -97,4 +117,13 @@ input[type='checkbox'] {
 .toggle:checked + .lbl-toggle {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
+}
+
+.edit-config-button {
+  padding: 0 .3rem;
+  margin-left: -0.3rem;
+}
+
+.edit-config:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
 }
