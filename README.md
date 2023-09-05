@@ -6,7 +6,7 @@ DevCycle is an intuitive extension for Visual Studio Code, built to manage and k
 
 DevCycle simplifies complex use of feature flags by providing a feature management platform that emphasizes user experience and flexibility.
 
-Learn more on our website: [DevCycle.com](https://devcycle.com).
+Learn more on our website: [DevCycle.com](https://devcycle.com/?utm_source=referral&utm_medium=marketplace&utm_campaign=vs-code).
 
 You can access this GitHub repository at: [https://github.com/DevCycleHQ/VSCode-Extension](https://github.com/DevCycleHQ/VSCode-Extension).
 
@@ -25,7 +25,7 @@ You can access this GitHub repository at: [https://github.com/DevCycleHQ/VSCode-
 
 Before getting started with DevCycle, make sure you meet the following requirements:
 
-- You need a DevCycle account. Sign up for a free account [here](https://devcycle.com/signup) (no credit card required).
+- You need a DevCycle account. Sign up for a free account [here](https://app.devcycle.com/?isSignUp=true) (no credit card required).
 
 ## Extension Installation
 
@@ -66,8 +66,8 @@ For detailed information about DevCycle and its usage, visit our documentation p
 
 Ready to get started with DevCycle
 
-Sign up today at [https://devcycle.com/signup](https://devcycle.com/signup). 
+Sign up today at [https://app.devcycle.com/?isSignUp=true](https://app.devcycle.com/?isSignUp=true). 
 
 Our platform is free to sign up, and we have a transparent pricing model that doesn't charge based on seats. 
 
-View our pricing details here: [https://devcycle.com/pricing](https://devcycle.com/pricing). Start exploring DevCycle today!
+View our pricing details here: [https://devcycle.com/pricing](https://devcycle.com/pricing/?utm_source=referral&utm_medium=marketplace&utm_campaign=vs-code/). Start exploring DevCycle today!
