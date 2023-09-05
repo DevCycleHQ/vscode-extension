@@ -1,1 +1,0 @@
-export const COMMAND_REFRESH_INSPECTOR = 'devcycle-feature-flags.refresh-inspector'
