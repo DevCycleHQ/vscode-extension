@@ -60,7 +60,7 @@ DevCycle is an open-source project, and we welcome contributions! If you're inte
 
 ## Documentation
 
-For detailed information about DevCycle and its usage, visit our documentation page: [https://docs.devcycle.com](https://docs.devcycle.com).
+For detailed information about DevCycle and its usage, visit our documentation page: [https://docs.devcycle.com/integrations/vscode-extension/](https://docs.devcycle.com/integrations/vscode-extension/).
 
 ## Sign Up for DevCycle
 

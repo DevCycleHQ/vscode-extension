@@ -134,7 +134,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
   private getLinkRow() {
     return `
     <div class="home-icon-link-group">
-      <a href="https://docs.devcycle.com/" class="icon-link">
+      <a href="https://docs.devcycle.com/integrations/vscode-extension/" class="icon-link">
         <i class="codicon codicon-book"></i>
       </a>
       <a href="https://docs.devcycle.com/release-notes" class="icon-link">
