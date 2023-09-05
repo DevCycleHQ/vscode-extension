@@ -25,7 +25,8 @@ import {
   registerShowReferenceCommand,
   registerOpenSettingsCommand,
   registerOpenUsagesViewCommand,
-  registerRefreshInspectorCommand
+  registerRefreshInspectorCommand,
+  registerOpenInspectorViewCommand
 } from './commands'
 import cliUtils from './cli/utils'
 import utils from './utils'
@@ -62,6 +63,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await utils.checkForWorkspaceFolders()
 
   void cliUtils.loadCli()
+  let inspectorViewProvider: InspectorViewProvider | undefined
 
   if (!StateManager.getGlobalState(KEYS.SEND_METRICS_PROMPTED)) {
     const sendMetricsMessage = 
@@ -92,9 +94,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerResourcesViewProvider(context)
   if (SHOW_HOME_VIEW) { await registerHomeViewProvider(context) }
   if (SHOW_INSPECTOR_VIEW) { 
-    const inspectorViewProvider = await registerInspectorViewProvider(context)
+    inspectorViewProvider = await registerInspectorViewProvider(context)
     refreshProviders.push(inspectorViewProvider) 
     await registerRefreshInspectorCommand(context, inspectorViewProvider)
+    await registerOpenInspectorViewCommand(context, inspectorViewProvider)
   }
 
   await registerUsagesNodeClickedCommand(context)
@@ -162,6 +165,12 @@ export const activate = async (context: vscode.ExtensionContext) => {
     }
     await executeRefreshAllCommand()
   })
+
+  const disposable = vscode.window.onDidChangeTextEditorSelection(() => {
+    inspectorViewProvider?.postMessageToWebview({ type: 'command', value: 'removeClass' })
+  })
+  
+  context.subscriptions.push(disposable)
 }
 
 export function deactivate() {}

@@ -122,3 +122,9 @@ input[type='checkbox'] {
 .detail-link-row > i {
   margin-right: 0.3rem;
 }
+
+.focus {
+  outline: 1px solid var(--vscode-foreground);
+  padding: 5px;
+  margin-top: 5px;
+}

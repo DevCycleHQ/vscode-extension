@@ -3,11 +3,13 @@ import { getNonce } from '../../utils/getNonce'
 import { Feature, FeaturesCLIController, UsagesCLIController, Variable, VariablesCLIController, getOrganizationId } from '../../cli'
 import { KEYS, StateManager } from '../../StateManager'
 import { OPEN_USAGES_VIEW } from '../../commands'
+import { INSPECTOR_VIEW_BUTTONS } from '../../components/hoverCard'
 
 type InspectorViewMessage =
   | { type: 'variableOrFeature', value: 'Variable' | 'Feature' }
-  | { type: 'key', value: string }
+  | { type: 'key', value: string, buttonType?: INSPECTOR_VIEW_BUTTONS }
   | { type: 'folder', value: number }
+  | { type: 'command', value: 'removeClass' }
 
 export class InspectorViewProvider implements vscode.WebviewViewProvider {
     _view?: vscode.WebviewView
@@ -16,6 +18,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     selectedFolder: vscode.WorkspaceFolder | undefined
     selectedType: 'Variable' | 'Feature'
     selectedKey: string
+    buttonType?: INSPECTOR_VIEW_BUTTONS
 
     variables: Record<string, Variable> = {}
     orderedVariables: Variable[] = []
@@ -77,10 +80,16 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           this.selectedKey = features[0] || ''
         }
       } else if (data.type === 'key') {
+        this.selectedType = "Variable"
         this.selectedKey = data.value
+        this.buttonType = data?.buttonType
       } else if (data.type === 'folder') {
         this.selectedFolder = vscode.workspace.workspaceFolders?.[data.value] as vscode.WorkspaceFolder
         this.matches = StateManager.getFolderState(this.selectedFolder.name, KEYS.CODE_USAGE_KEYS) || {}
+      } else if (data.type === 'command') {
+        if (data.value === 'removeClass') {
+          this.buttonType = undefined
+        }
       }
       webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
     })
@@ -118,6 +127,10 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     this._view = panel
   }
 
+  public postMessageToWebview(message: unknown) {
+    this._view?.webview.postMessage(message)
+  }
+
   private async getBodyHtml(): Promise<string> {
     const inspectorOptions = ['Variable', 'Feature'].map((option) => (
       `<vscode-option value="${option}"${option === this.selectedType ? ' selected' : '' }>${option}</vscode-option>`
@@ -150,7 +163,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             </vscode-dropdown>
           </div>
           <input id="collapsible-details" class="toggle" type="checkbox" checked>
-          <label for="collapsible-details" class="lbl-toggle">
+          <label for="collapsible-details" class="lbl-toggle ${this.buttonType === 'details' ? 'focus' : ''}">
             <i class="codicon codicon-chevron-right"></i>
             <i class="codicon codicon-info"></i>
             Details
@@ -158,7 +171,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           ${this.getDetailsHTML(this.selectedFolder)}
           ${this.selectedType === 'Variable' && possibleValues.length ? `
             <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
-            <label for="collapsible-possible=values" class="lbl-toggle">
+            <label for="collapsible-possible=values" class="lbl-toggle ${this.buttonType === 'values' ? 'focus' : ''}">
               <i class="codicon codicon-chevron-right"></i>
               <i class="codicon codicon-preserve-case"></i>
               Possible Values
@@ -169,7 +182,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
               </div>
             </div>
             ` : ''
-          }
+      }
           ${this.selectedType === 'Feature' ? `
             <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
             <label for="collapsible-possible=values" class="lbl-toggle">
@@ -183,7 +196,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
               </div>
             </div>
             ` : ''
-          }
+      }
         </div>
     `
   }
@@ -250,22 +263,22 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   }
 
   private getDetailsHTML(folder: vscode.WorkspaceFolder) {
-    const name = this.selectedType === 'Variable' ? 
-      this.variables[this.selectedKey]?.name : 
+    const name = this.selectedType === 'Variable' ?
+      this.variables[this.selectedKey]?.name :
       this.features[this.selectedKey]?.name
-    const key = this.selectedType === 'Variable' ? 
-      this.variables[this.selectedKey]?.key : 
+    const key = this.selectedType === 'Variable' ?
+      this.variables[this.selectedKey]?.key :
       this.features[this.selectedKey]?.key
     const featureName = this.selectedType === 'Variable' &&
       Object.values(this.features).find((feature) => feature._id === (this.variables[this.selectedKey] as Variable)?._feature)?.name
 
     const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
     const orgId = getOrganizationId(folder)
-    const dashboardPath = this.selectedType === 'Variable' ? 
-      `variables/${this.variables[this.selectedKey].key}` : 
+    const dashboardPath = this.selectedType === 'Variable' ?
+      `variables/${this.variables[this.selectedKey].key}` :
       `features/${this.features[this.selectedKey].key}`
     const usagesCommandParams = encodeURIComponent(
-      JSON.stringify({ 
+      JSON.stringify({
         variableKey: this.selectedKey,
         folderUri: folder.uri
       })
@@ -287,8 +300,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
               <label>Feature</label>
               <label class="details-value">${featureName}</label>
             </div>` :
-            ''
-          }
+        ''
+      }
           
           ${this.selectedType === 'Variable' && this.matches[this.selectedKey] ? `
             <div class="detail-entry">
@@ -297,7 +310,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
                 View Usages
               </a>
             </div>` : ''
-          }
+      }
           <div class="detail-entry">
             <a href="https://app.devcycle.com/o/${orgId}/p/${projectId}/${dashboardPath}" class="detail-link-row">
               <i class="codicon codicon-globe"></i>
@@ -314,7 +327,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       if (!variable) {
         return {}
       }
-     
+
       const feature = this.features[variable._feature]
       if (!feature) {
         return {}
@@ -326,7 +339,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       return variableVariationValueMap
     }
 
-    return this.selectedType === 'Variable' && 
+    return this.selectedType === 'Variable' &&
       Object.entries(getAllPossibleValuesForVariable(this.variables[this.selectedKey])).map((possibleValue) => {
         const variationName = possibleValue[0]
         return `<div class="detail-entry">
@@ -337,7 +350,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   }
 
   private getVariableKeysInFeatureHTML() {
-    return this.selectedType === 'Feature' && this.features[this.selectedKey].variables?.map((variable) => (
+    return this.selectedType === 'Feature' && this.features[this.selectedKey]?.variables?.map((variable) => (
       `
       <div class="detail-entry">
         <label>${variable.key}</label>

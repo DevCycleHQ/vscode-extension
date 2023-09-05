@@ -1,0 +1,1 @@
+export const OPEN_INSPECTOR_VIEW = 'devcycle-feature-flags.openInspectorView'
