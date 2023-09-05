@@ -6,6 +6,19 @@ const vscode = acquireVsCodeApi();
 
 window.addEventListener("load", main);
 
+window.addEventListener('click', (event) => {
+  const clickedElement = event.target
+  // Check if the clicked element is not inside the webview
+  if (!document.body.contains(clickedElement as Node)) {
+    vscode.postMessage({ type:'command', value: 'removeClass' });
+  }
+});
+
+window.addEventListener('message', (event) => {
+  const message = event.data
+  vscode.postMessage(message)
+});
+
 function main() {
   const addDropdownValueChangeListenersToDropdowns = (dropdowns: string[]) => {
     for (const dropdown of dropdowns) {
@@ -23,7 +36,7 @@ function main() {
     'inspector-dropdown-value'
   ])
 
- }
+}
 
 function handleDropdownValueChange(event: Event) {
   if (!event.target) {

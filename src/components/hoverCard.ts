@@ -2,9 +2,13 @@ import * as vscode from 'vscode'
 import { CombinedVariableData, getCombinedVariableDetails } from '../cli'
 import { KEYS, StateManager } from '../StateManager'
 
-const possibleValuesCommand = ''
+const openInspectorViewCommand = 'command:devcycle-feature-flags.openInspectorView'
 const usagesCommand = 'command:devcycle-feature-flags.openUsagesView'
-const detailsCommand = ''
+
+export enum INSPECTOR_VIEW_BUTTONS {
+  POSSIBLE_VALUES = 'values',
+  DETAILS = 'details',
+}
 
 export const getHoverString = async (
   folder: vscode.WorkspaceFolder,
@@ -30,9 +34,9 @@ const getVariableHTML = (
 ) => {
   const { variable, feature } = variableData
 
-  const possibleValuesLink = generateLinkToSidebar('codicon-preserve-case', 'Possible Values', possibleValuesCommand)
+  const possibleValuesLink = generateLinkToSidebar('codicon-preserve-case', 'Possible Values', openInspectorViewCommand, { buttonType: INSPECTOR_VIEW_BUTTONS.POSSIBLE_VALUES, variableKey: variable.key })
   const usagesLink = generateLinkToSidebar('codicon-symbol-keyword', 'Usages', usagesCommand, { variableKey: variable.key })
-  const detailsLink = generateLinkToSidebar('codicon-search', 'Details', detailsCommand)
+  const detailsLink = generateLinkToSidebar('codicon-search', 'Details', openInspectorViewCommand, { buttonType: INSPECTOR_VIEW_BUTTONS.DETAILS, variableKey: variable.key })
 
   return `
   <b>DevCycle Variable:</b> ${variable.name} \n
