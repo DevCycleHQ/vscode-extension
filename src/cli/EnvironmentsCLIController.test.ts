@@ -57,7 +57,7 @@ describe('EnvironmentsCLIController', () => {
       })
   })
 
-  describe.only('getAllEnvironments', () => {
+  describe('getAllEnvironments', () => {
     it('calls cli to get environments', async () => {
         mockGetState.returns(null)
   
