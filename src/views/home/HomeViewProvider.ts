@@ -88,6 +88,8 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
 
     const projectId = `project${folder.index}`
     const organizationId = `organization${folder.index}`
+    const editButtonId = `editConfigButton${folder.index}`
+
 
     const orgOptions = Object.values(organizations).map((organization) =>
       `<vscode-option value="${organization.name}"${organization.name === activeOrganizationName ? ' selected' : '' }>${organization.display_name || organization.name}</vscode-option>`
@@ -123,7 +125,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
             <vscode-dropdown id="${projectId}" class="home-dropdown" data-folder="${folder.index}" data-type="project">
               ${projectOptions.join('')}
             </vscode-dropdown>
-          <button id="edit-config-button" class="icon-button edit-config-button" data-folder="${folder.index}">
+          <button id="${editButtonId}" class="icon-button edit-config-button" data-folder="${folder.index}">
             <i class="codicon codicon-edit"></i>Edit Config
           </button>
         </div>

@@ -32,11 +32,11 @@ function main() {
   for (let i = 0; i < homeSectionDropdowns.length; i++) {
     const dropdown = homeSectionDropdowns[i];
     dropdown.addEventListener('change', handleDropdownValueChange);
-  }
 
-  // Edit config button
-  const editConfigButton = document.getElementById("edit-config-button") as HTMLAnchorElement;
-  editConfigButton.addEventListener('click', handleEditConfigClick);
+    // Edit config button
+    const editConfigButton = document.getElementById(`editConfigButton${i}`) as HTMLAnchorElement;
+    editConfigButton.addEventListener('click', handleEditConfigClick);
+  }
 }
 
 function handleDropdownValueChange(event: Event) {
