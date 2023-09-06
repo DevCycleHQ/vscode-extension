@@ -52,7 +52,8 @@ const webviewConfig = {
   target: ["web", "es2020"],
   entry: {
     homeView: "./src/webview/homeView.ts",
-    inspectorView: "./src/webview/inspectorView.ts"
+    inspectorView: "./src/webview/inspectorView.ts",
+    startup: "./src/scripts/startup.ts",
   },
   experiments: { outputModule: true },
   output: {
