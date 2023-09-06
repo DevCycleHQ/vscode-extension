@@ -94,7 +94,7 @@ jobs:
           echo "::notice title=Release URL::${{ steps.create-release.outputs.release-url }}"
 
       - name: Update Docs
-        uses: ./.github/workflows/updateDocs
+        uses: ./.github/actions/updateDocs
         with:
           latest_tag: ${{ steps.prepare-release.outputs.next-release-tag }}
           access_token: ${{ secrets.AUTOMATION_USER_TOKEN }}
