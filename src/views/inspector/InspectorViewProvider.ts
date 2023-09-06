@@ -7,7 +7,7 @@ import { INSPECTOR_VIEW_BUTTONS } from '../../components/hoverCard'
 
 type InspectorViewMessage =
   | { type: 'variableOrFeature', value: 'Variable' | 'Feature' }
-  | { type: 'key', value: string, buttonType?: INSPECTOR_VIEW_BUTTONS }
+  | { type: 'key', value: string, buttonType?: INSPECTOR_VIEW_BUTTONS, selectedType?: 'Variable' }
   | { type: 'folder', value: number }
   | { type: 'command', value: 'removeClass' }
 
@@ -90,7 +90,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           this.selectedKey = features[0] || ''
         }
       } else if (data.type === 'key') {
-        this.selectedType = "Variable"
+        this.selectedType = data?.selectedType || this.selectedType
         this.selectedKey = data.value
         this.buttonType = data?.buttonType
       } else if (data.type === 'folder') {
