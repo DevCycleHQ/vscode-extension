@@ -13,9 +13,6 @@
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}",
       "sourceMaps": true,
-      "env": {
-        "DEBUG_MODE": "1"
-      }
     },
     {
       "name": "Extension Tests",

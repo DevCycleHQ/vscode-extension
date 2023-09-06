@@ -36,14 +36,6 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
     this._view = panel
   }
 
-  private getScriptUri(webview: vscode.Webview): vscode.Uri {
-    const isDebug = process.env.DEBUG_MODE === '1'
-    const script = `startup.${isDebug ? 'ts' : 'js'}`
-    return webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, isDebug ? 'src' : 'out', `scripts/${script}`),
-    )
-  }
-
   private getBodyHtml(
     view: STARTUP_VIEWS,
   ): string {
@@ -71,8 +63,10 @@ export class StartupViewProvider implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'vscode.css'),
     )
 
-    const scriptUri = this.getScriptUri(webview)
-
+    const scriptUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'out', 'startup.js'),
+    )
+    
     const nonce = getNonce()
 
     return `<!DOCTYPE html>
