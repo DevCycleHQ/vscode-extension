@@ -36,6 +36,18 @@ function main() {
     'inspector-dropdown-value'
   ])
 
+
+  const featureLink = document.getElementById('featureLink') as HTMLDivElement
+  if (featureLink) {
+    featureLink.addEventListener('click', (event) => {
+      if (!event.currentTarget) {
+        return;
+      }
+      const element = event.currentTarget as HTMLDivElement
+      console.error('bruh', element)
+      vscode.postMessage({ type: 'key', value: element.dataset.value, selectedType: 'Feature' })
+    })
+  }
 }
 
 function handleDropdownValueChange(event: Event) {

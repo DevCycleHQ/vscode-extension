@@ -7,7 +7,7 @@ import { INSPECTOR_VIEW_BUTTONS } from '../../components/hoverCard'
 
 type InspectorViewMessage =
   | { type: 'variableOrFeature', value: 'Variable' | 'Feature' }
-  | { type: 'key', value: string, buttonType?: INSPECTOR_VIEW_BUTTONS, selectedType?: 'Variable' }
+  | { type: 'key', value: string, buttonType?: INSPECTOR_VIEW_BUTTONS, selectedType?: 'Variable' | 'Feature' }
   | { type: 'folder', value: number }
   | { type: 'command', value: 'removeClass' }
 
@@ -200,7 +200,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
               </div>
             </div>
             ` : ''
-      }
+          }
           ${this.selectedType === 'Feature' ? `
             <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
             <label for="collapsible-possible=values" class="lbl-toggle">
@@ -316,7 +316,10 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           ${featureName ?
             `<div class="detail-entry">
               <label>Feature</label>
-              <label class="details-value">${featureName}</label>
+              <div class="detail-entry-value-link" id="featureLink" data-value="${(this.variables[this.selectedKey] as Variable)?._feature}">
+                <label class="details-value">${featureName}</label>
+                <div>${this.inspectorSvg()}</div>
+              </div>
             </div>` :
         ''
       }
