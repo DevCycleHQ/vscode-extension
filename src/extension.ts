@@ -29,7 +29,6 @@ import {
 } from './commands'
 import cliUtils from './cli/utils'
 import utils from './utils'
-import { SHOW_HOME_VIEW, SHOW_INSPECTOR_VIEW } from './constants'
 import { InspectorViewProvider, registerInspectorViewProvider } from './views/inspector'
 import { loadRepoConfig } from './utils/loadRepoConfig'
 
@@ -41,20 +40,6 @@ const SCHEME_FILE = {
   scheme: 'file',
 }
 
-// Hide home view until development is done
-vscode.commands.executeCommand(
-  'setContext',
-  'devcycle-feature-flags.shouldShowHomeView',
-  SHOW_HOME_VIEW,
-)
-
-// Hide inspector view until development is done
-vscode.commands.executeCommand(
-  'setContext',
-  'devcycle-feature-flags.shouldShowInspectorView',
-  SHOW_INSPECTOR_VIEW,
-)
-
 export const activate = async (context: vscode.ExtensionContext) => {
   StateManager.globalState = context.globalState
   StateManager.workspaceState = context.workspaceState
@@ -62,7 +47,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await utils.checkForWorkspaceFolders()
 
   void cliUtils.loadCli()
-  let inspectorViewProvider: InspectorViewProvider | undefined
 
   if (!StateManager.getGlobalState(KEYS.SEND_METRICS_PROMPTED)) {
     const sendMetricsMessage = 
@@ -85,19 +69,16 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerLoginViewProvider(context)
   const { usagesDataProvider, usagesTreeView } = await registerUsagesViewProvider(context)
   const environmentsDataProvider = await registerEnvironmentsViewProvider(context)
+  const inspectorViewProvider = await registerInspectorViewProvider(context)
   const refreshProviders: (UsagesTreeProvider | EnvironmentsTreeProvider | InspectorViewProvider)[] = [
     usagesDataProvider, 
-    environmentsDataProvider
+    environmentsDataProvider,
+    inspectorViewProvider
   ]
 
   await registerResourcesViewProvider(context)
-  if (SHOW_HOME_VIEW) { await registerHomeViewProvider(context) }
-  if (SHOW_INSPECTOR_VIEW) { 
-    inspectorViewProvider = await registerInspectorViewProvider(context)
-    refreshProviders.push(inspectorViewProvider) 
-    await registerOpenInspectorViewCommand(context, inspectorViewProvider)
-  }
-
+  await registerHomeViewProvider(context)
+  await registerOpenInspectorViewCommand(context, inspectorViewProvider)
   await registerUsagesNodeClickedCommand(context)
   await registerInitCommand(context)
   await registerOpenLinkCommand(context)
