@@ -316,7 +316,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           ${featureName ?
             `<div class="detail-entry">
               <label>Feature</label>
-              <div class="detail-entry-value-link" id="featureLink" data-value="${(this.variables[this.selectedKey] as Variable)?._feature}">
+              <div class="detail-entry-value-link" id="feature-link" data-value="${(this.variables[this.selectedKey] as Variable)?._feature}">
                 <label class="details-value">${featureName}</label>
                 <div>${this.inspectorSvg()}</div>
               </div>
@@ -373,9 +373,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   private getVariableKeysInFeatureHTML() {
     return this.selectedType === 'Feature' && this.features[this.selectedKey]?.variables?.map((variable) => (
       `
-      <div class="detail-entry">
+      <div class="detail-entry variable-link" data-value="${variable.key}">
         <label>${variable.key}</label>
-      </div>`
+        <div>${this.inspectorSvg()}</div>
+      </div>
+      `
     )) || []
 
   }

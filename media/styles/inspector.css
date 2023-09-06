@@ -108,6 +108,10 @@ input[type='checkbox'] {
   cursor:pointer;
 }
 
+.variable-link > * {
+  cursor: pointer;
+}
+
 .details-value {
   color: gray;
   font-size: var(vscode-font-size - 2);
