@@ -52,13 +52,13 @@
           "type": "webview",
           "id": "devcycle-home",
           "name": "Home",
-          "when": "devcycle-feature-flags.hasCredentialsAndProject && devcycle-feature-flags.shouldShowHomeView"
+          "when": "devcycle-feature-flags.hasCredentialsAndProject"
         },
         {
           "type": "webview",
           "id": "devcycle-inspector",
           "name": "Inspector",
-          "when": "devcycle-feature-flags.hasWorkspaceFolders && devcycle-feature-flags.hasCredentialsAndProject && devcycle-feature-flags.shouldShowInspectorView"
+          "when": "devcycle-feature-flags.hasWorkspaceFolders && devcycle-feature-flags.hasCredentialsAndProject"
         },
         {
           "type": "tree",
