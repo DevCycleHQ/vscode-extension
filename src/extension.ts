@@ -25,7 +25,8 @@ import {
   registerShowReferenceCommand,
   registerOpenSettingsCommand,
   registerOpenUsagesViewCommand,
-  registerOpenInspectorViewCommand
+  registerOpenInspectorViewCommand,
+  registerRefreshInspectorCommand
 } from './commands'
 import cliUtils from './cli/utils'
 import utils from './utils'
@@ -86,6 +87,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerLogoutCommand(context)
   await registerRefreshAllCommand(context, refreshProviders)
   await registerRefreshUsagesCommand(context, usagesDataProvider)
+  await registerRefreshInspectorCommand(context, inspectorViewProvider)
   await registerRefreshEnvironmentsCommand(context, environmentsDataProvider)
   await registerSortUsagesCommand(context, usagesDataProvider)
   await registerShowReferenceCommand(context)
