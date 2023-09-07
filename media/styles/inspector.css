@@ -105,6 +105,11 @@ input[type='checkbox'] {
   font-size: var(vscode-font-size - 2);
 }
 
+.uppercase-value {
+  color: gray;
+  text-transform: uppercase;
+}
+
 .detail-link-row {
   display: flex;
   align-items: center;

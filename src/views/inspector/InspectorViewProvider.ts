@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
-import { Feature, FeaturesCLIController, UsagesCLIController, Variable, VariablesCLIController, getOrganizationId } from '../../cli'
+import { Environment, EnvironmentsCLIController, Feature, FeaturesCLIController, UsagesCLIController, Variable, VariablesCLIController, getOrganizationId } from '../../cli'
 import { KEYS, StateManager } from '../../StateManager'
 import { OPEN_USAGES_VIEW } from '../../commands'
 import { INSPECTOR_VIEW_BUTTONS } from '../../components/hoverCard'
@@ -22,19 +22,19 @@ const selectAProjectHtml = `<!DOCTYPE html>
 </html>`
 
 export class InspectorViewProvider implements vscode.WebviewViewProvider {
-    _view?: vscode.WebviewView
-    _doc?: vscode.TextDocument
+  _view?: vscode.WebviewView
+  _doc?: vscode.TextDocument
 
-    selectedFolder: vscode.WorkspaceFolder | undefined
-    selectedType: 'Variable' | 'Feature'
-    selectedKey: string
-    buttonType?: INSPECTOR_VIEW_BUTTONS
+  selectedFolder: vscode.WorkspaceFolder | undefined
+  selectedType: 'Variable' | 'Feature'
+  selectedKey: string
+  buttonType?: INSPECTOR_VIEW_BUTTONS
 
-    variables: Record<string, Variable> = {}
-    orderedVariables: Variable[] = []
-    features: Record<string, Feature> = {}
-    matches: Record<string, boolean> = {}
-    isRefreshing: boolean = false
+  variables: Record<string, Variable> = {}
+  orderedVariables: Variable[] = []
+  features: Record<string, Feature> = {}
+  matches: Record<string, boolean> = {}
+  isRefreshing: boolean = false
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this.selectedType = 'Variable'
@@ -50,12 +50,12 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       const variablesCLIController = new VariablesCLIController(folder)
       const featuresCLIController = new FeaturesCLIController(folder)
       const usagesCLIController = new UsagesCLIController(folder)
-      
+
       this.variables = await variablesCLIController.getAllVariables()
       this.orderedVariables = Object.values(this.variables).sort((a: Variable, b: Variable) => (a.name || a.key).localeCompare(b.name || a.key))
       this.features = await featuresCLIController.getAllFeatures()
       this.matches = await usagesCLIController.usagesKeys()
-      
+
       // default to the alphabetically first variable in variable list
       if (Object.values(this.variables).length) {
         this.selectedKey = this.orderedVariables[0].key
@@ -167,7 +167,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     if (!this.selectedFolder) {
       return ''
     }
-
+    const environmentStatusesSection = await this.getFeatureEnvironmentStatusesHTML(this.selectedFolder)
+    
     return `
         <div class="inspector-container">
           ${this.getSelectedFolderContainerHTML(this.selectedFolder)}
@@ -213,6 +214,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
                 ${variableKeysInFeature.join('')}
               </div>
             </div>
+            ${environmentStatusesSection}
             ` : ''
       }
         </div>
@@ -375,6 +377,43 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       </div>`
     )) || []
 
+  }
+
+  private async getFeatureEnvironmentStatusesHTML(folder: vscode.WorkspaceFolder) {
+
+    function isRecordOfStringEnvironment(obj: any): obj is Record<string, Environment> {
+      return typeof obj === 'object' && obj !== null && Object.keys(obj).length > 0
+    }
+
+    const featuresCLIController = new FeaturesCLIController(folder)
+    const environmentsCLIController = new EnvironmentsCLIController(folder)
+
+    const featureConfigs = await featuresCLIController.getFeatureConfigurations(this.selectedKey)
+    const environments = await environmentsCLIController.getAllEnvironments()
+
+    if (!isRecordOfStringEnvironment(environments)) {
+      return ''
+    }
+
+    const html = featureConfigs.map((featureConfig) => {
+      const environment = environments[featureConfig._environment]
+      return `
+      <div class="detail-entry">
+        <label>${environment.name}</label>
+        <label class="uppercase-value">${featureConfig.status}</label>
+      </div>`
+    })
+
+    return `<input id="collapsible-environment-status" class="toggle" type="checkbox" checked>
+    <label for="collapsible-environment-status" class="lbl-toggle">
+      <i class="codicon codicon-chevron-right"></i>
+      Status
+    </label>
+    <div class="collapsible-content">
+      <div class="details-container">
+        ${html.join('')}
+      </div>
+    </div>`
   }
 
   private inspectorSvg() {
