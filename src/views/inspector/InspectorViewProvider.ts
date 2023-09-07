@@ -7,7 +7,7 @@ import { INSPECTOR_VIEW_BUTTONS } from '../../components/hoverCard'
 
 type InspectorViewMessage =
   | { type: 'variableOrFeature', value: 'Variable' | 'Feature' }
-  | { type: 'key', value: string, buttonType?: INSPECTOR_VIEW_BUTTONS, selectedType?: 'Variable' }
+  | { type: 'key', value: string, buttonType?: INSPECTOR_VIEW_BUTTONS, selectedType?: 'Variable' | 'Feature' }
   | { type: 'folder', value: number }
   | { type: 'command', value: 'removeClass' }
 
@@ -200,7 +200,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
               </div>
             </div>
             ` : ''
-      }
+          }
           ${this.selectedType === 'Feature' ? `
             <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
             <label for="collapsible-possible=values" class="lbl-toggle">
@@ -316,7 +316,10 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           ${featureName ?
             `<div class="detail-entry">
               <label>Feature</label>
-              <label class="details-value">${featureName}</label>
+              <div class="detail-entry-value-link" id="feature-link" data-value="${(this.variables[this.selectedKey] as Variable)?._feature}">
+                <label class="details-value">${featureName}</label>
+                <div>${this.inspectorSvg()}</div>
+              </div>
             </div>` :
         ''
       }
@@ -370,9 +373,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   private getVariableKeysInFeatureHTML() {
     return this.selectedType === 'Feature' && this.features[this.selectedKey]?.variables?.map((variable) => (
       `
-      <div class="detail-entry">
+      <div class="detail-entry variable-link" data-value="${variable.key}">
         <label>${variable.key}</label>
-      </div>`
+        <div>${this.inspectorSvg()}</div>
+      </div>
+      `
     )) || []
 
   }

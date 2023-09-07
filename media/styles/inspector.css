@@ -100,6 +100,18 @@ input[type='checkbox'] {
   padding-top: 0.4rem;
 }
 
+.detail-entry-value-link {
+  display: flex;
+}
+
+.detail-entry-value-link > * {
+  cursor:pointer;
+}
+
+.variable-link > * {
+  cursor: pointer;
+}
+
 .details-value {
   color: gray;
   font-size: var(vscode-font-size - 2);

@@ -36,6 +36,21 @@ function main() {
     'inspector-dropdown-value'
   ])
 
+
+  const featureLink = document.getElementById('feature-link') as HTMLDivElement
+  if (featureLink) {
+    featureLink.addEventListener('click', (event) => {
+      handleLink(event, 'Feature')
+    })
+  }
+
+  const variableLinks = document.getElementsByClassName('variable-link') as HTMLCollectionOf<HTMLDivElement>
+  for (let i = 0; i < variableLinks.length; i++) {
+    const variableLink = variableLinks[i];
+    variableLink.addEventListener('click', (event) => {
+      handleLink(event, 'Variable')
+    })
+  }
 }
 
 function handleDropdownValueChange(event: Event) {
@@ -50,4 +65,12 @@ function handleDropdownValueChange(event: Event) {
     value: dropdownElement.value,
     folderIndex: dropdownElement.dataset.folder
   });
+}
+
+function handleLink(event: Event, type: 'Variable' | 'Feature') {
+  if (!event.currentTarget) {
+    return;
+  }
+  const element = event.currentTarget as HTMLDivElement
+  vscode.postMessage({ type: 'key', value: element.dataset.value, selectedType: type })
 }
