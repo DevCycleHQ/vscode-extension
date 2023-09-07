@@ -384,6 +384,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async getFeatureEnvironmentStatusesHTML(folder: vscode.WorkspaceFolder) {
+    if (this.selectedType !== 'Feature') return ''
 
     function isRecordOfStringEnvironment(obj: any): obj is Record<string, Environment> {
       return typeof obj === 'object' && obj !== null && Object.keys(obj).length > 0
