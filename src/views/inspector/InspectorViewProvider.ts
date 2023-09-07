@@ -119,7 +119,6 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     }
 
     this.isRefreshing = true
-
     // Use withProgress to show a progress indicator
     await vscode.window.withProgress(
       {
