@@ -394,9 +394,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     return this.selectedType === 'Variable' &&
       Object.entries(getAllPossibleValuesForVariable(this.variables[this.selectedKey])).map((possibleValue) => {
         const variationName = possibleValue[0]
+        const stringifiedValue = JSON.stringify(possibleValue[1])
+        const value = stringifiedValue.length > 40 ? `${stringifiedValue.slice(0, 40)}...` : stringifiedValue
         return `<div class="detail-entry">
           <label>${variationName}</label>
-          <label class="details-value">${possibleValue[1]}</label>
+          <label class="details-value">${value}</label>
         </div>`
       }) || []
   }
@@ -410,7 +412,6 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       </div>
       `
     )) || []
-
   }
 
   private async getFeatureEnvironmentStatusesHTML(folder: vscode.WorkspaceFolder) {
