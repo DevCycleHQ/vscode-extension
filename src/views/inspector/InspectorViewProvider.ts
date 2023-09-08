@@ -170,8 +170,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     
     return `
         <div class="inspector-container">
-          ${this.getSelectedFolderContainerHTML(this.selectedFolder)}
-          <div class="inspector-dropdown-container">
+          <div class="inspector-header">
+            ${this.getSelectedFolderContainerHTML(this.selectedFolder)}
             <div class="inspector-svg-container">${this.inspectorSvg()}</div>
             <vscode-dropdown id="typeId" class="inspector-dropdown-type" data-type="variableOrFeature">
               ${inspectorOptions.join('')}
@@ -195,6 +195,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
               Possible Values
             </label>
             <div class="collapsible-content">
+              <div class="collaspsible-content-indent"></div>
               <div class="details-container">
                 ${possibleValues.join('')}
               </div>
@@ -209,6 +210,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
               Variables
             </label>
             <div class="collapsible-content">
+              <div class="collaspsible-content-indent"></div>
               <div class="details-container">
                 ${variableKeysInFeature.join('')}
               </div>
@@ -271,13 +273,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       `<vscode-option value="${workspaceFolder.index}"${workspaceFolder.index === folder.index ? ' selected' : '' }>${workspaceFolder.name}</vscode-option>`
     ))
     return `
-      <div class="multiple-folder-container">
-        <i class="codicon codicon-debug-breakpoint-log"></i>
-        <label>${folder.name}</label>
-        <vscode-dropdown id="folderId" class="inspector-dropdown-folder" data-type="folder">
-          ${folderOptions.join('')}
-        </vscode-dropdown>
-      </div>
+      <i class="codicon codicon-debug-breakpoint-log"></i>
+      <label>${folder.name}</label>
+      <vscode-dropdown id="folderId" class="inspector-dropdown-folder" data-type="folder">
+        ${folderOptions.join('')}
+      </vscode-dropdown>
     `
   }
 
@@ -305,6 +305,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     const usagesCommand = `command:${OPEN_USAGES_VIEW}?${usagesCommandParams}`
     return `
       <div class="collapsible-content">
+        <div class="collaspsible-content-indent"></div>
         <div class="details-container">
           <div class="detail-entry">
             <label>Name</label>
@@ -415,6 +416,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       Status
     </label>
     <div class="collapsible-content">
+      <div class="collaspsible-content-indent"></div>
       <div class="details-container">
         ${html.join('')}
       </div>
