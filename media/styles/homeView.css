@@ -3,10 +3,6 @@ body {
   background-color: unset;
 }
 
-#home-view-main:hover .collaspsible-content-indent {
-  border-left: 1px solid var(--vscode-tree-inactiveIndentGuidesStroke);
-}
-
 #home-nav {
   display: flex;
   justify-content: space-between;
@@ -67,22 +63,10 @@ input[type='checkbox'] {
 }
 
 .collapsible-content {
-  display: flex;
   max-height: 0px;
   overflow: hidden;
   padding-left: 1.2rem;
   position: relative;
-}
-
-.collaspsible-content-indent {
-  height: 100%;
-  position: absolute;
-  left: 6px;
-  width: 0;
-  border: none;
-  box-sizing: border-box;
-  border-color: transparent;
-  transition: border-color .1s linear;
 }
 
 .home-view-form-container {
@@ -103,20 +87,6 @@ input[type='checkbox'] {
   gap: 6px;
   color: var(--vscode-foreground);
   font-size: var(--vscode-font-size);
-}
-
-.toggle:checked + .lbl-toggle + .collapsible-content {
-  max-height: fit-content;
-  overflow: visible;
-}
-
-.toggle:checked + .lbl-toggle > i {
-  transform: rotate(90deg)
-}
-
-.toggle:checked + .lbl-toggle {
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
 }
 
 .edit-config-button {

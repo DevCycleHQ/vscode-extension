@@ -139,3 +139,39 @@ textarea::placeholder {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.collapsible-content {
+  max-height: 0px;
+  overflow: hidden;
+  padding-left: 1.2rem;
+  position: relative;
+}
+
+.collaspsible-content-indent {
+  height: 100%;
+  position: absolute;
+  left: 6px;
+  width: 0;
+  border: none;
+  box-sizing: border-box;
+  border-color: transparent;
+  transition: border-color .1s linear;
+}
+
+main:hover .collaspsible-content-indent {
+  border-left: 1px solid var(--vscode-tree-inactiveIndentGuidesStroke);
+}
+
+.toggle:checked + .lbl-toggle + .collapsible-content {
+  max-height: fit-content;
+  overflow: visible;
+}
+
+.toggle:checked + .lbl-toggle {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.toggle:checked + .lbl-toggle > .codicon-chevron-right {
+  transform: rotate(90deg)
+}
