@@ -39,13 +39,6 @@ export class CodeUsageNode extends vscode.TreeItem {
     } else {
       const detailsChildNodes = [
         new CodeUsageNode(
-          key + ':status',
-          `Status`,
-          'detail',
-          [],
-          variable.status,
-        ),
-        new CodeUsageNode(
           key + ':createdAt',
           `Created Date`,
           'detail',
@@ -58,21 +51,9 @@ export class CodeUsageNode extends vscode.TreeItem {
           'detail',
           [],
           variable.updatedAt,
-        ),
-        new CodeUsageNode(key + ':id', `ID`, 'detail', [], variable._id)
+        )
       ]
 
-      if (variable.description) {
-        detailsChildNodes.unshift(
-          new CodeUsageNode(
-            key + ':description',
-            `Description`,
-            'detail',
-            [],
-            variable.description,
-          ),
-        )
-      }
       if (variable.name) {
         detailsChildNodes.unshift(
           new CodeUsageNode(key + ':name', `Name`, 'detail', [], variable.name),

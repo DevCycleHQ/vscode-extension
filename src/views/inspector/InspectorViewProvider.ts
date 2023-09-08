@@ -282,14 +282,20 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   }
 
   private getDetailsHTML(folder: vscode.WorkspaceFolder) {
-    const name = this.selectedType === 'Variable' ?
-      this.variables[this.selectedKey]?.name :
-      this.features[this.selectedKey]?.name
-    const key = this.selectedType === 'Variable' ?
-      this.variables[this.selectedKey]?.key :
-      this.features[this.selectedKey]?.key
-    const featureName = this.selectedType === 'Variable' &&
-      Object.values(this.features).find((feature) => feature._id === (this.variables[this.selectedKey] as Variable)?._feature)?.name
+    let name, key, featureName, status, createdAt, updatedAt, description, id
+    if (this.selectedType === 'Variable') {
+      name = this.variables[this.selectedKey]?.name
+      key = this.variables[this.selectedKey]?.key
+      createdAt = this.variables[this.selectedKey]?.createdAt
+      updatedAt = this.variables[this.selectedKey]?.updatedAt
+      status = this.variables[this.selectedKey]?.status
+      id = this.variables[this.selectedKey]?._id
+      featureName = Object.values(this.features).find((feature) => feature._id === (this.variables[this.selectedKey] as Variable)?._feature)?.name
+    } else {
+      name = this.features[this.selectedKey]?.name
+      key = this.features[this.selectedKey]?.key
+      id = this.variables[this.selectedKey]?._id
+    }
 
     const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
     const orgId = getOrganizationId(folder)
@@ -315,16 +321,39 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             <label>Key</label>
             <label class="details-value">${key}</label>
           </div>
+          <div class="detail-entry">
+            <label>ID</label>
+            <label class="details-value">${id}</label>
+          </div>
+          ${createdAt ?
+            `<div class="detail-entry">
+            <label>Created Date</label>
+            <label class="details-value">${createdAt}</label>
+          </div>` :
+        ''}
+          ${updatedAt ?
+            `<div class="detail-entry">
+            <label>Updated Date</label>
+            <label class="details-value">${updatedAt}</label>
+          </div>` :
+        ''
+          }
+          ${status && status === 'archived' ?
+            `<div class="detail-entry">
+            <label>Status</label>
+            <label class="details-value">${status}</label>
+          </div>` :
+        ''
+          }
           ${featureName ?
             `<div class="detail-entry">
               <label>Feature</label>
               <div class="detail-entry-value-link" id="feature-link" data-value="${(this.variables[this.selectedKey] as Variable)?._feature}">
                 <label class="details-value">${featureName}</label>
-                <div>${this.inspectorSvg()}</div>
-              </div>
-            </div>` :
-        ''
-      }
+              <div>${this.inspectorSvg()}</div>
+            </div>
+          </div>` :
+      ''}
           
           ${this.selectedType === 'Variable' && this.matches[this.selectedKey] ? `
             <div class="detail-entry">
