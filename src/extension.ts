@@ -133,7 +133,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
     if (filePath === path.join(folder.uri.path, repoConfigPath)) {
       await loadRepoConfig(folder)
-    } else if (settingsConfig.get('refreshUsagesOnSave')) {
+    } else if (vscode.workspace.getConfiguration('devcycle-feature-flags').get('refreshUsagesOnSave')) {
       await usagesDataProvider.refresh(folder, false)
     }
   })
