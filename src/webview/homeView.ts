@@ -32,7 +32,10 @@ function main() {
   for (let i = 0; i < homeSectionDropdowns.length; i++) {
     const dropdown = homeSectionDropdowns[i];
     dropdown.addEventListener('change', handleDropdownValueChange);
+  }
 
+  const editConfigButtons = document.getElementsByClassName("edit-config-button") as HTMLCollectionOf<HTMLAnchorElement>;
+  for (let i = 0; i < editConfigButtons.length; i++) {
     // Edit config button
     const editConfigButton = document.getElementById(`editConfigButton${i}`) as HTMLAnchorElement;
     editConfigButton.addEventListener('click', handleEditConfigClick);
@@ -61,9 +64,9 @@ function handleDropdownValueChange(event: Event) {
 }
 
 const handleEditConfigClick = (event: Event) => {
-  const anchorElement = event.target as HTMLAnchorElement;
+  const buttonElement = event.target as HTMLButtonElement;
   vscode.postMessage({
     type: 'config',
-    folderIndex: anchorElement.dataset.folder
+    folderIndex: buttonElement.dataset.folder
   });
 }
