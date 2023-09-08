@@ -366,7 +366,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
         const variationName = possibleValue[0]
         return `<div class="detail-entry">
           <label>${variationName}</label>
-          <label class="details-value">${possibleValue[1]}</label>
+          <label class="details-value">${JSON.stringify(possibleValue[1])}</label>
         </div>`
       }) || []
   }
@@ -380,7 +380,6 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       </div>
       `
     )) || []
-
   }
 
   private async getFeatureEnvironmentStatusesHTML(folder: vscode.WorkspaceFolder) {
