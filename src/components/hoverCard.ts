@@ -1,9 +1,10 @@
 import * as vscode from 'vscode'
 import { CombinedVariableData, getCombinedVariableDetails } from '../cli'
 import { KEYS, StateManager } from '../StateManager'
+import { OPEN_INSPECTOR_VIEW, OPEN_USAGES_VIEW } from '../commands'
 
-const openInspectorViewCommand = 'command:devcycle-feature-flags.openInspectorView'
-const usagesCommand = 'command:devcycle-feature-flags.openUsagesView'
+const openInspectorViewCommand = `command:${OPEN_INSPECTOR_VIEW}`
+const usagesCommand = `command:${OPEN_USAGES_VIEW}`
 
 export enum INSPECTOR_VIEW_BUTTONS {
   POSSIBLE_VALUES = 'values',

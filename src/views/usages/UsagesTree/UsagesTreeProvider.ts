@@ -8,7 +8,6 @@ import {
 
 import { CodeUsageNode } from './CodeUsageNode'
 import { FolderNode } from '../../utils/tree/FolderNode'
-import { KEYS, StateManager } from '../../../StateManager'
 
 export class UsagesTreeProvider
   implements vscode.TreeDataProvider<CodeUsageNode>

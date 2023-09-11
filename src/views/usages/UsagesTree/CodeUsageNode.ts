@@ -8,7 +8,7 @@ import {
 import path from 'path'
 
 import { KEYS, StateManager } from '../../../StateManager'
-import { COMMAND_OPEN_LINK } from '../../../commands'
+import { OPEN_INSPECTOR_VIEW } from '../../../commands'
 
 export type VariableCodeReference = JSONMatch & { variable?: Variable }
 
@@ -64,19 +64,29 @@ export class CodeUsageNode extends vscode.TreeItem {
       const orgId = getOrganizationId(folder)
       const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
       if (orgId && projectId) {
-        const link = `https://app.devcycle.com/o/${orgId}/p/${projectId}/variables/${variable._id}`
         const linkNode = new CodeUsageNode(
           key + ':link',
-          `Open In Dashboard ↗`,
+          `Inspector`,
           'detail',
           [],
         )
         linkNode.command = {
           title: '',
-          command: COMMAND_OPEN_LINK,
-          arguments: [link],
+          command: OPEN_INSPECTOR_VIEW,
+          arguments: [{ buttonType: 'details', variableKey: variable.key }],
         }
-        linkNode.tooltip = link
+        linkNode.iconPath = {
+          dark: vscode.Uri.joinPath(
+            context.extensionUri,
+            'media',
+            'inspector-white.svg',
+          ),
+          light: vscode.Uri.joinPath(
+            context.extensionUri,
+            'media',
+            'inspector.svg',
+          ),
+        }
         detailsChildNodes.push(linkNode)
       }
 
