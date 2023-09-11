@@ -9,7 +9,6 @@ type InspectorViewMessage =
   | { type: 'variableOrFeature', value: 'Variable' | 'Feature' }
   | { type: 'key', value: string, buttonType?: INSPECTOR_VIEW_BUTTONS, selectedType?: 'Variable' | 'Feature' }
   | { type: 'folder', value: number }
-  | { type: 'command', value: 'removeClass' }
 
 
 const selectAProjectHtml = `<!DOCTYPE html>
@@ -101,11 +100,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       } else if (data.type === 'folder') {
         this.selectedFolder = vscode.workspace.workspaceFolders?.[data.value] as vscode.WorkspaceFolder
         this.matches = StateManager.getFolderState(this.selectedFolder.name, KEYS.CODE_USAGE_KEYS) || {}
-      } else if (data.type === 'command') {
-        if (data.value === 'removeClass') {
-          this.buttonType = undefined
-        }
-      }
+      } 
       webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
     })
     this.webviewIsDisposed = false

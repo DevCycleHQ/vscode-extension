@@ -6,13 +6,16 @@ const vscode = acquireVsCodeApi();
 
 window.addEventListener("load", main);
 
-window.addEventListener('click', (event) => {
-  const clickedElement = event.target
-  // Check if the clicked element is not inside the webview
-  if (!document.body.contains(clickedElement as Node)) {
-    vscode.postMessage({ type:'command', value: 'removeClass' });
-  }
-});
+const focusedElement = document.querySelector('.focus')
+
+if (focusedElement) {
+  focusedElement.scrollIntoView()
+
+  window.addEventListener('click', () => {
+    focusedElement.classList.remove('focus')
+  }, { once: true })
+}
+
 
 window.addEventListener('message', (event) => {
   const message = event.data
