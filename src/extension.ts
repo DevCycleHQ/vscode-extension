@@ -147,11 +147,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
     await executeRefreshAllCommand()
   })
 
-  const disposable = vscode.window.onDidChangeTextEditorSelection(() => {
-    inspectorViewProvider?.postMessageToWebview({ type: 'command', value: 'removeClass' })
-  })
-  
-  context.subscriptions.push(disposable)
 }
 
 export function deactivate() {}
