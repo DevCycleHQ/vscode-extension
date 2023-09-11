@@ -11,11 +11,11 @@ type InspectorViewMessage =
   | { type: 'folder', value: number }
 
 
-const selectAProjectHtml = `<!DOCTYPE html>
+const htmlMessage = (message: string) => `<!DOCTYPE html>
 <html lang="en">
   <body>
     <main>
-      <p>Please select a project to view the inspector.</p>
+      <p>${message}</p>
     </main>
   </body>
 </html>`
@@ -44,6 +44,10 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
 
   private async initializeFeaturesAndVariables(folder?: vscode.WorkspaceFolder) {
     if (!folder) {
+      return
+    }
+    const isLoggedIn = StateManager.getFolderState(folder.name, KEYS.LOGGED_IN)
+    if (!isLoggedIn) {
       return
     }
     try {
@@ -106,16 +110,49 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     this.webviewIsDisposed = false
   }
 
+  private setWebviewHtml(html: string) {
+    if (this._view) {
+      this._view.webview.html = html
+    }
+  }
+
   public async refreshAll() {
+    vscode.workspace.workspaceFolders?.forEach(({ name }) => {
+      StateManager.setFolderState(name, KEYS.FEATURES, undefined)
+      StateManager.setFolderState(name, KEYS.VARIABLES, undefined)
+    })
+    this._refresh()
+  }
+
+  public async refresh(folder: vscode.WorkspaceFolder) {
+    StateManager.setFolderState(folder.name, KEYS.FEATURES, undefined)
+    StateManager.setFolderState(folder.name, KEYS.VARIABLES, undefined)
+    this._refresh()
+  }
+
+  private async _refresh() {
+    if (!this._view) {
+      setTimeout(() => this._refresh(), 100)
+      return
+    }
+    if (!this.selectedFolder) {
+      return
+    }
+    const isLoggedIn = StateManager.getFolderState(this.selectedFolder.name, KEYS.LOGGED_IN)
+    if (!isLoggedIn) {
+      const html = htmlMessage('Please login to view the inspector.')
+      this.setWebviewHtml(html)
+      return
+    }
+
     if (this.isRefreshing) {
       return
     }
 
-    const activeProjectKey = this.selectedFolder ? StateManager.getFolderState(this.selectedFolder.name, KEYS.PROJECT_ID) : undefined
+    const activeProjectKey = StateManager.getFolderState(this.selectedFolder.name, KEYS.PROJECT_ID)
     if (!activeProjectKey) {
-      if (this._view) {
-        this._view.webview.html = selectAProjectHtml
-      }
+      const html = htmlMessage('Please select a project to view the inspector.')
+      this.setWebviewHtml(html)
       return
     }
 
@@ -135,10 +172,6 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       }
     )
     this.isRefreshing = false
-  }
-
-  public async refresh(folder: vscode.WorkspaceFolder) {
-    this.refreshAll()
   }
 
   public revive(panel: vscode.WebviewView) {

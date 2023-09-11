@@ -12,14 +12,8 @@ export async function registerRefreshInspectorCommand(
       COMMAND_REFRESH_INSPECTOR,
       async ({ folder }: { folder?: vscode.WorkspaceFolder } = {}) => {
         if (folder) {
-          StateManager.setFolderState(folder.name, KEYS.FEATURES, undefined)
-          StateManager.setFolderState(folder.name, KEYS.VARIABLES, undefined)
           await inspectorViewProvider.refresh(folder)
         } else {
-          vscode.workspace.workspaceFolders?.forEach(({ name }) => {
-            StateManager.setFolderState(name, KEYS.FEATURES, undefined)
-            StateManager.setFolderState(name, KEYS.VARIABLES, undefined)
-          })
           await inspectorViewProvider.refreshAll()
         }
       },

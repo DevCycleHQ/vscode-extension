@@ -3,6 +3,7 @@ import * as vscode from 'vscode'
 import { FolderNode } from '../utils/tree/FolderNode'
 import { EnvironmentsCLIController } from '../../cli'
 import { EnvironmentNode, KeyListNode } from './nodes'
+import { KEYS, StateManager } from '../../StateManager'
 
 const ENV_ORDER = {
   development: 0,
@@ -31,7 +32,8 @@ export class EnvironmentsTreeProvider
   }
 
   async refresh(folder: vscode.WorkspaceFolder): Promise<void> {
-    if (this.isRefreshing[folder.name]) {
+    const isLoggedIn = StateManager.getFolderState(folder.name, KEYS.LOGGED_IN)
+    if (!isLoggedIn || this.isRefreshing[folder.name]) {
       return
     }
 

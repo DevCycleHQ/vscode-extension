@@ -51,7 +51,9 @@ export class AuthCLIController extends BaseCLIController {
       if (!repoConfigExists && initRepoOnLogin && org) {
         await this.init(org)
       }
+      StateManager.setFolderState(this.folder.name, KEYS.LOGGED_IN, true)
     } catch (e) {
+      StateManager.setFolderState(this.folder.name, KEYS.LOGGED_IN, false)
       if (e instanceof Error) {
         utils.showDebugOutput(`Login failed ${e.message}`)
         throw e
@@ -65,6 +67,7 @@ export class AuthCLIController extends BaseCLIController {
     const { code, error } = await this.execDvc('logout')
     if (code === 0) {
       vscode.window.showInformationMessage('Logged out of DevCycle')
+      StateManager.setFolderState(this.folder.name, KEYS.LOGGED_IN, false)
     } else {
       vscode.window.showInformationMessage(`Logout failed ${error?.message}}`)
     }

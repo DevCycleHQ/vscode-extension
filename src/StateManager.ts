@@ -3,6 +3,7 @@ import { Environment, Feature, FeatureConfiguration, Organization, Project, Vari
 import { RepoConfig } from './utils/loadRepoConfig'
 
 export const enum KEYS {
+  LOGGED_IN = 'logged_in',
   REPO_CONFIG = 'repo_config',
   PROJECT_ID = 'project_id',
   PROJECTS = 'projects',
@@ -25,10 +26,11 @@ export class StateManager {
   static clearState() {
     this.workspaceState.keys().forEach((key) => {
       if (
-          !(key.includes(KEYS.PROJECT_ID)||
-          key.includes(KEYS.ORGANIZATION)||
-          key.includes(KEYS.AUTH0_USER_ID))
-        ) {
+        !key.includes(KEYS.PROJECT_ID) &&
+        !key.includes(KEYS.ORGANIZATION) &&
+        !key.includes(KEYS.AUTH0_USER_ID) &&
+        !key.includes(KEYS.LOGGED_IN)
+      ) {
         this.workspaceState.update(key, undefined)
       }
     })
@@ -36,11 +38,13 @@ export class StateManager {
 
   static clearFolderState(folder: string) {
     this.workspaceState.keys().forEach((key) => {
-      if (key.startsWith(`${folder}.`) && !(
-        key.includes(KEYS.PROJECT_ID)||
-        key.includes(KEYS.ORGANIZATION)||
-        key.includes(KEYS.AUTH0_USER_ID))
-        ) {
+      if (
+        key.startsWith(`${folder}.`) &&
+        !key.includes(KEYS.PROJECT_ID) &&
+        !key.includes(KEYS.ORGANIZATION) &&
+        !key.includes(KEYS.AUTH0_USER_ID) &&
+        !key.includes(KEYS.LOGGED_IN)
+      ) {
         this.workspaceState.update(key, undefined)
       }
     })
@@ -70,6 +74,7 @@ export class StateManager {
     return this.workspaceState.get(key)
   }
 
+  static setFolderState(folder: string, key: KEYS.LOGGED_IN, value: boolean): Thenable<void>
   static setFolderState(folder: string, key: KEYS.REPO_CONFIG, value: RepoConfig): Thenable<void>
   static setFolderState(folder: string, key: KEYS.PROJECT_ID, value: string | undefined): Thenable<void>
   static setFolderState(folder: string, key: KEYS.PROJECTS, value: Record<string, Project> | undefined): Thenable<void>
@@ -83,6 +88,7 @@ export class StateManager {
     return this.workspaceState.update(`${folder}.${key}`, value)
   }
 
+  static getFolderState(folder: string, key: KEYS.LOGGED_IN): boolean | undefined
   static getFolderState(folder: string, key: KEYS.REPO_CONFIG): RepoConfig | undefined
   static getFolderState(folder: string, key: KEYS.PROJECT_ID): string | undefined
   static getFolderState(folder: string, key: KEYS.PROJECTS): Record<string, Project> | undefined
