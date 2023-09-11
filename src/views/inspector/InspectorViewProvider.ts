@@ -35,6 +35,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   features: Record<string, Feature> = {}
   matches: Record<string, boolean> = {}
   isRefreshing: boolean = false
+  webviewIsDisposed: boolean = false
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this.selectedType = 'Variable'
@@ -70,6 +71,10 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   public async resolveWebviewView(webviewView: vscode.WebviewView) {
     this._view = webviewView
 
+    webviewView.onDidDispose(() => {
+      this.webviewIsDisposed = true
+    })
+
     webviewView.webview.options = {
       enableScripts: true,
       enableCommandUris: true,
@@ -103,6 +108,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       }
       webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
     })
+    this.webviewIsDisposed = false
   }
 
   public async refreshAll() {
@@ -126,7 +132,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       },
       async () => {
         this.selectedFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0]
-        if (!this._view) {
+        if (!this._view || this.webviewIsDisposed) {
           return
         }
         await this.initializeFeaturesAndVariables(this.selectedFolder)
