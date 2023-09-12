@@ -2,10 +2,10 @@ import * as vscode from 'vscode'
 import { describe, it, afterEach } from 'mocha'
 import sinon from 'sinon'
 import { AuthCLIController } from '../cli'
-import { loginAndRefresh } from './loginAndRefresh'
+import { loginAndRefreshAll } from './loginAndRefresh'
 import { COMMAND_REFRESH_ALL } from '../commands'
 
-describe('loginAndRefresh', () => {
+describe('loginAndRefreshAll', () => {
   const folder = { name: 'test-folder', uri: vscode.Uri.parse('file:///test-folder'), index: 0 }
   const folder2 = { name: 'test-folder2', uri: vscode.Uri.parse('file:///test-folder2'), index: 1 }
 
@@ -18,19 +18,20 @@ describe('loginAndRefresh', () => {
     sinon.stub(vscode.commands, 'executeCommand')
     const mockLogin = sinon.stub(AuthCLIController.prototype, 'login').resolves()
 
-    await loginAndRefresh()
+    await loginAndRefreshAll()
 
     sinon.assert.calledTwice(mockLogin)
   })
 
-  it('refreshes all folders', async () => {
+  it('calls refresh for each folder', async () => {
     sinon.stub(vscode.workspace, 'workspaceFolders').value([folder, folder2])
     const mockExecuteCommand = sinon.stub(vscode.commands, 'executeCommand')
     sinon.stub(AuthCLIController.prototype, 'login').resolves()
 
-    await loginAndRefresh()
+    await loginAndRefreshAll()
 
-    sinon.assert.calledWith(mockExecuteCommand, COMMAND_REFRESH_ALL, { folder: undefined })
+    sinon.assert.calledWith(mockExecuteCommand, COMMAND_REFRESH_ALL, { folder })
+    sinon.assert.calledWith(mockExecuteCommand, COMMAND_REFRESH_ALL, { folder: folder2 })
   })
 
   it('sets hasCredentialsAndProject to true', async () => {
@@ -38,7 +39,7 @@ describe('loginAndRefresh', () => {
     const mockExecuteCommand = sinon.stub(vscode.commands, 'executeCommand')
     sinon.stub(AuthCLIController.prototype, 'login').resolves()
 
-    await loginAndRefresh()
+    await loginAndRefreshAll()
 
     sinon.assert.calledWith(
       mockExecuteCommand,
@@ -53,7 +54,7 @@ describe('loginAndRefresh', () => {
     const mockExecuteCommand = sinon.stub(vscode.commands, 'executeCommand')
     sinon.stub(AuthCLIController.prototype, 'login').throws(new Error('test error'))
 
-    await loginAndRefresh().catch(() => {})
+    await loginAndRefreshAll().catch(() => {})
 
     sinon.assert.notCalled(mockExecuteCommand)
   })

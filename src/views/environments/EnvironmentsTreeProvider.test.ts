@@ -6,6 +6,9 @@ import { EnvironmentsTreeProvider } from './EnvironmentsTreeProvider'
 import { Environment, EnvironmentsCLIController } from '../../cli'
 import { EnvironmentNode, KeyListNode, KeyNode, LinkNode } from './nodes'
 import { FolderNode } from '../utils/tree/FolderNode'
+import { StateManager } from '../../StateManager'
+
+const mockGetState = sinon.stub().returns(true)
 
 describe('EnvironmentsTreeProvider', () => {
   const folder = { name: 'test-folder', uri: vscode.Uri.parse('file:///test-folder'), index: 0 }
@@ -33,6 +36,7 @@ describe('EnvironmentsTreeProvider', () => {
     getAllEnvironmentsStub = sinon.stub(EnvironmentsCLIController.prototype, 'getAllEnvironments').resolves({
       'development': environment
     })
+    StateManager.getFolderState = mockGetState
   })
 
   afterEach(() => {

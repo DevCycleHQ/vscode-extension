@@ -27,6 +27,18 @@ function main() {
     });
   });
 
+  // Login button
+  const loginButtons = document.getElementsByClassName("login-button")
+  for (let i = 0; i < loginButtons.length; i++) {
+    loginButtons[i].addEventListener('click', (event) => {
+      const buttonElement = event.target as HTMLButtonElement
+      vscode.postMessage({
+        type: 'login',
+        folderIndex: buttonElement.dataset.folder
+      });
+    })
+  }
+
   // Home section dropdowns
   const homeSectionDropdowns = document.getElementsByClassName("home-dropdown") as HTMLCollectionOf<Dropdown>;
   for (let i = 0; i < homeSectionDropdowns.length; i++) {
@@ -34,11 +46,11 @@ function main() {
     dropdown.addEventListener('change', handleDropdownValueChange);
   }
 
-  const editConfigButtons = document.getElementsByClassName("edit-config-button") as HTMLCollectionOf<HTMLAnchorElement>;
+  const editConfigButtons = document.getElementsByClassName("edit-config-button")
   for (let i = 0; i < editConfigButtons.length; i++) {
     // Edit config button
-    const editConfigButton = document.getElementById(`editConfigButton${i}`) as HTMLAnchorElement;
-    editConfigButton.addEventListener('click', handleEditConfigClick);
+    const editConfigButton = document.getElementById(`editConfigButton${i}`)
+    editConfigButton?.addEventListener('click', handleEditConfigClick);
   }
 }
 

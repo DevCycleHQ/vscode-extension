@@ -6,10 +6,12 @@ import { COMMAND_LOGOUT } from '../../commands/logout'
 import { KEYS, StateManager } from '../../StateManager'
 import { updateRepoConfig } from '../../utils/updateRepoConfigProject'
 import { executeRefreshAllCommand } from '../../commands'
+import { loginAndRefresh } from '../../utils/loginAndRefresh'
 
 type HomeViewMessage =
   | { type: 'project' | 'organization', value: string, folderIndex: number }
   | { type: 'config', folderIndex: number }
+  | { type: 'login', folderIndex: number }
   | { type: 'logout' }
 
 export class HomeViewProvider implements vscode.WebviewViewProvider {
@@ -37,7 +39,10 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
       const folder = vscode.workspace.workspaceFolders?.[data.folderIndex]
       if (!folder) { return }
 
-      if (data.type === 'organization') {
+      if (data.type === 'login') {
+        await loginAndRefresh([folder])
+        webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
+      } else if (data.type === 'organization') {
         // TODO Add a generic loading state for sidebars that we can use while the organization is being fetched
         await vscode.window.withProgress(
           {
@@ -85,6 +90,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const projects = await projectsController.getAllProjects()
     const organizations = await organizationsController.getAllOrganizations()
     const activeOrganizationName = StateManager.getFolderState(folder.name, KEYS.ORGANIZATION)?.name
+    const isLoggedIn = StateManager.getFolderState(folder.name, KEYS.LOGGED_IN)
 
     const projectId = `project${folder.index}`
     const organizationId = `organization${folder.index}`
@@ -113,22 +119,26 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
         <div class="collaspsible-content-indent"></div>
         ` : ''
       }
+      ${isLoggedIn ? `
         <div class="home-view-form-container">
-            <label class="home-view-dropdown-label">
-              <i class="codicon codicon-briefcase"></i>Organization
-            </label>
-            <vscode-dropdown id="${organizationId}" class="home-dropdown" data-folder="${folder.index}" data-type="organization">
-              ${orgOptions.join('')}
-            </vscode-dropdown>
-            <label class="home-view-dropdown-label">
-              <i class="codicon codicon-star-empty"></i>Project</label>
-            <vscode-dropdown id="${projectId}" class="home-dropdown" data-folder="${folder.index}" data-type="project">
-              ${projectOptions.join('')}
-            </vscode-dropdown>
+          <label class="home-view-dropdown-label">
+            <i class="codicon codicon-briefcase"></i>Organization
+          </label>
+          <vscode-dropdown id="${organizationId}" class="home-dropdown" data-folder="${folder.index}" data-type="organization">
+            ${orgOptions.join('')}
+          </vscode-dropdown>
+          <label class="home-view-dropdown-label">
+            <i class="codicon codicon-star-empty"></i>Project</label>
+          <vscode-dropdown id="${projectId}" class="home-dropdown" data-folder="${folder.index}" data-type="project">
+            ${projectOptions.join('')}
+          </vscode-dropdown>
           <button id="${editButtonId}" class="icon-button edit-config-button" data-folder="${folder.index}">
             <i class="codicon codicon-edit"></i>Edit Config
           </button>
         </div>
+      `: `
+        <button class="login-button" data-folder="${folder.index}">Login</button>
+      ` }
       ${ showHeader ? ` </div>` : '' }
     `
   }

@@ -32,6 +32,7 @@ import cliUtils from './cli/utils'
 import utils from './utils'
 import { InspectorViewProvider, registerInspectorViewProvider } from './views/inspector'
 import { loadRepoConfig } from './utils/loadRepoConfig'
+import { loginAndRefresh } from './utils/loginAndRefresh'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -72,7 +73,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const environmentsDataProvider = await registerEnvironmentsViewProvider(context)
   const inspectorViewProvider = await registerInspectorViewProvider(context)
   const refreshProviders: (UsagesTreeProvider | EnvironmentsTreeProvider | InspectorViewProvider)[] = [
-    usagesDataProvider, 
+    usagesDataProvider,
     environmentsDataProvider,
     inspectorViewProvider
   ]
@@ -97,7 +98,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const settingsConfig = vscode.workspace.getConfiguration('devcycle-feature-flags')
   
   if (settingsConfig.get('loginOnWorkspaceOpen')) {
-    await utils.loginAndRefresh()
+    await utils.loginAndRefreshAll()
   }
 
   // On Hover
@@ -140,11 +141,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
     utils.checkForWorkspaceFolders()
-    for (const folder of event.added) {
-      const cli = new AuthCLIController(folder)
-      await cli.login()
-    }
-    await executeRefreshAllCommand()
+    await loginAndRefresh([...event.added])
   })
 
 }

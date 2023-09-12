@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
-import { loginAndRefresh } from '../../utils/loginAndRefresh'
+import { loginAndRefreshAll } from '../../utils/loginAndRefresh'
 
 const enum ACTIONS {
   LOGIN = 'login',
@@ -31,7 +31,7 @@ export class LoginViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data: Data) => {
       try {
-        await loginAndRefresh()
+        await loginAndRefreshAll()
       } catch (e) {
         webviewView.webview.html = this._getHtmlForWebview(
           webviewView.webview,
