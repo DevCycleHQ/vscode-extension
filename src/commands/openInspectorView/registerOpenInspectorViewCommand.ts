@@ -9,11 +9,11 @@ export async function registerOpenInspectorViewCommand(
     context.subscriptions.push(
         vscode.commands.registerCommand(
             OPEN_INSPECTOR_VIEW,
-            async ({ buttonType, variableKey }: { buttonType: string, variableKey: string }) => {
+            async ({ buttonType, variableKey, folderUri }: { buttonType: string, variableKey: string, folderUri?: string }) => {
                 try {
-                    const activeDocumentUri = vscode.window.activeTextEditor?.document.uri
+                    const activeDocumentUri = (folderUri && vscode.Uri.parse(folderUri)) || vscode.window.activeTextEditor?.document.uri
                     const currentFolder = activeDocumentUri ? vscode.workspace.getWorkspaceFolder(activeDocumentUri) : undefined
-                
+
                     if (!currentFolder) {
                         return
                     }
