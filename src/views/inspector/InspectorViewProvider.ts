@@ -57,7 +57,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       this.matches = await usagesCLIController.usagesKeys()
 
       // default to the alphabetically first variable in variable list
-      if (Object.values(this.variables).length) {
+      // only default if the currently selected key is no longer in the list of variables
+      if (Object.values(this.variables).length && !this.variables[this.selectedKey]) {
         this.selectedKey = this.orderedVariables[0].key
       }
     } catch (e) {
@@ -100,6 +101,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       } else if (data.type === 'folder') {
         this.selectedFolder = vscode.workspace.workspaceFolders?.[data.value] as vscode.WorkspaceFolder
         this.matches = StateManager.getFolderState(this.selectedFolder.name, KEYS.CODE_USAGE_KEYS) || {}
+        await this.initializeFeaturesAndVariables(this.selectedFolder)
       } 
       webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
     })
@@ -126,7 +128,10 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
         location: { viewId: 'devcycle-inspector' },
       },
       async () => {
-        this.selectedFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0]
+        if (!(this.selectedFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.includes(this.selectedFolder))) {
+          this.selectedFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0]
+        }
+
         if (!this._view || this.webviewIsDisposed) {
           return
         }

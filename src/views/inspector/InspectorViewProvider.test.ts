@@ -123,5 +123,14 @@ describe('InspectorViewProvider', () => {
 
       sinon.assert.match(inspectorViewProvider.selectedFolder, undefined)
     })
+
+    it('refreshing should not update the selectedKey or selectedFolder if they are still valid', async () => {
+      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      const selectedKey = inspectorViewProvider.selectedKey
+      const selectedFolder = inspectorViewProvider.selectedFolder
+      await inspectorViewProvider.refreshAll()
+      sinon.assert.match(inspectorViewProvider.selectedFolder, selectedFolder)
+      sinon.assert.match(inspectorViewProvider.selectedKey, selectedKey)
+    })
   })
 })
