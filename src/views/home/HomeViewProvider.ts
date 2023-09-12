@@ -17,10 +17,17 @@ type HomeViewMessage =
 export class HomeViewProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView
   _doc?: vscode.TextDocument
+  isRefreshing: boolean = false
+  webviewIsDisposed: boolean = false
+
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
   public async resolveWebviewView(webviewView: vscode.WebviewView) {
     this._view = webviewView
+
+    webviewView.onDidDispose(() => {
+      this.webviewIsDisposed = true
+    })
 
     webviewView.webview.options = {
       enableScripts: true,
@@ -55,7 +62,6 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
           const organizationsController = new OrganizationsCLIController(folder)
           await organizationsController.selectOrganization(data.value, false)
           await executeRefreshAllCommand()
-          webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
         })
       } else if (data.type === 'project') {
         const projectsController = new ProjectsCLIController(folder)
@@ -77,10 +83,37 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
         }
       }
     })
+
+    this.webviewIsDisposed = false
   }
 
   public revive(panel: vscode.WebviewView) {
     this._view = panel
+  }
+
+  public async refreshAll() {
+    if (this.isRefreshing) {
+      return
+    }
+
+    this.isRefreshing = true
+
+    await vscode.window.withProgress(
+      {
+        location: { viewId: 'devcycle-home' },
+      },
+      async () => {
+        if (!this._view || this.webviewIsDisposed) {
+          return
+        }
+        this._view.webview.html = await this._getHtmlForWebview(this._view.webview)
+      }
+    )
+    this.isRefreshing = false
+  }
+
+  public async refresh() {
+    await this.refreshAll()
   }
 
   private async getBodyHtml(folder: vscode.WorkspaceFolder, showHeader?: boolean): Promise<string> {

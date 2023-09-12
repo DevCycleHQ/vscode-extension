@@ -2,7 +2,7 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
 import { KEYS, StateManager } from './StateManager'
-import { AuthCLIController, BaseCLIController, getOrganizationId } from './cli'
+import { BaseCLIController, getOrganizationId } from './cli'
 import { getHoverString } from './components/hoverCard'
 import { trackRudderstackEvent } from './RudderStackService'
 import { registerStartupViewProvider } from './views/startup'
@@ -10,9 +10,8 @@ import { registerLoginViewProvider } from './views/login'
 import { UsagesTreeProvider, registerUsagesViewProvider } from './views/usages'
 import { EnvironmentsTreeProvider, registerEnvironmentsViewProvider } from './views/environments'
 import { registerResourcesViewProvider } from './views/resources'
-import { registerHomeViewProvider } from './views/home'
+import { HomeViewProvider, registerHomeViewProvider } from './views/home'
 import {
-  executeRefreshAllCommand,
   registerRefreshAllCommand,
   registerInitCommand,
   registerUsagesNodeClickedCommand,
@@ -72,14 +71,15 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const { usagesDataProvider, usagesTreeView } = await registerUsagesViewProvider(context)
   const environmentsDataProvider = await registerEnvironmentsViewProvider(context)
   const inspectorViewProvider = await registerInspectorViewProvider(context)
-  const refreshProviders: (UsagesTreeProvider | EnvironmentsTreeProvider | InspectorViewProvider)[] = [
-    usagesDataProvider,
+  const homeViewProvider = await registerHomeViewProvider(context)
+  const refreshProviders: (UsagesTreeProvider | EnvironmentsTreeProvider | InspectorViewProvider | HomeViewProvider)[] = [
+    usagesDataProvider, 
     environmentsDataProvider,
-    inspectorViewProvider
+    inspectorViewProvider,
+    homeViewProvider
   ]
 
   await registerResourcesViewProvider(context)
-  await registerHomeViewProvider(context)
   await registerOpenInspectorViewCommand(context, inspectorViewProvider)
   await registerUsagesNodeClickedCommand(context)
   await registerInitCommand(context)
