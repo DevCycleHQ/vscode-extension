@@ -97,7 +97,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const settingsConfig = vscode.workspace.getConfiguration('devcycle-feature-flags')
   
   if (settingsConfig.get('loginOnWorkspaceOpen')) {
-    utils.loginAndRefresh()
+    await utils.loginAndRefresh()
   }
 
   // On Hover
