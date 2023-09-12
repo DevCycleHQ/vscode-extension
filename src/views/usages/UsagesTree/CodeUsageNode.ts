@@ -59,36 +59,6 @@ export class CodeUsageNode extends vscode.TreeItem {
           new CodeUsageNode(key + ':name', `Name`, 'detail', [], variable.name),
         )
       }
-      
-
-      const orgId = getOrganizationId(folder)
-      const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
-      if (orgId && projectId) {
-        const linkNode = new CodeUsageNode(
-          key + ':link',
-          `Inspector`,
-          'detail',
-          [],
-        )
-        linkNode.command = {
-          title: '',
-          command: OPEN_INSPECTOR_VIEW,
-          arguments: [{ buttonType: 'details', variableKey: variable.key }],
-        }
-        linkNode.iconPath = {
-          dark: vscode.Uri.joinPath(
-            context.extensionUri,
-            'media',
-            'inspector-white.svg',
-          ),
-          light: vscode.Uri.joinPath(
-            context.extensionUri,
-            'media',
-            'inspector.svg',
-          ),
-        }
-        detailsChildNodes.push(linkNode)
-      }
 
       const variableDetailsRoot = new CodeUsageNode(
         key,
@@ -97,7 +67,7 @@ export class CodeUsageNode extends vscode.TreeItem {
         detailsChildNodes,
       )
       children.push(variableDetailsRoot)
-    } 
+    }
 
     const usagesChildNodes = references.map((reference) =>
       this.usageFrom(match, reference, folder.uri.fsPath),
@@ -109,6 +79,33 @@ export class CodeUsageNode extends vscode.TreeItem {
       usagesChildNodes,
     )
     children.push(usagesRoot)
+
+    if (variable) {
+      const inspectorLinkNode = new CodeUsageNode(
+        key + ':link',
+        `Inspector`,
+        'detail',
+        [],
+      )
+      inspectorLinkNode.command = {
+        title: '',
+        command: OPEN_INSPECTOR_VIEW,
+        arguments: [{ buttonType: 'details', variableKey: variable.key, folderUri: folder.uri.fsPath }],
+      }
+      inspectorLinkNode.iconPath = {
+        dark: vscode.Uri.joinPath(
+          context.extensionUri,
+          'media',
+          'inspector-white.svg',
+        ),
+        light: vscode.Uri.joinPath(
+          context.extensionUri,
+          'media',
+          'inspector.svg',
+        ),
+      }
+      children.push(inspectorLinkNode)
+    }
 
     const instance = new CodeUsageNode(key, key, 'flag', children)
     instance.key = key
