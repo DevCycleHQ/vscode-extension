@@ -38,7 +38,7 @@ runs:
       working-directory: devcycle-docs
       run: |
         git checkout -b "$BRANCH_NAME"
-        sed -i "s/const VSCODE_EXTENSION_VERSION = .*/const VSCODE_EXTENSION_VERSION = '${{ inputs.latest_tag }}' \/\/ auto updated by extension release workflow/" docusaurus.config.js
+        sed -i "s/const VSCODE_EXTENSION_VERSION = .*/const VSCODE_EXTENSION_VERSION = 'v${{ inputs.latest_tag }}' \/\/ auto updated by extension release workflow/" docusaurus.config.js
         git add docusaurus.config.js
         git commit -m "Update VSCode Extension version to ${{ inputs.latest_tag }}"
 
