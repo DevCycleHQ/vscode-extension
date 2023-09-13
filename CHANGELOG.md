@@ -1,25 +1,27 @@
 ## Features
 
-- feat: add environment statuses to feature by @L-Joli in #158
+- feat: Don't require all folders to be logged in by @laurawarr in #170
 
 ## Bug Fixes
 
-- fix: open folder button not working in prod by @L-Joli in #155
-- fix: added clickable feature detail to switch to feature in inspector by @jsalaber in #157
-- fix: don't evaluate getFeatureEnvironmentStatusesHTML for variables by @laurawarr in #160
+- fix: refresh usages on save setting by @nsalamad in #163
+- fix: json stringify possible values due to possible values possibly being JSON by @jsalaber in #161
+- fix: exception in homeView.ts by @nsalamad in #165
+- fix: Webview is disposed error on login by @nsalamad in #168
+- fix: project not set when two folders opened by @L-Joli in #169
+- fix: inspector button not working when no file is open by @nsalamad in #171
 
 ## Other Changes
 
-- chore: skip integration tests on workflow by @L-Joli in #156
-- chore: add indent indicators to the inspector view by @nsalamad in #162
+- chore: remove and update event listeners for removing focus style by @L-Joli in #167
+- chore: add homeViewProvider to refreshProviders by @L-Joli in #173
+- chore: fix styling for light mode and dark mode hover states by @jsalaber in #174
 
 
 
 ## Uncategorized
 
-- Fix broken github action to update docs by @emmawillis in #151
-- Dvc 0000 update docs by @emmawillis in #152
-- Add click handlers to add edit config buttons by @emmawillis in #154
-- fix selectedType resetting to Variable after changing feature key in dropdown by @elliotCamblor in #153
-- fix inspector refresh by @elliotCamblor in #159
+- Move details from usages to inspector, keep Created Date and Updated date in usages by @elliotCamblor in #164
+- replace open in dashboard option with an inspector link in usages by @elliotCamblor in #166
+- fix inspector to work properly with multiple folders open in the workspace by @elliotCamblor in #172
 
