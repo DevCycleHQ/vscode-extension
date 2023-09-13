@@ -43,8 +43,8 @@ body {
 }
 
 .icon-link:hover, .edit-config-button:hover, .icon-button:hover {
-  background-color: var(--vscode-button-hoverBackground);
-  color: var(--vscode-editorWidget-background);
+  background-color: var(--vscode-inputOption-hoverBackground);
+  color: var(--vscode-foreground);
   text-decoration: none;
 }
 
