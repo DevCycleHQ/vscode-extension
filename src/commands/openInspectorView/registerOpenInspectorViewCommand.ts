@@ -19,7 +19,13 @@ export async function registerOpenInspectorViewCommand(
                     }
 
                     await vscode.commands.executeCommand('devcycle-inspector.focus')
-                    inspectorViewProvider.postMessageToWebview({buttonType, type: 'key', value: variableKey, selectedType: 'Variable'})
+                    inspectorViewProvider.postMessageToWebview({
+                        buttonType,
+                        type: 'key',
+                        value: variableKey,
+                        selectedFolder: currentFolder,
+                        selectedType: 'Variable'
+                    })
                 } catch (error) {
                     console.error("Failed to open inspector view: ", error)
                 }

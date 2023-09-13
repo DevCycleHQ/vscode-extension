@@ -27,7 +27,7 @@ export class CodeUsageNode extends vscode.TreeItem {
   ) {
     const children = []
     const { key, references, variable } = match
-
+    const folderUri = folder.uri.fsPath
     if (!variable) {
       const notFoundNode = new CodeUsageNode(
         key + ':not-found',
@@ -70,7 +70,7 @@ export class CodeUsageNode extends vscode.TreeItem {
     }
 
     const usagesChildNodes = references.map((reference) =>
-      this.usageFrom(match, reference, folder.uri.fsPath),
+      this.usageFrom(match, reference, folderUri),
     )
     const usagesRoot = new CodeUsageNode(
       key,
@@ -90,7 +90,7 @@ export class CodeUsageNode extends vscode.TreeItem {
       inspectorLinkNode.command = {
         title: '',
         command: OPEN_INSPECTOR_VIEW,
-        arguments: [{ buttonType: 'details', variableKey: variable.key, folderUri: folder.uri.fsPath }],
+        arguments: [{ buttonType: 'details', variableKey: variable.key, folderUri }],
       }
       inspectorLinkNode.iconPath = {
         dark: vscode.Uri.joinPath(
