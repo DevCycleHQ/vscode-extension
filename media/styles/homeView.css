@@ -42,9 +42,9 @@ body {
   padding: .3rem;
 }
 
-.icon-link:hover {
-  background-color: var(--vscode-button-secondaryHoverBackground);
-  color: var(--vscode-foreground);
+.icon-link:hover, .edit-config-button:hover, .icon-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+  color: var(--vscode-editorWidget-background);
   text-decoration: none;
 }
 
@@ -92,8 +92,4 @@ input[type='checkbox'] {
 .edit-config-button {
   padding: 0 .3rem;
   margin-left: -0.3rem;
-}
-
-.edit-config:hover {
-  background-color: var(--vscode-button-secondaryHoverBackground);
 }
