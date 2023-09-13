@@ -14,7 +14,10 @@ export type Organization = {
 export class OrganizationsCLIController extends BaseCLIController {
   projectController: ProjectsCLIController
 
-  constructor(folder: vscode.WorkspaceFolder) {
+  constructor(
+    folder: vscode.WorkspaceFolder,
+    public headlessLogin = false
+  ) {
     super(folder)
     this.projectController = new ProjectsCLIController(folder)
   }
@@ -52,6 +55,9 @@ export class OrganizationsCLIController extends BaseCLIController {
 
       const projectFromConfig = await this.projectController.selectProjectFromConfig()
       if (!projectFromConfig) {
+        if (this.headlessLogin) {
+          throw new Error('No project found in config, skipping auto-login')
+        }
         const projectMap = await this.projectController.getAllProjects() || {}
         const projectKeys = Object.keys(projectMap)
         await this.projectController.selectProjectFromList(projectKeys)
@@ -85,8 +91,8 @@ export class OrganizationsCLIController extends BaseCLIController {
   }
 
   public async selectOrganization(org: Organization | string, selectProject?: boolean) {
-    const orgName = typeof org === 'string' ? org : org?.name
-    const { code, error, output } = await this.execDvc(`organizations select --org=${orgName}`)
+    const orgId = typeof org === 'string' ? org : org?.id
+    const { code, error, output } = await this.execDvc(`organizations select --org=${orgId}`)
 
     if (code !== 0) {
       vscode.window.showErrorMessage(

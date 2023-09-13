@@ -10,7 +10,7 @@ const mockGetState = sinon.stub().returns(null)
 
 describe('OrganizationsCLIController', () => {
   const folder = { name: 'test-folder', uri: vscode.Uri.parse('file:///test-folder'), index: 0 }
-  const organizationsCLIController = new OrganizationsCLIController(folder)
+  let organizationsCLIController: OrganizationsCLIController
 
   let execDvcStub: sinon.SinonStub
   let selectProjectFromConfigStub: sinon.SinonStub
@@ -21,6 +21,7 @@ describe('OrganizationsCLIController', () => {
     StateManager.setFolderState = mockSetState
     mockGetState.returns(null)
 
+    organizationsCLIController = new OrganizationsCLIController(folder)
     execDvcStub = sinon.stub(organizationsCLIController, 'execDvc').resolves({
       code: 0,
       output: '[]',
@@ -60,6 +61,24 @@ describe('OrganizationsCLIController', () => {
       sinon.assert.notCalled(selectProjectFromListStub)
     })
 
+
+    it('does not prompt for project from list if headlessLogin is true', async () => {
+      mockGetState.returns({ org: { id: '123' } })
+      selectProjectFromConfigStub.resolves(undefined)
+      execDvcStub.resolves({ code: 0, output: '[]', error: null })
+      let errorThrown = false
+
+      try {
+        organizationsCLIController.headlessLogin = true
+        await organizationsCLIController.selectOrganizationFromConfig()
+      } catch (e) {
+        expect(e).to.haveOwnProperty('message', 'No project found in config, skipping auto-login')
+        errorThrown = true
+      }
+      expect(errorThrown).to.be.true
+      sinon.assert.notCalled(selectProjectFromListStub)
+    })
+
     it('prompts for project from list if it does not exist in the config', async () => {
       mockGetState.returns({ org: { id: '123' } })
       selectProjectFromConfigStub.resolves(undefined)
@@ -90,12 +109,12 @@ describe('OrganizationsCLIController', () => {
 
       expect(result).to.equal(org)
 
-      assert.isTrue(execDvcStub.calledWithExactly(`organizations select --org=${org.name}`))
+      assert.isTrue(execDvcStub.calledWithExactly(`organizations select --org=${org.id}`))
     })
 
     it('calls cli to select organization after prompting user to select', async () => {
       const org1 = { id: '123', name: 'org_123', display_name: 'Org 123' }
-      const org2 = { id: 'anc', name: 'org_abc', display_name: 'Org ABC' }
+      const org2 = { id: 'abc', name: 'org_abc', display_name: 'Org ABC' }
       const showQuickPickStub = sinon
         .stub(vscode.window, 'showQuickPick')
         .resolves({ label: org2.display_name, value: org2 } as vscode.QuickPickItem)
@@ -104,7 +123,7 @@ describe('OrganizationsCLIController', () => {
 
       expect(result).to.equal(org2)
 
-      assert.isTrue(execDvcStub.calledWithExactly(`organizations select --org=${org2.name}`))
+      assert.isTrue(execDvcStub.calledWithExactly(`organizations select --org=${org2.id}`))
       showQuickPickStub.restore()
     })
   })
