@@ -4,6 +4,7 @@ import { BaseCLIController } from './BaseCLIController'
 
 export type Variable = {
   key: string
+  type: 'String' | 'Number' | 'Boolean' | 'JSON'
   _feature: string
   _id: string
   name: string
