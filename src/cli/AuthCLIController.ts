@@ -8,14 +8,17 @@ import utils from '../utils'
 export class AuthCLIController extends BaseCLIController {
   organizationsController: OrganizationsCLIController
 
-  constructor(folder: vscode.WorkspaceFolder) {
+  constructor(
+    folder: vscode.WorkspaceFolder,
+    public headlessLogin = false
+  ) {
     super(folder)
-    this.organizationsController = new OrganizationsCLIController(folder)
+    this.organizationsController = new OrganizationsCLIController(folder, headlessLogin)
   }
 
   public async init(organization: Organization) {
     showBusyMessage('Initializing DevCycle')
-    const { code, error } = await this.execDvc(`repo init --org=${organization.name}`)
+    const { code, error } = await this.execDvc(`repo init --org=${organization.id}`)
     if (code !== 0) {
       throw error
     }
@@ -33,6 +36,9 @@ export class AuthCLIController extends BaseCLIController {
         const orgFromConfig = await this.organizationsController.selectOrganizationFromConfig()
 
         if (!orgFromConfig) {
+          if (this.headlessLogin) {
+            throw new Error('No organization found in config, skipping auto-login')
+          }
           const { error, output: orgResponse } = await this.execDvc('organizations get')
           if (error) throw error
           const organizations = JSON.parse(orgResponse) as Organization[]
@@ -48,7 +54,7 @@ export class AuthCLIController extends BaseCLIController {
         .getConfiguration('devcycle-feature-flags')
         .get('initRepoOnLogin')
       const org = StateManager.getFolderState(this.folder.name, KEYS.ORGANIZATION)
-      if (!repoConfigExists && initRepoOnLogin && org) {
+      if (!this.headlessLogin && !repoConfigExists && initRepoOnLogin && org) {
         await this.init(org)
       }
       StateManager.setFolderState(this.folder.name, KEYS.LOGGED_IN, true)

@@ -98,7 +98,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const settingsConfig = vscode.workspace.getConfiguration('devcycle-feature-flags')
   
   if (settingsConfig.get('loginOnWorkspaceOpen')) {
-    await utils.loginAndRefreshAll()
+    await utils.loginAndRefreshAll(true)
   }
 
   // On Hover
@@ -141,7 +141,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
     utils.checkForWorkspaceFolders()
-    await loginAndRefresh([...event.added])
+    await loginAndRefresh([...event.added], true)
   })
 
 }

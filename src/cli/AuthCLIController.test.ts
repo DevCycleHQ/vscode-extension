@@ -38,11 +38,11 @@ describe('AuthCLIController', () => {
     it('calls cli with specified org', async () => {
       mockGetState.returns(null)
 
-      const org = { name: 'org123' } as Organization
+      const org = { id: 'org_123', name: 'org123' } as Organization
       const cli = new AuthCLIController(folder)
       await cli.init(org)
 
-      sinon.assert.calledWith(execDvcStub, 'repo init --org=org123')
+      sinon.assert.calledWith(execDvcStub, 'repo init --org=org_123')
     })
   })
 
@@ -61,6 +61,22 @@ describe('AuthCLIController', () => {
       await cli.login()
 
       sinon.assert.notCalled(selectOrganizationFromConfigStub)
+      sinon.assert.notCalled(selectOrganizationFromListStub)
+    })
+
+    it('does not trigger org list selection if headlessLogin is true', async () => {
+      sinon.stub(AuthCLIController.prototype, 'isLoggedIn').resolves(false)
+      selectOrganizationFromConfigStub.resolves(false)
+      let errorThrown = false
+
+      try {
+        const cli = new AuthCLIController(folder, true)
+        await cli.login()
+      } catch (e) {
+        expect(e).to.haveOwnProperty('message', 'No organization found in config, skipping auto-login')
+        errorThrown = true
+      }
+      expect(errorThrown).to.be.true
       sinon.assert.notCalled(selectOrganizationFromListStub)
     })
 
