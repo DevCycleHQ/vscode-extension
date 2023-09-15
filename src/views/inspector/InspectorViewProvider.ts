@@ -324,19 +324,26 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   }
 
   private getDetailsHTML(folder: vscode.WorkspaceFolder) {
-    let name, key, featureName, status, createdAt, updatedAt, description, id
+    let name, key, type, featureName, status, createdAt, updatedAt
     if (this.selectedType === 'Variable') {
       name = this.variables[this.selectedKey]?.name
       key = this.variables[this.selectedKey]?.key
+      type = this.variables[this.selectedKey]?.type
       createdAt = this.variables[this.selectedKey]?.createdAt
       updatedAt = this.variables[this.selectedKey]?.updatedAt
+
+      if (createdAt) {
+        createdAt = new Date(createdAt).toLocaleString()
+      }
+      if (updatedAt) {
+        updatedAt = new Date(updatedAt).toLocaleString()
+      }
+
       status = this.variables[this.selectedKey]?.status
-      id = this.variables[this.selectedKey]?._id
       featureName = Object.values(this.features).find((feature) => feature._id === (this.variables[this.selectedKey] as Variable)?._feature)?.name
     } else {
       name = this.features[this.selectedKey]?.name
       key = this.features[this.selectedKey]?.key
-      id = this.variables[this.selectedKey]?._id
     }
 
     const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
@@ -363,10 +370,10 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             <span>Key</span>
             <span class="details-value">${key}</span>
           </div>
-          <div class="detail-entry">
-            <span>ID</span>
-            <span class="details-value">${id}</span>
-          </div>
+          ${type ? `<div class="detail-entry">
+            <span>Type</span>
+            <span class="details-value">${type}</span>
+          </div>` : ''}
           ${createdAt ?
         `<div class="detail-entry">
             <span>Created Date</span>

@@ -17,6 +17,7 @@ describe('InspectorViewProvider', () => {
     var1: {
       key: 'var1',
       name: 'var1',
+      type: 'String',
       _id: 'id1',
       _feature: 'feature1',
       status: 'archived',
@@ -26,6 +27,7 @@ describe('InspectorViewProvider', () => {
     var2: {
       key: 'var2',
       name: 'var2',
+      type: 'String',
       _id: 'id2',
       _feature: 'feature2',
       status: 'active',
