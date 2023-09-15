@@ -54,6 +54,16 @@ function main() {
       handleLink(event, 'Variable')
     })
   }
+
+  const jsonTypeVariables = document.querySelectorAll('.clickable-object')
+  if (jsonTypeVariables) {
+    jsonTypeVariables.forEach((jsonTypeVariable) => {
+      jsonTypeVariable.addEventListener('click', () => {
+        vscode.postMessage({ type: 'jsonReadonly', value: jsonTypeVariable.textContent })
+      })
+    })
+  }
+
 }
 
 function handleDropdownValueChange(event: Event) {
