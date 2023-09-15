@@ -25,13 +25,16 @@ import {
   registerOpenSettingsCommand,
   registerOpenUsagesViewCommand,
   registerOpenInspectorViewCommand,
-  registerRefreshInspectorCommand
+  registerRefreshInspectorCommand,
+  registerOpenReadonlyDocumentCommand,
+  TEXT_PROVIDER_SCHEME
 } from './commands'
 import cliUtils from './cli/utils'
 import utils from './utils'
 import { InspectorViewProvider, registerInspectorViewProvider } from './views/inspector'
 import { loadRepoConfig } from './utils/loadRepoConfig'
 import { loginAndRefresh } from './utils/loginAndRefresh'
+import { registerReadonlyTextProvider } from './views/readonlyText/registerReadonlyTextProvider'
 
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.deactivate = exports.activate = void 0
@@ -94,6 +97,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerShowReferenceCommand(context)
   await registerOpenSettingsCommand(context)
   await registerOpenUsagesViewCommand(context, usagesTreeView, usagesDataProvider)
+  registerReadonlyTextProvider(context, TEXT_PROVIDER_SCHEME)
+  await registerOpenReadonlyDocumentCommand(context)
 
   const settingsConfig = vscode.workspace.getConfiguration('devcycle-feature-flags')
   

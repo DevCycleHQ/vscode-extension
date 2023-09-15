@@ -95,6 +95,24 @@ input[type='checkbox'] {
 .details-value {
   color: gray;
   font-size: var(vscode-font-size - 2);
+  width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  cursor: default;
+}
+
+.clickable-object {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.clickable-object:active {
+  color: var(--vscode-foreground);
+}
+
+span {
+  cursor: default;
 }
 
 .uppercase-value {
