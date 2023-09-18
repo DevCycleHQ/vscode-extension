@@ -60,7 +60,7 @@ export class EnvironmentsCLIController extends BaseCLIController {
       vscode.window.showErrorMessage(
         `Retrieving environments failed: ${error?.message}}`,
       )
-      return []
+      return {}
     } else {
       const environments = JSON.parse(output) as Environment[]
       const environmentMap = environments.reduce((result, currentEnvironment) => {

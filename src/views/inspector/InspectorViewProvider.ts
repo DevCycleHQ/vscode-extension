@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
-import { Environment, EnvironmentsCLIController, Feature, FeaturesCLIController, UsagesCLIController, Variable, VariablesCLIController, getOrganizationId } from '../../cli'
+import { Environment, EnvironmentsCLIController, Feature, FeatureConfiguration, FeaturesCLIController, UsagesCLIController, Variable, VariablesCLIController, getOrganizationId } from '../../cli'
 import { KEYS, StateManager } from '../../StateManager'
 import { OPEN_USAGES_VIEW, executeOpenReadonlyDocumentCommand } from '../../commands'
 import { INSPECTOR_VIEW_BUTTONS } from '../../components/hoverCard'
@@ -27,12 +27,18 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
 
   selectedFolder: vscode.WorkspaceFolder | undefined
   selectedType: 'Variable' | 'Feature'
+  // for Feature, we use the _id, for Variable, we use the key
   selectedKey: string
   buttonType?: INSPECTOR_VIEW_BUTTONS
 
+  featuresCLIController?: FeaturesCLIController
   variables: Record<string, Variable> = {}
   orderedVariables: Variable[] = []
   features: Record<string, Feature> = {}
+  orderedFeatures: Feature[] = []
+  environments: Record<string, Environment> = {}
+  featureConfigsMap: Record<string, FeatureConfiguration[]> = {}
+
   matches: Record<string, boolean> = {}
   isRefreshing: boolean = false
   webviewIsDisposed: boolean = false
@@ -52,19 +58,25 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       return
     }
     try {
+      this.featuresCLIController = new FeaturesCLIController(folder)
       const variablesCLIController = new VariablesCLIController(folder)
-      const featuresCLIController = new FeaturesCLIController(folder)
       const usagesCLIController = new UsagesCLIController(folder)
+      const environmentsCLIController = new EnvironmentsCLIController(folder)
 
       this.variables = await variablesCLIController.getAllVariables()
-      this.orderedVariables = Object.values(this.variables).sort((a: Variable, b: Variable) => (a.name || a.key).localeCompare(b.name || a.key))
-      this.features = await featuresCLIController.getAllFeatures()
+      this.orderedVariables = Object.values(this.variables).sort((a, b) => (a.name || a.key).localeCompare(b.name || a.key))
+      this.features = await this.featuresCLIController.getAllFeatures()
+      this.orderedFeatures = Object.values(this.features).sort((a, b) => (a.name).localeCompare(b.name))
       this.matches = await usagesCLIController.usagesKeys()
+      this.environments = await environmentsCLIController.getAllEnvironments()
+      this.featureConfigsMap = {}
 
       // default to the alphabetically first variable in variable list
       // only default if the currently selected key is no longer in the list of variables
-      if (Object.values(this.variables).length && !this.variables[this.selectedKey]) {
+      if (this.selectedType === 'Variable' && !this.variables[this.selectedKey]) {
         this.selectedKey = this.orderedVariables[0].key
+      } else if (this.selectedType === 'Feature' && !this.features[this.selectedKey]) {
+        this.selectedKey = this.orderedFeatures[0]._id
       }
     } catch (e) {
       vscode.window.showErrorMessage(
@@ -93,11 +105,9 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       if (data.type === 'variableOrFeature') {
         this.selectedType = data.value
         if (this.selectedType === 'Variable') {
-          const variables = Object.keys(this.variables)
-          this.selectedKey = variables[0] || ''
+          this.selectedKey = this.orderedVariables[0]?.key || ''
         } else {
-          const features = Object.keys(this.features)
-          this.selectedKey = features[0] || ''
+          this.selectedKey = this.orderedFeatures[0]?._id || ''
         }
       } else if (data.type === 'key') {
         this.selectedType = data?.selectedType || this.selectedType
@@ -111,9 +121,28 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       } else if (data.type === 'jsonReadonly') {
         await executeOpenReadonlyDocumentCommand(data.value)
       }
-      webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
+
+      // check if we need to fetch feature configs for the feature currently selected
+      if (this.selectedFolder &&
+          this.selectedType === 'Feature' &&
+          !this.featureConfigsMap[this.selectedKey]
+      ) {
+        this.featuresCLIController?.getFeatureConfigurations(this.selectedKey).then((featureConfigs) => {
+          this.featureConfigsMap[this.selectedKey] = featureConfigs || []
+          this.refreshInspectorView()
+        })
+      }
+
+      this.refreshInspectorView()
     })
     this.webviewIsDisposed = false
+  }
+
+  private async refreshInspectorView() {
+    if (!this._view?.webview) {
+      return
+    }
+    this.setWebviewHtml(await this._getHtmlForWebview(this._view.webview))
   }
 
   private setWebviewHtml(html: string) {
@@ -177,7 +206,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           return
         }
         await this.initializeFeaturesAndVariables(this.selectedFolder)
-        this._view.webview.html = await this._getHtmlForWebview(this._view.webview)
+        this.refreshInspectorView()
       }
     )
     this.isRefreshing = false
@@ -200,8 +229,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       `<vscode-option value="${variable.key}"${variable.key === this.selectedKey ? ' selected' : ''}>${variable.key}</vscode-option>`
     )) || []
 
-    const featureOptions = this.features && Object.values(this.features).sort((a, b) => (a.name || a.key).localeCompare(b.name || b.key)).map((feature) => (
-      `<vscode-option value="${feature._id}"${feature._id === this.selectedKey ? ' selected' : ''}>${feature.key}</vscode-option>`
+    const featureOptions = this.orderedFeatures.map((feature) => (
+      `<vscode-option value="${feature._id}"${feature._id === this.selectedKey ? ' selected' : ''}>${feature.name} (${feature.key})</vscode-option>`
     )) || []
 
     const possibleValues = this.getPossibleValuesHTML()
@@ -209,7 +238,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     if (!this.selectedFolder) {
       return ''
     }
-    const environmentStatusesSection = await this.getFeatureEnvironmentStatusesHTML(this.selectedFolder)
+    const environmentStatusesSection = this.getFeatureEnvironmentStatusesHTML()
 
     return `
         <div class="inspector-container">
@@ -349,8 +378,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
     const orgId = getOrganizationId(folder)
     const dashboardPath = this.selectedType === 'Variable' ?
-      `variables/${this.variables[this.selectedKey].key}` :
-      `features/${this.features[this.selectedKey].key}`
+      `variables/${this.variables[this.selectedKey]?.key}` :
+      `features/${this.features[this.selectedKey]?.key}`
     const usagesCommandParams = encodeURIComponent(
       JSON.stringify({
         variableKey: this.selectedKey,
@@ -463,25 +492,21 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     )) || []
   }
 
-  private async getFeatureEnvironmentStatusesHTML(folder: vscode.WorkspaceFolder) {
+  private getFeatureEnvironmentStatusesHTML() {
     if (this.selectedType !== 'Feature') return ''
 
     function isRecordOfStringEnvironment(obj: any): obj is Record<string, Environment> {
       return typeof obj === 'object' && obj !== null && Object.keys(obj).length > 0
     }
 
-    const featuresCLIController = new FeaturesCLIController(folder)
-    const environmentsCLIController = new EnvironmentsCLIController(folder)
+    const featureConfigs = this.featureConfigsMap[this.selectedKey]
 
-    const featureConfigs = await featuresCLIController.getFeatureConfigurations(this.selectedKey)
-    const environments = await environmentsCLIController.getAllEnvironments()
-
-    if (!isRecordOfStringEnvironment(environments)) {
+    if (!isRecordOfStringEnvironment(this.environments) || !featureConfigs || !featureConfigs.length) {
       return ''
     }
 
-    const html = featureConfigs.map((featureConfig) => {
-      const environment = environments[featureConfig._environment]
+    const html = this.featureConfigsMap[this.selectedKey].map((featureConfig) => {
+      const environment = this.environments[featureConfig._environment]
       return `
       <div class="detail-entry">
         <label>${environment.name}</label>
