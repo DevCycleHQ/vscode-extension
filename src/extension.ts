@@ -146,7 +146,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
     utils.checkForWorkspaceFolders()
-    await loginAndRefresh([...event.added], true)
+    const foldersToRefresh = [...event.added, ...event.removed]
+    await loginAndRefresh([...foldersToRefresh], true)
   })
 
 }
