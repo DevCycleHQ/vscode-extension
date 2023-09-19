@@ -4,6 +4,7 @@ import { Environment, EnvironmentsCLIController, Feature, FeatureConfiguration, 
 import { KEYS, StateManager } from '../../StateManager'
 import { OPEN_USAGES_VIEW, executeOpenReadonlyDocumentCommand } from '../../commands'
 import { INSPECTOR_VIEW_BUTTONS } from '../../components/hoverCard'
+import { sortByName } from './utils'
 
 type InspectorViewMessage =
   | { type: 'variableOrFeature', value: 'Variable' | 'Feature' }
@@ -49,6 +50,14 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     this.selectedFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0]
   }
 
+  private getDefaultSelectedKey() {
+    if (this.selectedType === 'Variable') {
+      return this.orderedVariables[0]?.key || ''
+    } else {
+      return this.orderedFeatures[0]?._id || ''
+    }
+  }
+
   private async initializeFeaturesAndVariables(folder?: vscode.WorkspaceFolder) {
     if (!folder) {
       return
@@ -64,20 +73,16 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       const environmentsCLIController = new EnvironmentsCLIController(folder)
 
       this.variables = await variablesCLIController.getAllVariables()
-      this.orderedVariables = Object.values(this.variables).sort((a, b) => (a.name || a.key).localeCompare(b.name || a.key))
+      this.orderedVariables = sortByName(this.variables)
       this.features = await this.featuresCLIController.getAllFeatures()
-      this.orderedFeatures = Object.values(this.features).sort((a, b) => (a.name).localeCompare(b.name))
+      this.orderedFeatures = sortByName(this.features)
       this.matches = await usagesCLIController.usagesKeys()
       this.environments = await environmentsCLIController.getAllEnvironments()
       this.featureConfigsMap = {}
 
       // default to the alphabetically first variable in variable list
       // only default if the currently selected key is no longer in the list of variables
-      if (this.selectedType === 'Variable' && !this.variables[this.selectedKey]) {
-        this.selectedKey = this.orderedVariables[0].key
-      } else if (this.selectedType === 'Feature' && !this.features[this.selectedKey]) {
-        this.selectedKey = this.orderedFeatures[0]._id
-      }
+      this.selectedKey = this.getDefaultSelectedKey()
     } catch (e) {
       vscode.window.showErrorMessage(
         `Error initializing features and variables in inspector: ${e}`,
@@ -104,11 +109,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (data: InspectorViewMessage) => {
       if (data.type === 'variableOrFeature') {
         this.selectedType = data.value
-        if (this.selectedType === 'Variable') {
-          this.selectedKey = this.orderedVariables[0]?.key || ''
-        } else {
-          this.selectedKey = this.orderedFeatures[0]?._id || ''
-        }
+        this.selectedKey = this.getDefaultSelectedKey()
       } else if (data.type === 'key') {
         this.selectedType = data?.selectedType || this.selectedType
         this.selectedKey = data.value
@@ -220,24 +221,39 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     this._view?.webview.postMessage(message)
   }
 
+  private getDropdownOptions() {
+    if (this.selectedType === 'Variable') {
+      return this.orderedVariables.map((variable) => (
+        `<vscode-option value="${variable.key}"${variable.key === this.selectedKey ? ' selected' : ''}>${variable.key}</vscode-option>`
+      )) || []  
+    } else {
+      const featuresGroupedByName = Object.values(this.features).reduce((acc, feature) => {
+        if (!acc[feature.name]) {
+          acc[feature.name] = []
+        }
+        acc[feature.name].push(feature)
+        return acc
+      }, {} as Record<string, Feature[]>)
+  
+      return this.orderedFeatures.map((feature) => {
+        // add key to option value if there are multiple features with the same name
+        const featureName = featuresGroupedByName[feature.name]?.length > 1
+          ? `${feature.name} (${feature.key})` 
+          : feature.name
+        return `<vscode-option value="${feature._id}"${feature._id === this.selectedKey ? ' selected' : ''}>${featureName}</vscode-option>`
+      }) || []
+    }
+  }
+
   private async getBodyHtml(): Promise<string> {
-    const inspectorOptions = ['Variable', 'Feature'].map((option) => (
-      `<vscode-option value="${option}"${option === this.selectedType ? ' selected' : ''}>${option}</vscode-option>`
-    ))
-
-    const variableOptions = this.orderedVariables.map((variable) => (
-      `<vscode-option value="${variable.key}"${variable.key === this.selectedKey ? ' selected' : ''}>${variable.key}</vscode-option>`
-    )) || []
-
-    const featureOptions = this.orderedFeatures.map((feature) => (
-      `<vscode-option value="${feature._id}"${feature._id === this.selectedKey ? ' selected' : ''}>${feature.name} (${feature.key})</vscode-option>`
-    )) || []
-
-    const possibleValues = this.getPossibleValuesHTML()
-    const variableKeysInFeature = this.getVariableKeysInFeatureHTML()
     if (!this.selectedFolder) {
       return ''
     }
+    const inspectorOptions = ['Variable', 'Feature'].map((option) => (
+      `<vscode-option value="${option}"${option === this.selectedType ? ' selected' : ''}>${option}</vscode-option>`
+    ))
+    
+    const variableKeysInFeature = this.getVariableKeysInFeatureHTML()
     const environmentStatusesSection = this.getFeatureEnvironmentStatusesHTML()
 
     return `
@@ -249,7 +265,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
               ${inspectorOptions.join('')}
             </vscode-dropdown>
             <vscode-dropdown id="dataId" class="inspector-dropdown-value" data-type="key">
-              ${this.selectedType === 'Variable' ? variableOptions.join('') : featureOptions.join('')}
+              ${this.getDropdownOptions().join('')}
             </vscode-dropdown>
           </div>
           <input id="collapsible-details" class="toggle" type="checkbox" checked>
@@ -259,21 +275,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             Details
           </label>
           ${this.getDetailsHTML(this.selectedFolder)}
-          ${this.selectedType === 'Variable' && possibleValues.length ? `
-            <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
-            <label for="collapsible-possible=values" class="lbl-toggle ${this.buttonType === 'values' ? 'focus' : ''}">
-              <i class="codicon codicon-chevron-right"></i>
-              <i class="codicon codicon-preserve-case"></i>
-              Possible Values
-            </label>
-            <div class="collapsible-content">
-              <div class="collaspsible-content-indent"></div>
-              <div class="details-container">
-                ${possibleValues.join('')}
-              </div>
-            </div>
-            ` : ''
-      }
+          ${this.getPossibleValuesHTML()}
           ${this.selectedType === 'Feature' ? `
             <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
             <label for="collapsible-possible=values" class="lbl-toggle">
@@ -378,8 +380,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     const projectId = StateManager.getFolderState(folder.name, KEYS.PROJECT_ID)
     const orgId = getOrganizationId(folder)
     const dashboardPath = this.selectedType === 'Variable' ?
-      `variables/${this.variables[this.selectedKey]?.key}` :
-      `features/${this.features[this.selectedKey]?.key}`
+      `variables/${this.variables[this.selectedKey]?.key || ''}` :
+      `features/${this.features[this.selectedKey]?.key || ''}`
     const usagesCommandParams = encodeURIComponent(
       JSON.stringify({
         variableKey: this.selectedKey,
@@ -452,6 +454,9 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
   }
 
   private getPossibleValuesHTML() {
+    if (this.selectedType !== 'Variable') {
+      return ''
+    }
     const getAllPossibleValuesForVariable = (variable?: Variable) => {
       const variableVariationValueMap: Record<string, unknown> = {}
       if (!variable) {
@@ -469,16 +474,36 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       return variableVariationValueMap
     }
 
-    return this.selectedType === 'Variable' &&
-      Object.entries(getAllPossibleValuesForVariable(this.variables[this.selectedKey])).map((possibleValue) => {
-        const variationName = possibleValue[0]
-        const stringifiedValue = JSON.stringify(possibleValue[1])
-        const shouldAddObjectStyle = typeof possibleValue[1] === 'object'
-        return `<div class="detail-entry">
-          <span>${variationName}</span>
-          <span class="details-value ${shouldAddObjectStyle ? 'clickable-object' : ''}" title=${stringifiedValue}>${stringifiedValue}</span>
-        </div>`
-      }) || []
+    const possibleVariableValues = Object.entries(
+      getAllPossibleValuesForVariable(this.variables[this.selectedKey])
+    )
+    if (!possibleVariableValues.length) {
+      return ''
+    }
+    const possibleValueRows = possibleVariableValues.map((possibleValue) => {
+      const variationName = possibleValue[0]
+      const stringifiedValue = JSON.stringify(possibleValue[1])
+      const shouldAddObjectStyle = typeof possibleValue[1] === 'object'
+      return `<div class="detail-entry">
+        <span>${variationName}</span>
+        <span class="details-value ${shouldAddObjectStyle ? 'clickable-object' : ''}" title=${stringifiedValue}>${stringifiedValue}</span>
+      </div>`
+    })
+
+    return `
+      <input id="collapsible-possible=values" class="toggle" type="checkbox" checked>
+      <label for="collapsible-possible=values" class="lbl-toggle ${this.buttonType === 'values' ? 'focus' : ''}">
+        <i class="codicon codicon-chevron-right"></i>
+        <i class="codicon codicon-preserve-case"></i>
+        Possible Values
+      </label>
+      <div class="collapsible-content">
+        <div class="collaspsible-content-indent"></div>
+        <div class="details-container">
+          ${possibleValueRows.join('')}
+        </div>
+      </div>
+    `
   }
 
   private getVariableKeysInFeatureHTML() {
@@ -505,7 +530,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       return ''
     }
 
-    const html = this.featureConfigsMap[this.selectedKey].map((featureConfig) => {
+    const html = featureConfigs.map((featureConfig) => {
       const environment = this.environments[featureConfig._environment]
       return `
       <div class="detail-entry">
