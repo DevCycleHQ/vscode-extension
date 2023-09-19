@@ -10,10 +10,23 @@ Learn more on our website: [DevCycle.com](https://devcycle.com/?utm_source=refer
 
 You can access this GitHub repository at: [https://github.com/DevCycleHQ/VSCode-Extension](https://github.com/DevCycleHQ/VSCode-Extension).
 
+## Extension Installation
+
+DevCycle extension can be installed directly within Visual Studio Code or via the Visual Studio Code Marketplace.
+
+### Visual Studio Code Marketplace
+1. **[Visit the DevCycle Feature Flags Extension page at Visual Studio Marketplace.](https://marketplace.visualstudio.com/items?itemName=DevCycle.devcycle-feature-flags)**
+2. Click on the "Install" button.
+
+### Within Visual Studio Code
+1. Search for "DevCycle Feature Flags" in the Extensions page.
+2. Click on the "Install" button.
+
+Post-installation, you can start utilizing the extension straightaway. No additional configuration is necessary.
+
 ## Feature Overview
 
 ### Current Features
-
 
 1. **View All Feature Flags**: The variable view in the extension displays a list of all variables existing within your code and your project.
 
@@ -26,20 +39,6 @@ You can access this GitHub repository at: [https://github.com/DevCycleHQ/VSCode-
 Before getting started with DevCycle, make sure you meet the following requirements:
 
 - You need a DevCycle account. Sign up for a free account [here](https://app.devcycle.com/?isSignUp=true) (no credit card required).
-
-## Extension Installation
-
-DevCycle extension can be installed directly within Visual Studio Code or via the Visual Studio Code Marketplace.
-
-### Visual Studio Code Marketplace
-1. Visit the DevCycle Feature Flags Extension page at Visual Studio Marketplace.
-2. Click on the "Install" button.
-
-### Within Visual Studio Code
-1. Search for "DevCycle Feature Flags" in the Extensions page.
-2. Click on the "Install" button.
-
-Post-installation, you can start utilizing the extension straightaway. No additional configuration is necessary.
 
 ## Extension Settings
 
