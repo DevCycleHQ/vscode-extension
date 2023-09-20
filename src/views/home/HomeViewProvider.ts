@@ -185,7 +185,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
       <a href="https://docs.devcycle.com/release-notes" class="icon-link">
         <i class="codicon codicon-bell"></i>
       </a>
-      <a href="https://discord.gg/TQdnvcJH" class="icon-link">
+      <a href="https://discord.gg/tutPhscVC9" class="icon-link">
         <i class="codicon codicon-comment-discussion"></i>
       </a>
       <a href="https://github.com/DevCycleHQ" class="icon-link">
