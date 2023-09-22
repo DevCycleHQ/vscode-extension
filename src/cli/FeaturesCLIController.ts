@@ -83,7 +83,7 @@ export class FeaturesCLIController extends BaseCLIController {
       return []
     } else {
       // add the missing feature configs to the state
-      const featureConfigs = JSON.parse(output)
+      const featureConfigs = output ? JSON.parse(output) : output
       featureConfigsMap[featureId] = featureConfigs
       StateManager.setFolderState(this.folder.name, KEYS.FEATURE_CONFIGURATIONS, featureConfigsMap)
       return featureConfigs as FeatureConfiguration[]

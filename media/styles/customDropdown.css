@@ -1,0 +1,55 @@
+.custom-dropdown {
+    position: relative;
+    min-width: 100px;
+    background-color: var(--dropdown-background);
+}
+
+.custom-dropdown .dropdown-input {
+    padding: 4px 20px 4px 9px;
+    width: 100%;
+    background-color: var(--dropdown-background);
+    color: var(--vscode-editor-foreground);
+    outline: calc(var(--border-width) * 1px) solid var(--dropdown-border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box
+}
+
+.custom-dropdown .dropdown-arrow {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-60%) rotate(180deg) scale(1.5, 1);
+    transform-origin: center center;
+    font-weight: 100;
+    pointer-events: none;
+}
+
+.custom-dropdown .dropdown-options {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1;
+    display: none;
+    background-color: var(--dropdown-background);
+    color: var(--vscode-foreground);
+    border: calc(var(--border-width) * 1px) solid var(--vscode-focusBorder);
+}
+
+.custom-dropdown .dropdown-options div {
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.custom-dropdown .dropdown-options div:hover {
+    background-color: var(--list-active-selection-background);
+    border: calc(var(--border-width) * 1px) solid var(--vscode-focusBorder);
+}
+
+.custom-dropdown .dropdown-options.visible {
+    display: block;
+}
