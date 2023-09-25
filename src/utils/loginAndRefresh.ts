@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { AuthCLIController } from '../cli'
 import { executeRefreshAllCommand } from '../commands'
+import utils from '.'
 
 export async function loginAndRefreshAll(headlessLogin = false) {
   const { workspaceFolders = [] } = vscode.workspace
@@ -11,20 +12,20 @@ export async function loginAndRefresh(
   folders: vscode.WorkspaceFolder[],
   headlessLogin = false,
 ) {
-  const foldersLoggedIn = []
+  const foldersToRefresh = []
 
   for (const folder of folders) {
     const cli = new AuthCLIController(folder, headlessLogin)
     try {
       await cli.login()
-      foldersLoggedIn.push(folder)
+      foldersToRefresh.push(folder)
     } catch (e) {}
   }
-  await Promise.all(foldersLoggedIn.map(executeRefreshAllCommand))
-
+  await Promise.all(foldersToRefresh.map(executeRefreshAllCommand))
+  const loggedInFolders = utils.getLoggedInFolders()
   await vscode.commands.executeCommand(
     'setContext',
     'devcycle-feature-flags.hasCredentialsAndProject',
-    foldersLoggedIn.length > 0,
+    loggedInFolders.length > 0,
   )
 }

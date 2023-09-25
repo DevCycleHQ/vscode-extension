@@ -4,6 +4,7 @@ import sinon from 'sinon'
 import { AuthCLIController } from '../cli'
 import { loginAndRefreshAll } from './loginAndRefresh'
 import { COMMAND_REFRESH_ALL } from '../commands'
+import utils from '.'
 
 describe('loginAndRefreshAll', () => {
   const folder = {
@@ -50,6 +51,7 @@ describe('loginAndRefreshAll', () => {
     sinon.stub(vscode.workspace, 'workspaceFolders').value([folder, folder2])
     const mockExecuteCommand = sinon.stub(vscode.commands, 'executeCommand')
     sinon.stub(AuthCLIController.prototype, 'login').resolves()
+    sinon.stub(utils, 'getLoggedInFolders').returns([folder, folder2])
 
     await loginAndRefreshAll()
 
