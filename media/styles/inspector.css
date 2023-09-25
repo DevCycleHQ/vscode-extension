@@ -76,6 +76,11 @@ input[type='checkbox'] {
   flex-direction: row;
   justify-content: space-between;
   padding-top: 0.4rem;
+  gap: 5px;
+}
+
+.detail-entry svg {
+  color: var(--vscode-foreground);
 }
 
 .detail-entry-value-link {
@@ -93,12 +98,15 @@ input[type='checkbox'] {
 
 .details-value {
   color: gray;
-  font-size: var(vscode-font-size - 2);
-  width: 50%;
+  font-size: var(--vscode-font-size) - 2;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: right;
   cursor: default;
+}
+
+.detail-entry span {
+  white-space: nowrap;
 }
 
 .details-value-with-link {
@@ -129,6 +137,7 @@ span {
   color: var(--vscode-foreground);
   font-size: var(--vscode-font-size);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .detail-link-row:hover {
