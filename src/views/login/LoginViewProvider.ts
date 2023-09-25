@@ -53,10 +53,7 @@ export class LoginViewProvider implements vscode.WebviewViewProvider {
     return `<p style="color:#F48771;">${errorMessage}</p>`
   }
 
-  private _getHtmlForWebview(
-    webview: vscode.Webview,
-    error?: ERRORS,
-  ) {
+  private _getHtmlForWebview(webview: vscode.Webview, error?: ERRORS) {
     const styleResetUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'reset.css'),
     )
