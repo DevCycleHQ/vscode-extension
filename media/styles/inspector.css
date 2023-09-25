@@ -80,7 +80,6 @@ input[type='checkbox'] {
 
 .detail-entry-value-link {
   display: flex;
-  align-items: center;
   gap: 5px;
 }
 
@@ -100,6 +99,10 @@ input[type='checkbox'] {
   text-overflow: ellipsis;
   text-align: right;
   cursor: default;
+}
+
+.details-value-with-link {
+  width: 100%;
 }
 
 .clickable-object {
