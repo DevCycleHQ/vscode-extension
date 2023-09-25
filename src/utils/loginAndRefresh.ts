@@ -7,25 +7,24 @@ export async function loginAndRefreshAll(headlessLogin = false) {
   await loginAndRefresh([...workspaceFolders], headlessLogin)
 }
 
-export async function loginAndRefresh(folders: vscode.WorkspaceFolder[], headlessLogin = false) {
+export async function loginAndRefresh(
+  folders: vscode.WorkspaceFolder[],
+  headlessLogin = false,
+) {
   const foldersLoggedIn = []
 
   for (const folder of folders) {
+    const cli = new AuthCLIController(folder, headlessLogin)
     try {
-      const cli = new AuthCLIController(folder, headlessLogin)
       await cli.login()
       foldersLoggedIn.push(folder)
     } catch (e) {}
   }
-  await Promise.all(
-    foldersLoggedIn.map(executeRefreshAllCommand)
-  )
+  await Promise.all(foldersLoggedIn.map(executeRefreshAllCommand))
 
-  if (foldersLoggedIn.length > 0) {
-    await vscode.commands.executeCommand(
-      'setContext',
-      'devcycle-feature-flags.hasCredentialsAndProject',
-      true,
-    )
-  }
+  await vscode.commands.executeCommand(
+    'setContext',
+    'devcycle-feature-flags.hasCredentialsAndProject',
+    foldersLoggedIn.length > 0,
+  )
 }
