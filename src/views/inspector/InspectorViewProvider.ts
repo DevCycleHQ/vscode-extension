@@ -69,17 +69,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0]
   }
 
-  private getDefaultSelectedKey() {
-    if (this.selectedType === 'Variable') {
-      return this.orderedVariables[0]?.key || ''
-    } else {
-      return this.orderedFeatures[0]?._id || ''
-    }
-  }
-
-  private async initializeFeaturesAndVariables(
-    folder?: vscode.WorkspaceFolder,
-  ) {
+  private async initializeFeaturesAndVariables(folder?: vscode.WorkspaceFolder) {
     if (!folder) {
       return
     }
@@ -100,10 +90,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       this.matches = await usagesCLIController.usagesKeys()
       this.environments = await environmentsCLIController.getAllEnvironments()
       this.featureConfigsMap = {}
-
-      // default to the alphabetically first variable in variable list
-      // only default if the currently selected key is no longer in the list of variables
-      this.selectedKey = this.getDefaultSelectedKey()
+      
+      this.selectedKey = ''
+      // Send variables data to the webview to initialize fuse
+      this.postMessageToWebview({type: 'variables', value: JSON.stringify(this.orderedVariables)})
+      this.postMessageToWebview({type: 'features', value: JSON.stringify(this.orderedFeatures)})
     } catch (e) {
       vscode.window.showErrorMessage(
         `Error initializing features and variables in inspector: ${e}`,
@@ -125,33 +116,24 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
     }
 
     await this.initializeFeaturesAndVariables(this.selectedFolder)
-    webviewView.webview.html = await this._getHtmlForWebview(
-      webviewView.webview,
-    )
+    webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview)
 
-    webviewView.webview.onDidReceiveMessage(
-      async (data: InspectorViewMessage) => {
-        if (data.type === 'variableOrFeature') {
-          this.selectedType = data.value
-          this.selectedKey = this.getDefaultSelectedKey()
-        } else if (data.type === 'key') {
-          this.selectedType = data?.selectedType || this.selectedType
-          this.selectedKey = data.value
-          this.selectedFolder = data?.selectedFolder || this.selectedFolder
-          this.buttonType = data?.buttonType
-        } else if (data.type === 'folder') {
-          this.selectedFolder = vscode.workspace.workspaceFolders?.[
-            data.value
-          ] as vscode.WorkspaceFolder
-          this.matches =
-            StateManager.getFolderState(
-              this.selectedFolder.name,
-              KEYS.CODE_USAGE_KEYS,
-            ) || {}
-          await this.initializeFeaturesAndVariables(this.selectedFolder)
-        } else if (data.type === 'jsonReadonly') {
-          await executeOpenReadonlyDocumentCommand(data.value)
-        }
+    webviewView.webview.onDidReceiveMessage(async (data: InspectorViewMessage) => {
+      if (data.type === 'variableOrFeature') {
+        this.selectedType = data.value
+        this.selectedKey = ''
+      } else if (data.type === 'key') {
+        this.selectedType = data?.selectedType || this.selectedType
+        this.selectedKey = data.value
+        this.selectedFolder = data?.selectedFolder || this.selectedFolder
+        this.buttonType = data?.buttonType
+      } else if (data.type === 'folder') {
+        this.selectedFolder = vscode.workspace.workspaceFolders?.[data.value] as vscode.WorkspaceFolder
+        this.matches = StateManager.getFolderState(this.selectedFolder.name, KEYS.CODE_USAGE_KEYS) || {}
+        await this.initializeFeaturesAndVariables(this.selectedFolder)
+      } else if (data.type === 'jsonReadonly') {
+        await executeOpenReadonlyDocumentCommand(data.value)
+      }
 
         // check if we need to fetch feature configs for the feature currently selected
         if (
@@ -271,38 +253,33 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
 
   private getDropdownOptions() {
     if (this.selectedType === 'Variable') {
-      return (
-        this.orderedVariables.map(
-          (variable) =>
-            `<vscode-option value="${variable.key}"${
-              variable.key === this.selectedKey ? ' selected' : ''
-            }>${variable.key}</vscode-option>`,
-        ) || []
-      )
+      return this.orderedVariables.map((variable) => (
+        `<div data-value="${variable.key}">${variable.key}</div>`
+      )) || []  
     } else {
-      const featuresGroupedByName = Object.values(this.features).reduce(
-        (acc, feature) => {
-          if (!acc[feature.name]) {
-            acc[feature.name] = []
-          }
-          acc[feature.name].push(feature)
-          return acc
-        },
-        {} as Record<string, Feature[]>,
-      )
+      const featuresGroupedByName = Object.values(this.features).reduce((acc, feature) => {
+        if (!acc[feature.name]) {
+          acc[feature.name] = []
+        }
+        acc[feature.name].push(feature)
+        return acc
+      }, {} as Record<string, Feature[]>)
+  
+      return this.orderedFeatures.map((feature) => {
+        // add key to option value if there are multiple features with the same name
+        const featureName = featuresGroupedByName[feature.name]?.length > 1
+          ? `${feature.name} (${feature.key})` 
+          : feature.name
+        return `<div data-value="${feature._id}">${featureName}</div>`
+      }) || []
+    }
+  }
 
-      return (
-        this.orderedFeatures.map((feature) => {
-          // add key to option value if there are multiple features with the same name
-          const featureName =
-            featuresGroupedByName[feature.name]?.length > 1
-              ? `${feature.name} (${feature.key})`
-              : feature.name
-          return `<vscode-option value="${feature._id}"${
-            feature._id === this.selectedKey ? ' selected' : ''
-          }>${featureName}</vscode-option>`
-        }) || []
-      )
+  private getDropdownInputValue(key: string) {
+    if (this.selectedType === 'Feature') {
+      return this.features[key]?.name || key
+    } else {
+      return key     
     }
   }
 
@@ -328,9 +305,13 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             <vscode-dropdown id="typeId" class="inspector-dropdown-type" data-type="variableOrFeature">
               ${inspectorOptions.join('')}
             </vscode-dropdown>
-            <vscode-dropdown id="dataId" class="inspector-dropdown-value" data-type="key">
-              ${this.getDropdownOptions().join('')}
-            </vscode-dropdown>
+            <div class="custom-dropdown">
+              <input type="text" class="dropdown-input" placeholder="Search..." value="${this.getDropdownInputValue(this.selectedKey)}">
+              <div class="dropdown-arrow">^</div>
+              <div class="dropdown-options">
+                ${this.getDropdownOptions().join('')}
+              </div>
+            </div>
           </div>
           <input id="collapsible-details" class="toggle" type="checkbox" checked>
           <label for="collapsible-details" class="lbl-toggle ${
@@ -377,6 +358,9 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
         'inspector.css',
       ),
     )
+    const dropdownStylesUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'customDropdown.css'),
+    )
     const webViewUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'out', 'inspectorView.js'),
     )
@@ -399,6 +383,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <link href="${styleVSCodeUri}" rel="stylesheet">
           <link href="${inspectorStylesUri}" rel="stylesheet">
+          <link href="${dropdownStylesUri}" rel="stylesheet">
           <link href="${codiconsUri}" rel="stylesheet"/>
         </head>
         <body>
@@ -476,11 +461,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
         <div class="details-container">
           <div class="detail-entry">
             <span>Name</span>
-            <span class="details-value">${name || '(No Name)'}</span>
+            <span class="details-value">${this.selectedKey ? (name || '(No Name)') : ' - '}</span>
           </div>
           <div class="detail-entry">
             <span>Key</span>
-            <span class="details-value">${key}</span>
+            <span class="details-value">${key || ' - '}</span>
           </div>
           ${
             type
