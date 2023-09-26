@@ -1,3 +1,5 @@
+![Static Badge](https://img.shields.io/badge/vscode-%5E1.64.0-green)
+
 # DevCycle Feature Flags extension for Visual Studio Code
 
 DevCycle is an intuitive extension for Visual Studio Code, built to manage and keep track of your feature flags from the comfort of your IDE.
@@ -15,10 +17,12 @@ You can access this GitHub repository at: [https://github.com/DevCycleHQ/VSCode-
 DevCycle extension can be installed directly within Visual Studio Code or via the Visual Studio Code Marketplace.
 
 ### Visual Studio Code Marketplace
+
 1. **[Visit the DevCycle Feature Flags Extension page at Visual Studio Marketplace.](https://marketplace.visualstudio.com/items?itemName=DevCycle.devcycle-feature-flags)**
 2. Click on the "Install" button.
 
 ### Within Visual Studio Code
+
 1. Search for "DevCycle Feature Flags" in the Extensions page.
 2. Click on the "Install" button.
 
@@ -59,14 +63,14 @@ DevCycle is an open-source project, and we welcome contributions! If you're inte
 
 ## Documentation
 
-For detailed information about DevCycle and its usage, visit our documentation page: [https://docs.devcycle.com/integrations/vscode-extension/](https://docs.devcycle.com/integrations/vscode-extension/).
+For detailed information about DevCycle and its usage, visit our [documentation page](https://docs.devcycle.com/integrations/vscode-extension/).
 
 ## Sign Up for DevCycle
 
 Ready to get started with DevCycle
 
-Sign up today at [https://app.devcycle.com/?isSignUp=true](https://app.devcycle.com/?isSignUp=true). 
+Sign up [today](https://app.devcycle.com/?isSignUp=true).
 
-Our platform is free to sign up, and we have a transparent pricing model that doesn't charge based on seats. 
+Our platform is free to sign up, and we have a transparent pricing model that doesn't charge based on seats.
 
 View our pricing details here: [https://devcycle.com/pricing](https://devcycle.com/pricing/?utm_source=referral&utm_medium=marketplace&utm_campaign=vs-code/). Start exploring DevCycle today!
