@@ -3,15 +3,30 @@ import { expect } from 'chai'
 import { describe, it, beforeEach, afterEach } from 'mocha'
 import sinon from 'sinon'
 import { InspectorViewProvider } from './InspectorViewProvider'
-import { Feature, FeaturesCLIController, UsagesCLIController, Variable, VariablesCLIController } from '../../cli'
+import {
+  Feature,
+  FeaturesCLIController,
+  UsagesCLIController,
+  Variable,
+  VariablesCLIController,
+} from '../../cli'
 import { KEYS, StateManager } from '../../StateManager'
+import utils from '../../utils'
 
 const mockGetState = sinon.stub()
 const mockSetState = sinon.stub()
 
 describe('InspectorViewProvider', () => {
-  const folder = { name: 'test-folder', uri: vscode.Uri.parse('file:///test-folder'), index: 0 }
-  const folder2 = { name: 'test-folder2', uri: vscode.Uri.parse('file:///test-folder2'), index: 1 }
+  const folder = {
+    name: 'test-folder',
+    uri: vscode.Uri.parse('file:///test-folder'),
+    index: 0,
+  }
+  const folder2 = {
+    name: 'test-folder2',
+    uri: vscode.Uri.parse('file:///test-folder2'),
+    index: 1,
+  }
 
   const variables: Record<string, Variable> = {
     var1: {
@@ -22,7 +37,7 @@ describe('InspectorViewProvider', () => {
       _feature: 'feature1',
       status: 'archived',
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     },
     var2: {
       key: 'var2',
@@ -32,8 +47,8 @@ describe('InspectorViewProvider', () => {
       _feature: 'feature2',
       status: 'active',
       createdAt: '',
-      updatedAt: ''
-    }
+      updatedAt: '',
+    },
   }
 
   const features: Record<string, Feature> = {
@@ -42,16 +57,16 @@ describe('InspectorViewProvider', () => {
       name: 'var1',
       _id: 'id1',
       variations: [],
-      variables: []
-    }
+      variables: [],
+    },
   }
 
   const usagesForFolder1: Record<string, boolean> = {
-    var1: true
+    var1: true,
   }
 
   const usagesForFolder2: Record<string, boolean> = {
-    var1: true
+    var1: true,
   }
 
   let getAllVariables: sinon.SinonStub
@@ -60,12 +75,18 @@ describe('InspectorViewProvider', () => {
 
   beforeEach(() => {
     sinon.stub(vscode.workspace, 'workspaceFolders').value([folder, folder2])
-    getAllVariables = sinon.stub(VariablesCLIController.prototype, 'getAllVariables').resolves(variables)
-    getAllFeatures = sinon.stub(FeaturesCLIController.prototype, 'getAllFeatures').resolves(features)
-    usagesKeys = sinon.stub(UsagesCLIController.prototype, 'usagesKeys').resolves(usagesForFolder1)
+    getAllVariables = sinon
+      .stub(VariablesCLIController.prototype, 'getAllVariables')
+      .resolves(variables)
+    getAllFeatures = sinon
+      .stub(FeaturesCLIController.prototype, 'getAllFeatures')
+      .resolves(features)
+    usagesKeys = sinon
+      .stub(UsagesCLIController.prototype, 'usagesKeys')
+      .resolves(usagesForFolder1)
     StateManager.getFolderState = mockGetState
     StateManager.setFolderState = mockSetState
-    mockGetState.returns("test-project-key")
+    mockGetState.returns('test-project-key')
   })
 
   afterEach(() => {
@@ -77,16 +98,30 @@ describe('InspectorViewProvider', () => {
 
   describe('refresh', () => {
     it('clears stored variables and features', async () => {
-      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      const inspectorViewProvider = new InspectorViewProvider(
+        vscode.Uri.parse('extensionUri'),
+      )
       await inspectorViewProvider.refresh(folder)
-      
-      sinon.assert.calledWith(mockSetState, folder.name, KEYS.VARIABLES, undefined)
-      sinon.assert.calledWith(mockSetState, folder.name, KEYS.FEATURES, undefined)
+
+      sinon.assert.calledWith(
+        mockSetState,
+        folder.name,
+        KEYS.VARIABLES,
+        undefined,
+      )
+      sinon.assert.calledWith(
+        mockSetState,
+        folder.name,
+        KEYS.FEATURES,
+        undefined,
+      )
     })
 
     it('displays login message if folder is not logged in', async () => {
       mockGetState.returns(false)
-      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      const inspectorViewProvider = new InspectorViewProvider(
+        vscode.Uri.parse('extensionUri'),
+      )
       inspectorViewProvider._view = { webview: {} } as any
       await inspectorViewProvider.refreshAll()
 
@@ -95,10 +130,11 @@ describe('InspectorViewProvider', () => {
     })
 
     it('prompts to select a project if none selected', async () => {
-      mockGetState.onFirstCall().returns(true)
-      mockGetState.onSecondCall().returns(undefined)
-      mockGetState.returns(true)
-      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      sinon.stub(utils, 'getLoggedInFolders').returns([folder])
+      mockGetState.withArgs(folder.name, KEYS.PROJECT_ID).returns(undefined)
+      const inspectorViewProvider = new InspectorViewProvider(
+        vscode.Uri.parse('extensionUri'),
+      )
       inspectorViewProvider._view = { webview: {} } as any
       await inspectorViewProvider.refreshAll()
 
@@ -109,17 +145,23 @@ describe('InspectorViewProvider', () => {
     it('shows progress bar on inspector view', async () => {
       const withProgressStub = sinon.stub(vscode.window, 'withProgress')
       mockGetState.returns(true)
-      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      const inspectorViewProvider = new InspectorViewProvider(
+        vscode.Uri.parse('extensionUri'),
+      )
       inspectorViewProvider._view = { webview: {} } as any
 
       await inspectorViewProvider.refresh(folder)
 
-      sinon.assert.calledWith(withProgressStub, { location: { viewId: 'devcycle-inspector' } })
+      sinon.assert.calledWith(withProgressStub, {
+        location: { viewId: 'devcycle-inspector' },
+      })
     })
 
     it('exits early if refresh already in progress', async () => {
       const withProgressStub = sinon.stub(vscode.window, 'withProgress')
-      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      const inspectorViewProvider = new InspectorViewProvider(
+        vscode.Uri.parse('extensionUri'),
+      )
       inspectorViewProvider.isRefreshing = true
       inspectorViewProvider._view = { webview: {} } as any
 
@@ -131,7 +173,9 @@ describe('InspectorViewProvider', () => {
     it('isRefreshing is set to false once process is complete', async () => {
       const withProgressStub = sinon.stub(vscode.window, 'withProgress')
       mockGetState.returns(true)
-      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      const inspectorViewProvider = new InspectorViewProvider(
+        vscode.Uri.parse('extensionUri'),
+      )
       inspectorViewProvider._view = { webview: {} } as any
 
       await inspectorViewProvider.refresh(folder)
@@ -142,7 +186,9 @@ describe('InspectorViewProvider', () => {
 
     it('removing last folder should updated selected folder to be undefined', async () => {
       sinon.stub(vscode.workspace, 'workspaceFolders').value([])
-      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      const inspectorViewProvider = new InspectorViewProvider(
+        vscode.Uri.parse('extensionUri'),
+      )
       inspectorViewProvider._view = { webview: {} } as any
       await inspectorViewProvider.refreshAll()
 
@@ -150,7 +196,9 @@ describe('InspectorViewProvider', () => {
     })
 
     it('refreshing should not update the selectedKey or selectedFolder if they are still valid', async () => {
-      const inspectorViewProvider = new InspectorViewProvider(vscode.Uri.parse('extensionUri'))
+      const inspectorViewProvider = new InspectorViewProvider(
+        vscode.Uri.parse('extensionUri'),
+      )
       const selectedKey = inspectorViewProvider.selectedKey
       const selectedFolder = inspectorViewProvider.selectedFolder
       await inspectorViewProvider.refreshAll()

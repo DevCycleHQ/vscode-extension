@@ -8,7 +8,10 @@ import { trackRudderstackEvent } from './RudderStackService'
 import { registerStartupViewProvider } from './views/startup'
 import { registerLoginViewProvider } from './views/login'
 import { UsagesTreeProvider, registerUsagesViewProvider } from './views/usages'
-import { EnvironmentsTreeProvider, registerEnvironmentsViewProvider } from './views/environments'
+import {
+  EnvironmentsTreeProvider,
+  registerEnvironmentsViewProvider,
+} from './views/environments'
 import { registerResourcesViewProvider } from './views/resources'
 import { HomeViewProvider, registerHomeViewProvider } from './views/home'
 import {
@@ -27,11 +30,14 @@ import {
   registerOpenInspectorViewCommand,
   registerRefreshInspectorCommand,
   registerOpenReadonlyDocumentCommand,
-  TEXT_PROVIDER_SCHEME
+  TEXT_PROVIDER_SCHEME,
 } from './commands'
 import cliUtils from './cli/utils'
 import utils from './utils'
-import { InspectorViewProvider, registerInspectorViewProvider } from './views/inspector'
+import {
+  InspectorViewProvider,
+  registerInspectorViewProvider,
+} from './views/inspector'
 import { loadRepoConfig } from './utils/loadRepoConfig'
 import { loginAndRefresh } from './utils/loginAndRefresh'
 import { registerReadonlyTextProvider } from './views/readonlyText/registerReadonlyTextProvider'
@@ -53,13 +59,16 @@ export const activate = async (context: vscode.ExtensionContext) => {
   void cliUtils.loadCli()
 
   if (!StateManager.getGlobalState(KEYS.SEND_METRICS_PROMPTED)) {
-    const sendMetricsMessage = 
-      `DevCycle collects usage metrics to gather information on feature adoption, usage, and frequency. 
+    const sendMetricsMessage = `DevCycle collects usage metrics to gather information on feature adoption, usage, and frequency. 
       By clicking "Accept", you consent to the collection of this data. Would you like to opt-in?`
-    vscode.window.showInformationMessage(sendMetricsMessage, 'Accept', 'Decline').then((selection) => {
-      vscode.workspace.getConfiguration('devcycle-feature-flags').update('sendMetrics', selection === 'Accept')
-      StateManager.setGlobalState(KEYS.SEND_METRICS_PROMPTED, true)
-    })
+    vscode.window
+      .showInformationMessage(sendMetricsMessage, 'Accept', 'Decline')
+      .then((selection) => {
+        vscode.workspace
+          .getConfiguration('devcycle-feature-flags')
+          .update('sendMetrics', selection === 'Accept')
+        StateManager.setGlobalState(KEYS.SEND_METRICS_PROMPTED, true)
+      })
   }
 
   if (!StateManager.getGlobalState(KEYS.EXTENSION_INSTALLED)) {
@@ -71,15 +80,23 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   await registerStartupViewProvider(context)
   await registerLoginViewProvider(context)
-  const { usagesDataProvider, usagesTreeView } = await registerUsagesViewProvider(context)
-  const environmentsDataProvider = await registerEnvironmentsViewProvider(context)
+  const { usagesDataProvider, usagesTreeView } =
+    await registerUsagesViewProvider(context)
+  const environmentsDataProvider = await registerEnvironmentsViewProvider(
+    context,
+  )
   const inspectorViewProvider = await registerInspectorViewProvider(context)
   const homeViewProvider = await registerHomeViewProvider(context)
-  const refreshProviders: (UsagesTreeProvider | EnvironmentsTreeProvider | InspectorViewProvider | HomeViewProvider)[] = [
-    usagesDataProvider, 
+  const refreshProviders: (
+    | UsagesTreeProvider
+    | EnvironmentsTreeProvider
+    | InspectorViewProvider
+    | HomeViewProvider
+  )[] = [
+    usagesDataProvider,
     environmentsDataProvider,
     inspectorViewProvider,
-    homeViewProvider
+    homeViewProvider,
   ]
 
   await registerResourcesViewProvider(context)
@@ -96,12 +113,18 @@ export const activate = async (context: vscode.ExtensionContext) => {
   await registerSortUsagesCommand(context, usagesDataProvider)
   await registerShowReferenceCommand(context)
   await registerOpenSettingsCommand(context)
-  await registerOpenUsagesViewCommand(context, usagesTreeView, usagesDataProvider)
+  await registerOpenUsagesViewCommand(
+    context,
+    usagesTreeView,
+    usagesDataProvider,
+  )
   registerReadonlyTextProvider(context, TEXT_PROVIDER_SCHEME)
   await registerOpenReadonlyDocumentCommand(context)
 
-  const settingsConfig = vscode.workspace.getConfiguration('devcycle-feature-flags')
-  
+  const settingsConfig = vscode.workspace.getConfiguration(
+    'devcycle-feature-flags',
+  )
+
   if (settingsConfig.get('loginOnWorkspaceOpen')) {
     await utils.loginAndRefreshAll(true)
   }
@@ -110,19 +133,31 @@ export const activate = async (context: vscode.ExtensionContext) => {
   vscode.languages.registerHoverProvider(SCHEME_FILE, {
     async provideHover(document, position) {
       const activeDocument = vscode.window.activeTextEditor?.document
-      const currentFolder = activeDocument ? vscode.workspace.getWorkspaceFolder(activeDocument.uri) : undefined
-      if (!currentFolder) { return }
+      const currentFolder = activeDocument
+        ? vscode.workspace.getWorkspaceFolder(activeDocument.uri)
+        : undefined
+      if (!currentFolder) {
+        return
+      }
       const range = document.getWordRangeAtPosition(position, REGEX)
 
-      if (!range) { return }
+      if (!range) {
+        return
+      }
 
-      const variableAliases = (await utils.getRepoConfig(currentFolder)).codeInsights?.variableAliases || {}
+      const variableAliases =
+        (await utils.getRepoConfig(currentFolder)).codeInsights
+          ?.variableAliases || {}
       let variableKey = document.getText(range)
       variableKey = variableAliases[variableKey] || variableKey
 
-      const codeUsages = StateManager.getFolderState(currentFolder.name, KEYS.CODE_USAGE_KEYS) || {}
+      const codeUsages =
+        StateManager.getFolderState(currentFolder.name, KEYS.CODE_USAGE_KEYS) ||
+        {}
 
-      if (!codeUsages[variableKey]) { return }
+      if (!codeUsages[variableKey]) {
+        return
+      }
 
       const hoverString = await getHoverString(currentFolder, variableKey)
       return new vscode.Hover(hoverString)
@@ -132,14 +167,20 @@ export const activate = async (context: vscode.ExtensionContext) => {
   vscode.workspace.onDidSaveTextDocument(async (document) => {
     const filePath = document.uri.path
     const folder = vscode.workspace.getWorkspaceFolder(document.uri)
-    if (!folder) { return }
+    if (!folder) {
+      return
+    }
 
     const cli = new BaseCLIController(folder)
     const { repoConfigPath } = await cli.status()
 
     if (filePath === path.join(folder.uri.path, repoConfigPath)) {
       await loadRepoConfig(folder)
-    } else if (vscode.workspace.getConfiguration('devcycle-feature-flags').get('refreshUsagesOnSave')) {
+    } else if (
+      vscode.workspace
+        .getConfiguration('devcycle-feature-flags')
+        .get('refreshUsagesOnSave')
+    ) {
       await usagesDataProvider.refresh(folder, false)
     }
   })
@@ -149,7 +190,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
     const foldersToRefresh = [...event.added, ...event.removed]
     await loginAndRefresh([...foldersToRefresh], true)
   })
-
 }
 
 export function deactivate() {}
