@@ -17,7 +17,7 @@ import {
   executeOpenReadonlyDocumentCommand,
 } from '../../commands'
 import { INSPECTOR_VIEW_BUTTONS } from '../../components/hoverCard'
-import { sortByName } from './utils'
+import { sortByKey, sortByName } from './utils'
 import { getLoggedInFolders } from '../../utils/getLoggedInFolders'
 import { SearchType, getCustomDropdown } from '../../components/fuzzySearch'
 
@@ -87,7 +87,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       const environmentsCLIController = new EnvironmentsCLIController(folder)
 
       this.variables = await variablesCLIController.getAllVariables()
-      this.orderedVariables = sortByName(this.variables)
+      this.orderedVariables = sortByKey(this.variables)
       this.features = await this.featuresCLIController.getAllFeatures()
       this.orderedFeatures = sortByName(this.features)
       this.matches = await usagesCLIController.usagesKeys()

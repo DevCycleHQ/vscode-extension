@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha'
 import sinon from 'sinon'
 import { Feature, Variable } from '../../cli'
-import { sortByName } from './utils'
+import { sortByKey, sortByName } from './utils'
 
 describe('Inspector Utils', () => {
   describe('sortByName', () => {
@@ -40,14 +40,14 @@ describe('Inspector Utils', () => {
 
     const features: Record<string, Feature> = {
       feature1: {
-        key: 'var1',
+        key: 'feat1',
         name: 'feat1',
         _id: 'id1',
         variations: [],
         variables: [],
       },
       feature2: {
-        key: 'var1',
+        key: 'feat2',
         name: 'feat2',
         _id: 'id1',
         variations: [],
@@ -57,24 +57,27 @@ describe('Inspector Utils', () => {
       feature3: {
         key: 'feat3',
         _id: 'id1',
+        name: 'feat3',
         variations: [],
         variables: [],
       },
     }
     it('should sort by name', async () => {
-      const orderedVariables = sortByName(variables)
       const orderedFeatures = sortByName(features)
 
       // assert its in alphabetical order
-      sinon.assert.match(orderedVariables[0].name, 'var1')
-      sinon.assert.match(orderedVariables[1].name, 'var2')
-      sinon.assert.match(orderedVariables[2].name, undefined)
-      sinon.assert.match(orderedVariables[2].key, 'var3')
-
       sinon.assert.match(orderedFeatures[0].name, 'feat1')
       sinon.assert.match(orderedFeatures[1].name, 'feat2')
-      sinon.assert.match(orderedFeatures[2].name, undefined)
-      sinon.assert.match(orderedFeatures[2].key, 'feat3')
+      sinon.assert.match(orderedFeatures[2].name, 'feat3')
+    })
+
+    it('should sort by key', async () => {
+      const orderedVariables = sortByKey(variables)
+
+      // assert its in alphabetical order
+      sinon.assert.match(orderedVariables[0].key, 'var1')
+      sinon.assert.match(orderedVariables[1].key, 'var2')
+      sinon.assert.match(orderedVariables[2].key, 'var3')
     })
   })
 })
