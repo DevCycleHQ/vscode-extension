@@ -38,6 +38,7 @@
     background-color: var(--dropdown-background);
     color: var(--vscode-foreground);
     border: calc(var(--border-width) * 1px) solid var(--vscode-focusBorder);
+    box-sizing: border-box;
 }
 
 .custom-dropdown .dropdown-options div {
