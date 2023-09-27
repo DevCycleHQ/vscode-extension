@@ -48,6 +48,7 @@
 .custom-dropdown .dropdown-options div:hover {
     background-color: var(--list-active-selection-background);
     border: calc(var(--border-width) * 1px) solid var(--vscode-focusBorder);
+    color: var(--list-active-selection-foreground);
 }
 
 .custom-dropdown .dropdown-options.visible {
