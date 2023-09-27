@@ -26,25 +26,41 @@ export type Range = {
 
 export class UsagesCLIController extends BaseCLIController {
   public async usagesKeys() {
-    const usagesKeys = StateManager.getFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS)
+    const usagesKeys = StateManager.getFolderState(
+      this.folder.name,
+      KEYS.CODE_USAGE_KEYS,
+    )
     if (usagesKeys) {
       return usagesKeys
     }
     await this.usages()
-    return StateManager.getFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS) || {}
+    return (
+      StateManager.getFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS) || {}
+    )
   }
 
-  public async usages(): Promise<JSONMatch[]> {
+  public async usages(savedFilePath?: string): Promise<JSONMatch[]> {
     showBusyMessage('Finding Devcycle code usages')
-    const { output } = await this.execDvc('usages --format=json')
-    
+    const { output } = await this.execDvc(
+      `usages --format=json${
+        savedFilePath ? ` --include=${savedFilePath}` : ''
+      }`,
+    )
+
     const matches = JSON.parse(output) as JSONMatch[]
     hideBusyMessage()
-    const codeUsageKeys = matches.reduce((map, match) => {
-      map[match.key] = true
-      return map
-    }, {} as Record<string, boolean>)
-    StateManager.setFolderState(this.folder.name, KEYS.CODE_USAGE_KEYS, codeUsageKeys)
+    const codeUsageKeys = matches.reduce(
+      (map, match) => {
+        map[match.key] = true
+        return map
+      },
+      {} as Record<string, boolean>,
+    )
+    StateManager.setFolderState(
+      this.folder.name,
+      KEYS.CODE_USAGE_KEYS,
+      codeUsageKeys,
+    )
     return matches
   }
 }
