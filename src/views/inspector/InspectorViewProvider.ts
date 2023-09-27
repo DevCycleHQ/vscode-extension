@@ -19,6 +19,7 @@ import {
 import { INSPECTOR_VIEW_BUTTONS } from '../../components/hoverCard'
 import { sortByName } from './utils'
 import { getLoggedInFolders } from '../../utils/getLoggedInFolders'
+import { SearchType, getCustomDropdown } from '../../components/fuzzySearch'
 
 type InspectorViewMessage =
   | { type: 'variableOrFeature'; value: 'Variable' | 'Feature' }
@@ -94,15 +95,17 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       this.featureConfigsMap = {}
 
       this.selectedKey = ''
+
       // Send variables data to the webview to initialize fuse
-      this.postMessageToWebview({
-        type: 'variables',
-        value: JSON.stringify(this.orderedVariables),
-      })
-      this.postMessageToWebview({
-        type: 'features',
-        value: JSON.stringify(this.orderedFeatures),
-      })
+      const variableOptions = this.orderedVariables.map(variable => ({
+        label: variable.key
+      }))
+      const featureOptions = this.orderedFeatures.map(feature => ({
+        label: feature.name || feature.key,
+        value: feature._id
+      }))
+      this.postMessageToWebview({type: 'searchData', searchType: SearchType.variables, value: JSON.stringify(variableOptions)})
+      this.postMessageToWebview({type: 'searchData', searchType: SearchType.features, value: JSON.stringify(featureOptions)})
     } catch (e) {
       vscode.window.showErrorMessage(
         `Error initializing features and variables in inspector: ${e}`,
@@ -321,7 +324,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
 
     const variableKeysInFeature = this.getVariableKeysInFeatureHTML()
     const environmentStatusesSection = this.getFeatureEnvironmentStatusesHTML()
-
+    const dropdownOptions = this.getDropdownOptions().join('')
+    const selectedValue = this.getDropdownInputValue(this.selectedKey)
     return `
         <div class="inspector-container">
           <div class="inspector-header">
@@ -330,15 +334,7 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
             <vscode-dropdown id="typeId" class="inspector-dropdown-type" data-type="variableOrFeature">
               ${inspectorOptions.join('')}
             </vscode-dropdown>
-            <div class="custom-dropdown">
-              <input type="text" class="dropdown-input" placeholder="Search..." value="${this.getDropdownInputValue(
-                this.selectedKey,
-              )}">
-              <div class="dropdown-arrow">^</div>
-              <div class="dropdown-options">
-                ${this.getDropdownOptions().join('')}
-              </div>
-            </div>
+            ${getCustomDropdown(dropdownOptions, selectedValue)}
           </div>
           <input id="collapsible-details" class="toggle" type="checkbox" checked>
           <label for="collapsible-details" class="lbl-toggle ${

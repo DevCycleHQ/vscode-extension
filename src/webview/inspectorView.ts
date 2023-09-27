@@ -1,6 +1,5 @@
 import { provideVSCodeDesignSystem, vsCodeDropdown, vsCodeOption, Dropdown } from "@vscode/webview-ui-toolkit";
-import Fuse from "fuse.js";
-import { Feature, Variable } from "../cli";
+import { SearchType, handleFuzzySearchDropdown } from "../components/fuzzySearch";
 
 provideVSCodeDesignSystem().register(vsCodeDropdown(), vsCodeOption());
 
@@ -22,12 +21,6 @@ if (focusedElement) {
 window.addEventListener('message', (event) => {
   const message = event.data
   vscode.postMessage(message)
-
-  if (message.type === 'variables' || message.type === 'features') {
-    const data = JSON.parse(message.value)
-    localStorage.setItem(message.type, JSON.stringify(data))
-  }
-
 })
 
 function main() {
@@ -72,7 +65,12 @@ function main() {
     })
   }
 
-  handleCustomDropdown()
+  const keyType = document.querySelector('#typeId') as HTMLSelectElement
+  if (keyType?.value === 'Feature') {
+    handleFuzzySearchDropdown(vscode, SearchType.features)
+  } else if (keyType?.value === 'Variable') {
+    handleFuzzySearchDropdown(vscode, SearchType.variables)
+  }
 }
 
 function handleDropdownValueChange(event: Event) {
@@ -95,93 +93,4 @@ function handleLink(event: Event, type: 'Variable' | 'Feature') {
   }
   const element = event.currentTarget as HTMLDivElement
   vscode.postMessage({ type: 'key', value: element.dataset.value, selectedType: type })
-}
-
-function handleCustomDropdown() {
-  const input = document.querySelector('.dropdown-input') as HTMLInputElement
-  const optionsList = document.querySelector('.dropdown-options') as HTMLDivElement
-  const keyType = document.querySelector('#typeId') as HTMLSelectElement
-  const keyTypeValue = keyType?.value
-
-  let localStorageData
-
-  if (keyTypeValue === 'Feature') {
-    localStorageData = localStorage.getItem('features')
-  }
-  if (keyTypeValue === 'Variable') {
-    localStorageData = localStorage.getItem('variables')
-  }
-
-  if (!localStorageData) {
-    return
-  }
-
-  let fuse: Fuse<Variable | Feature>
-  const searchData: Variable[] | Feature[] = JSON.parse(localStorageData)
-  const fuseOptions = {
-    keys: ['key', 'name'],
-    threshold: 0.5,
-  }
-
-  fuse = new Fuse([...searchData], fuseOptions)
-  
-  const createAndAppendOption = (item: Feature | Variable) =>{
-    const option = document.createElement('div')
-    option.textContent = keyTypeValue === 'Feature' ? item.name : item.key
-    option.setAttribute('data-value', keyTypeValue === 'Feature' ? item._id : item.key)
-    optionsList.appendChild(option);
-  }
-
-  // Event listeners to handle dropdown behavior
-  document.addEventListener('click', () => {
-    optionsList?.classList.remove('visible')
-  })
-
-  input?.addEventListener('click', (event) => {
-    event.stopPropagation()
-    optionsList?.classList.toggle('visible')
-  })
-
-  input?.addEventListener('input', () => {
-    if (!fuse) {
-      return
-    }
-
-    const inputValue = input?.value.toLowerCase().trim()
-    optionsList.innerHTML = ''
-
-    if (inputValue === '') {
-      searchData.forEach((item) => {
-        createAndAppendOption(item)
-      })
-
-      optionsList.classList.add('visible')
-    } else {
-      const results = fuse?.search(inputValue)
-
-      results.forEach((result) => {
-        createAndAppendOption(result.item)
-      })
-
-      if (results.length > 0) {
-        optionsList.classList.add('visible')
-      } else {
-        optionsList.classList.remove('visible')
-      }
-    }
-  })
-
-  optionsList.addEventListener('click', (event) => {
-    const selectedOption = event.target as HTMLElement
-    if (selectedOption.tagName === 'DIV') {
-      const selectedValue = selectedOption.getAttribute('data-value')
-      if (selectedValue) {
-        vscode.postMessage({
-          type: 'key',
-          value: selectedValue,
-        })
-        optionsList.classList.remove('visible')
-      }
-    }
-  })
 }
