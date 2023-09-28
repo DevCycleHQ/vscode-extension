@@ -18,7 +18,7 @@ const SUPPORTED_PLATFORMS = [
 ]
 const OUTPUT_DIR = path.join(path.resolve(__dirname), '..')
 const CLI_ROOT = path.join(OUTPUT_DIR, 'dvc')
-const CLI_EXEC = path.join(CLI_ROOT, 'bin/run')
+const CLI_EXEC = path.join(CLI_ROOT, 'bin/dvc')
 
 function getArtifactName() {
   const platform = `${process.platform}-${process.arch}`
