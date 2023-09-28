@@ -100,6 +100,14 @@ export class UsagesTreeProvider
         this.flagsByFolder[folder.name].push(usageNode)
       })
     )
+    if (this.flagsByFolder[folder.name].length === 0) {
+      const noUsagesNode = new CodeUsageNode(
+        'noUsages',
+        'No usages found',
+        'usage'
+      )
+      this.flagsByFolder[folder.name].push(noUsagesNode)
+    }
     this.sortData()
   }
   getTreeItem(element: CodeUsageNode): vscode.TreeItem {
