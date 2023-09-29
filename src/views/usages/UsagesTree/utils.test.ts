@@ -108,5 +108,37 @@ describe('Usages Utils Tests', () => {
         savedFilePath,
       )
     })
+
+    it('should add matches if new key is found', () => {
+      const fileName = 'src/filename.ts'
+      const matches: JSONMatch[] = [createMatch('key3', fileName, 115)]
+      const updatedMatches = updateMatchesFromSavedFile(
+        oldMatches,
+        matches,
+        fileName,
+      )
+
+      expect(updatedMatches.length).to.equal(3)
+      expect(updatedMatches[2].key).to.equal('key3')
+    })
+
+    const createMatch = (
+      key: string,
+      fileName: string,
+      lineNumber: number,
+    ) => ({
+      key,
+      references: [
+        {
+          codeSnippet: {
+            lineNumbers: { start: lineNumber, end: lineNumber },
+            content: `useVariableValue(${key}, false)`,
+          },
+          lineNumbers: { start: lineNumber, end: lineNumber },
+          fileName,
+          language: 'typescript',
+        },
+      ],
+    })
   })
 })

@@ -72,7 +72,7 @@ export class UsagesTreeProvider
     }
 
     this.isRefreshing[folder.name] = true
-    this.matchesByFolder[folder.name] = this.flagsByFolder[folder.name] = []
+    this.flagsByFolder[folder.name] = []
     if (showLoading) {
       this._onDidChangeTreeData.fire(undefined)
     }
@@ -83,27 +83,33 @@ export class UsagesTreeProvider
         location: { viewId: 'devcycle-code-usages' },
       },
       async () => {
-        const usagesCLIController = new UsagesCLIController(folder)
-        const variablesCLIController = new VariablesCLIController(folder)
+        try {
+          const usagesCLIController = new UsagesCLIController(folder)
+          const variablesCLIController = new VariablesCLIController(folder)
 
-        const variables = await variablesCLIController.getAllVariables()
-        const relativeSavedFilePath = savedFilePath
-          ?.replace(folder.uri.fsPath, '')
-          ?.substring(1)
-        const matches = await usagesCLIController.usages(relativeSavedFilePath)
-
-        let updatedMatches = matches
-        if (relativeSavedFilePath) {
-          updatedMatches = updateMatchesFromSavedFile(
-            this.matchesByFolder[folder.name],
-            matches,
+          const variables = await variablesCLIController.getAllVariables()
+          const relativeSavedFilePath = savedFilePath
+            ?.replace(folder.uri.fsPath, '')
+            ?.substring(1)
+          const matches = await usagesCLIController.usages(
             relativeSavedFilePath,
           )
-        } else {
-          // If we're not refreshing a single file, usages are called for the entire folder
-          this.matchesByFolder[folder.name] = matches
+
+          let updatedMatches = matches
+          if (relativeSavedFilePath) {
+            updatedMatches = updateMatchesFromSavedFile(
+              this.matchesByFolder[folder.name],
+              matches,
+              relativeSavedFilePath,
+            )
+          } else {
+            // If we're not refreshing a single file, usages are called for the entire folder
+            this.matchesByFolder[folder.name] = matches
+          }
+          await this.populateCodeUsagesNodes(updatedMatches, variables, folder)
+        } catch (e) {
+          vscode.window.showErrorMessage((e as Error).message)
         }
-        await this.populateCodeUsagesNodes(updatedMatches, variables, folder)
       },
     )
     this.isRefreshing[folder.name] = false
