@@ -181,7 +181,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
         .getConfiguration('devcycle-feature-flags')
         .get('refreshUsagesOnSave')
     ) {
-      await usagesDataProvider.refresh(folder, false)
+      await usagesDataProvider.refresh(folder, false, filePath)
     }
   })
 

@@ -29,11 +29,7 @@ export class CodeUsageNode extends vscode.TreeItem {
     const { key, references, variable } = match
     const folderUri = folder.uri.fsPath
     if (!variable) {
-      const notFoundNode = new CodeUsageNode(
-        key + ':not-found',
-        '',
-        'detail'
-      )
+      const notFoundNode = new CodeUsageNode(key + ':not-found', '', 'detail')
       notFoundNode.description = 'VARIABLE NOT FOUND IN DEVCYCLE'
       children.push(notFoundNode)
     } else {
@@ -51,7 +47,7 @@ export class CodeUsageNode extends vscode.TreeItem {
           'detail',
           [],
           variable.updatedAt,
-        )
+        ),
       ]
 
       if (variable.name) {
@@ -90,7 +86,9 @@ export class CodeUsageNode extends vscode.TreeItem {
       inspectorLinkNode.command = {
         title: '',
         command: OPEN_INSPECTOR_VIEW,
-        arguments: [{ buttonType: 'details', variableKey: variable.key, folderUri }],
+        arguments: [
+          { buttonType: 'details', variableKey: variable.key, folderUri },
+        ],
       }
       inspectorLinkNode.iconPath = {
         dark: vscode.Uri.joinPath(
