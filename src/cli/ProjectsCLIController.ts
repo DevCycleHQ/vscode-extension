@@ -18,7 +18,7 @@ export class ProjectsCLIController extends BaseCLIController {
     if (projects) {
       return projects
     }
-    const { code, error, output } = await this.execDvc('projects get')
+    const { code, error, output } = await this.execDvc('projects get --sortOrder asc --sortBy name')
     if (code !== 0) {
       vscode.window.showErrorMessage(
         `Retrieving projects failed: ${error?.message}}`,

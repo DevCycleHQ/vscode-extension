@@ -58,7 +58,7 @@ describe('ProjectsCLIController', () => {
     it('should use CLI to fetch projects if none cached', async () => {
       const result = await projectsCLIController.getAllProjects()
 
-      assert.isTrue(execDvcStub.calledWithExactly('projects get'))
+      assert.isTrue(execDvcStub.calledWithExactly('projects get --sortOrder asc --sortBy name'))
       const expectedCLIResult = {
         'cli-project': mockCLIProjects[0],
       }
