@@ -134,7 +134,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
       `<vscode-option value="${organization.name}"${organization.name === activeOrganizationName ? ' selected' : '' }>${organization.display_name || organization.name}</vscode-option>`
     )
     const projectOptions = Object.values(projects).map((project) =>
-      `<vscode-option value="${project.key}"${project.key === activeProjectKey ? ' selected' : ''}>${project.key}</vscode-option>`
+      `<vscode-option value="${project.key}"${project.key === activeProjectKey ? ' selected' : ''}>${project.name}</vscode-option>`
     )
     if (!activeProjectKey) {
       projectOptions.unshift(`<vscode-option class="placeholder" selected>Select a project...</vscode-option>`)
