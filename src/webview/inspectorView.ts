@@ -20,6 +20,10 @@ if (focusedElement) {
 
 window.addEventListener('message', (event) => {
   const message = event.data
+  // if message type is 'searchData' then we don't want to post it back to the extension
+  if (message.type === 'searchData') {
+    return
+  }
   vscode.postMessage(message)
 })
 

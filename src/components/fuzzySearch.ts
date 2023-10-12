@@ -3,15 +3,23 @@ import { WebviewApi } from "vscode-webview";
 
 export enum SearchType {
     variables = 'variables',
-    features = 'features'
+    features = 'features',
+    projects = 'projects',
 }
+
+type LocalStorageKey = `${SearchType}${string}` | SearchType
+
 //View Provider
-export const getCustomDropdown = (optionElements: string, selectedValue: string) => {
+export const getCustomDropdown = (optionElements: string, selectedValue: string, folderIndex?: number, dataType?: string) => {
+    const folderAttribute = folderIndex !== undefined ? `data-folder="${folderIndex}"` : ''
+    const dataTypeAttribute = dataType ? `data-type="${dataType}"` : ''
+    const inputId = folderIndex !== undefined ? `id="dropdown-input-${folderIndex}"` : ''
+    const optionsListId = folderIndex !== undefined ? `id="dropdown-optionsList-${folderIndex}"` : ''
     return `
     <div class="custom-dropdown">
-    <input type="text" class="dropdown-input" placeholder="Search..." value="${selectedValue}">
+    <input ${inputId} type="text" class="dropdown-input" placeholder="Search..." value="${selectedValue}">
     <div class="dropdown-arrow">^</div>
-    <div class="dropdown-options">
+    <div ${optionsListId} class="dropdown-options" ${folderAttribute} ${dataTypeAttribute}>
       ${optionElements}
     </div>
   </div>`
@@ -28,11 +36,13 @@ export const getCustomDropdown = (optionElements: string, selectedValue: string)
 */
 export function handleFuzzySearchDropdown(
     vscode: WebviewApi<unknown>,
-    searchType: SearchType,
+    localStorageKey: LocalStorageKey,
     fuseOptions: Fuse.IFuseOptions<any> = {
         keys: ['label', 'value'],
         threshold: 0.5,
-    }
+    },
+    inputSelector: string = '.dropdown-input',
+    optionsListSelector: string = '.dropdown-options'
 ) {
     window.addEventListener('message', (event) => {
         const message = event.data
@@ -42,17 +52,10 @@ export function handleFuzzySearchDropdown(
         }
     })
 
-    const localStorageData = localStorage.getItem(searchType)
-
-    if (!localStorageData) {
-        return
-    }
-
-    const input = document.querySelector('.dropdown-input') as HTMLInputElement
-    const optionsList = document.querySelector('.dropdown-options') as HTMLDivElement
-
-    const searchData: { label: string, value?: string }[] = JSON.parse(localStorageData)
-    const fuse = new Fuse([...searchData], fuseOptions)
+    const input = document.querySelector(inputSelector) as HTMLInputElement
+    const optionsList = document.querySelector(optionsListSelector) as HTMLDivElement
+    const folderIndex = optionsList?.getAttribute('data-folder')
+    const selectedValueKey = `selectedValue${folderIndex || ''}`
 
     const createAndAppendOption = (displayValue: string, dataAttributeValue?: string) => {
         const option = document.createElement('div')
@@ -63,15 +66,57 @@ export function handleFuzzySearchDropdown(
 
     // Event listeners to handle dropdown behavior
     document.addEventListener('click', () => {
+        if (!optionsList?.classList.contains('visible')) {
+            return
+        }
+        const selectedValue = localStorage.getItem(selectedValueKey)
+        if (selectedValue) {
+            input.value = selectedValue
+        }
         optionsList?.classList.remove('visible')
     })
 
+    optionsList?.addEventListener('click', (event) => {
+        const selectedOption = event.target as HTMLElement
+        if (selectedOption.tagName === 'DIV') {
+            const selectedValue = selectedOption.getAttribute('data-value')
+            const selectedType = optionsList.getAttribute('data-type')
+            if (selectedValue) {
+                input.value = selectedOption.innerText
+                vscode.postMessage({
+                    type: selectedType || 'key',
+                    value: selectedValue,
+                    ...(optionsList.dataset.folder && { folderIndex: optionsList.dataset.folder })
+                })
+                optionsList.classList.remove('visible')
+            }
+        }
+    })
+
     input?.addEventListener('click', (event) => {
+        const { value } = event.target as HTMLInputElement
+        localStorage.setItem(selectedValueKey, value)
         event.stopPropagation()
         optionsList?.classList.toggle('visible')
     })
 
+
+    let localStorageData: string | null = localStorage.getItem(localStorageKey)
+    const refreshLocalStorageData = () => {
+        localStorageData = localStorage.getItem(localStorageKey)
+    }
     input?.addEventListener('input', () => {
+        if (!localStorageData) {
+            vscode.postMessage({
+                type: 'setFuseData',
+                ...(folderIndex && { folderIndex: folderIndex })
+            })
+            refreshLocalStorageData()
+            return
+        }
+
+        const searchData: { label: string, value?: string }[] = JSON.parse(localStorageData)
+        const fuse = new Fuse([...searchData], fuseOptions)
         const inputValue = input?.value.toLowerCase().trim()
         optionsList.innerHTML = ''
 
@@ -90,20 +135,6 @@ export function handleFuzzySearchDropdown(
             if (results.length > 0) {
                 optionsList.classList.add('visible')
             } else {
-                optionsList.classList.remove('visible')
-            }
-        }
-    })
-
-    optionsList.addEventListener('click', (event) => {
-        const selectedOption = event.target as HTMLElement
-        if (selectedOption.tagName === 'DIV') {
-            const selectedValue = selectedOption.getAttribute('data-value')
-            if (selectedValue) {
-                vscode.postMessage({
-                    type: 'key',
-                    value: selectedValue,
-                })
                 optionsList.classList.remove('visible')
             }
         }
