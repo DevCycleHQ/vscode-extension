@@ -3,15 +3,18 @@ import { WebviewApi } from "vscode-webview";
 
 export enum SearchType {
     variables = 'variables',
-    features = 'features'
+    features = 'features',
+    projects = 'projects',
 }
 //View Provider
-export const getCustomDropdown = (optionElements: string, selectedValue: string) => {
+export const getCustomDropdown = (optionElements: string, selectedValue: string, folderIndex?: number, dataType?: string) => {
+    const folderAttribute = dataType ? `data-folder="${folderIndex}"` : ''
+    const dataTypeAttribute = dataType ? `data-type="${dataType}"` : ''
     return `
     <div class="custom-dropdown">
     <input type="text" class="dropdown-input" placeholder="Search..." value="${selectedValue}">
     <div class="dropdown-arrow">^</div>
-    <div class="dropdown-options">
+    <div class="dropdown-options" ${folderAttribute} ${dataTypeAttribute}>
       ${optionElements}
     </div>
   </div>`
@@ -43,12 +46,18 @@ export function handleFuzzySearchDropdown(
     })
 
     const localStorageData = localStorage.getItem(searchType)
-
+    const input = document.querySelector('.dropdown-input') as HTMLInputElement
+    
     if (!localStorageData) {
+        input?.addEventListener('click', (event) => {
+            event.stopPropagation()
+            vscode.postMessage({
+                type: 'setDropdownData'
+            })
+        }, { once: true })
         return
     }
 
-    const input = document.querySelector('.dropdown-input') as HTMLInputElement
     const optionsList = document.querySelector('.dropdown-options') as HTMLDivElement
 
     const searchData: { label: string, value?: string }[] = JSON.parse(localStorageData)
@@ -99,10 +108,13 @@ export function handleFuzzySearchDropdown(
         const selectedOption = event.target as HTMLElement
         if (selectedOption.tagName === 'DIV') {
             const selectedValue = selectedOption.getAttribute('data-value')
+            const selectedType = optionsList.getAttribute('data-type')
             if (selectedValue) {
+                input.value = selectedOption.innerText
                 vscode.postMessage({
-                    type: 'key',
+                    type: selectedType || 'key',
                     value: selectedValue,
+                    ...(optionsList.dataset.folder && { folderIndex: optionsList.dataset.folder })
                 })
                 optionsList.classList.remove('visible')
             }

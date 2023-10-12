@@ -1,4 +1,5 @@
 import { provideVSCodeDesignSystem, vsCodeDropdown, vsCodeOption, Dropdown } from "@vscode/webview-ui-toolkit";
+import { SearchType, handleFuzzySearchDropdown } from "../components/fuzzySearch";
 
 provideVSCodeDesignSystem().register(vsCodeDropdown(), vsCodeOption());
 
@@ -45,6 +46,8 @@ function main() {
     const dropdown = homeSectionDropdowns[i];
     dropdown.addEventListener('change', handleDropdownValueChange);
   }
+
+  handleFuzzySearchDropdown(vscode, SearchType.projects)
 
   const editConfigButtons = document.getElementsByClassName("edit-config-button")
   for (let i = 0; i < editConfigButtons.length; i++) {
