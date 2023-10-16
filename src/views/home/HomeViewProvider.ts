@@ -1,24 +1,27 @@
 import * as vscode from 'vscode'
 import { getNonce } from '../../utils/getNonce'
-import { BaseCLIController, OrganizationsCLIController, ProjectsCLIController } from '../../cli'
+import { BaseCLIController, OrganizationsCLIController, Project, ProjectsCLIController } from '../../cli'
 import path from 'path'
 import { COMMAND_LOGOUT } from '../../commands/logout'
 import { KEYS, StateManager } from '../../StateManager'
 import { updateRepoConfig } from '../../utils/updateRepoConfigProject'
 import { executeRefreshAllCommand } from '../../commands'
 import { loginAndRefresh } from '../../utils/loginAndRefresh'
+import { SearchType, getCustomDropdown } from '../../components/fuzzySearch'
 
 type HomeViewMessage =
   | { type: 'project' | 'organization', value: string, folderIndex: number }
   | { type: 'config', folderIndex: number }
   | { type: 'login', folderIndex: number }
   | { type: 'logout' }
+  | { type: 'setFuseData', folderIndex: number }
 
 export class HomeViewProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView
   _doc?: vscode.TextDocument
   isRefreshing: boolean = false
   webviewIsDisposed: boolean = false
+  projectOptions: Record<number, { label: string, value: string }[]> = []
 
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
@@ -45,6 +48,11 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
 
       const folder = vscode.workspace.workspaceFolders?.[data.folderIndex]
       if (!folder) { return }
+
+      if (data.type === 'setFuseData') {
+        this.setFuseSearchData(this.projectOptions[folder.index], folder)
+        return
+      }
 
       if (data.type === 'login') {
         await loginAndRefresh([folder])
@@ -116,6 +124,21 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     await this.refreshAll()
   }
 
+  private postMessageToWebview(message: unknown) {
+    this._view?.webview.postMessage(message)
+  }
+
+  private setFuseSearchData<Data>(data: Data[], folder: vscode.WorkspaceFolder) {
+    this.postMessageToWebview({ type: 'searchData', searchType: `${SearchType.projects}${folder.index}`, value: JSON.stringify(data)})
+  }
+
+  private getSelectedProject(activeProjectKey: string | undefined, projects: Record<string, Project>) {
+    if (!activeProjectKey) {
+      return ''
+    }
+    return projects[activeProjectKey]?.name || projects[activeProjectKey]?.key
+  }
+
   private async getBodyHtml(folder: vscode.WorkspaceFolder, showHeader?: boolean): Promise<string> {
     const organizationsController = new OrganizationsCLIController(folder)
     const projectsController = new ProjectsCLIController(folder)
@@ -125,7 +148,13 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const activeOrganizationName = StateManager.getFolderState(folder.name, KEYS.ORGANIZATION)?.name
     const isLoggedIn = StateManager.getFolderState(folder.name, KEYS.LOGGED_IN)
 
-    const projectId = `project${folder.index}`
+    const projectOptions = Object.values(projects).map((project) => ({
+      label: project.name || project.key,
+      value: project.key,
+    }))
+    this.projectOptions[folder.index] = projectOptions
+    this.setFuseSearchData(projectOptions, folder)
+
     const organizationId = `organization${folder.index}`
     const editButtonId = `editConfigButton${folder.index}`
 
@@ -133,13 +162,10 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const orgOptions = Object.values(organizations).map((organization) =>
       `<vscode-option value="${organization.name}"${organization.name === activeOrganizationName ? ' selected' : '' }>${organization.display_name || organization.name}</vscode-option>`
     )
-    const projectOptions = Object.values(projects).map((project) =>
-      `<vscode-option value="${project.key}"${project.key === activeProjectKey ? ' selected' : ''}>${project.name}</vscode-option>`
+    const projectOptionElements = Object.values(projects).map((project) =>
+      `<div data-value="${project.key}">${project.name}</div>`
     )
-    if (!activeProjectKey) {
-      projectOptions.unshift(`<vscode-option class="placeholder" selected>Select a project...</vscode-option>`)
-    }
-
+    const selectedProject = this.getSelectedProject(activeProjectKey, projects)
     return `
       ${
         showHeader ? `
@@ -162,9 +188,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
           </vscode-dropdown>
           <label class="home-view-dropdown-label">
             <i class="codicon codicon-star-empty"></i>Project</label>
-          <vscode-dropdown id="${projectId}" class="home-dropdown" data-folder="${folder.index}" data-type="project">
-            ${projectOptions.join('')}
-          </vscode-dropdown>
+            ${getCustomDropdown(projectOptionElements.join(''), selectedProject, folder.index, 'project')}
           <button id="${editButtonId}" class="icon-button edit-config-button" data-folder="${folder.index}">
             <i class="codicon codicon-edit"></i>Edit Config
           </button>
@@ -207,6 +231,14 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
     const homeViewStylesUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'media', 'styles', 'homeView.css'),
     )
+    const dropdownStylesUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        'media',
+        'styles',
+        'customDropdown.css',
+      ),
+    )
     const webViewUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'out', 'homeView.js'),
     )
@@ -236,6 +268,7 @@ export class HomeViewProvider implements vscode.WebviewViewProvider {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <link href="${styleVSCodeUri}" rel="stylesheet">
           <link href="${homeViewStylesUri}" rel="stylesheet">
+          <link href="${dropdownStylesUri}" rel="stylesheet">
           <link href="${codiconsUri}" rel="stylesheet"/>
         </head>
         <body>

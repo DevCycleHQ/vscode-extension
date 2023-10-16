@@ -32,6 +32,7 @@ type InspectorViewMessage =
     }
   | { type: 'folder'; value: number }
   | { type: 'jsonReadonly'; value: string }
+  | { type: 'setFuseData' }
 
 const htmlMessage = (message: string) => `<!DOCTYPE html>
 <html lang="en">
@@ -96,16 +97,8 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
 
       this.selectedKey = ''
 
-      // Send variables data to the webview to initialize fuse
-      const variableOptions = this.orderedVariables.map(variable => ({
-        label: variable.key
-      }))
-      const featureOptions = this.orderedFeatures.map(feature => ({
-        label: feature.name || feature.key,
-        value: feature._id
-      }))
-      this.postMessageToWebview({type: 'searchData', searchType: SearchType.variables, value: JSON.stringify(variableOptions)})
-      this.postMessageToWebview({type: 'searchData', searchType: SearchType.features, value: JSON.stringify(featureOptions)})
+      // Send data to the webview to initialize Fuse
+      this.setFuseSearchData()
     } catch (e) {
       vscode.window.showErrorMessage(
         `Error initializing features and variables in inspector: ${e}`,
@@ -133,6 +126,11 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(
       async (data: InspectorViewMessage) => {
+        if (data.type === 'setFuseData') {
+          this.setFuseSearchData()
+          return
+        }
+
         if (data.type === 'variableOrFeature') {
           this.selectedType = data.value
           this.selectedKey = ''
@@ -173,6 +171,18 @@ export class InspectorViewProvider implements vscode.WebviewViewProvider {
       },
     )
     this.webviewIsDisposed = false
+  }
+
+  private setFuseSearchData() {
+    const variableOptions = this.orderedVariables.map(variable => ({
+      label: variable.key
+    }))
+    const featureOptions = this.orderedFeatures.map(feature => ({
+      label: feature.name || feature.key,
+      value: feature._id
+    }))
+    this.postMessageToWebview({ type: 'searchData', searchType: SearchType.variables, value: JSON.stringify(variableOptions) })
+    this.postMessageToWebview({ type: 'searchData', searchType: SearchType.features, value: JSON.stringify(featureOptions) })
   }
 
   private async refreshInspectorView() {
