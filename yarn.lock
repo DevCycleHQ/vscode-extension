@@ -7837,10 +7837,10 @@ wdio-vscode-service@^5.2.1:
     ws "^8.13.0"
     yargs-parser "^21.1.1"
 
-wdio-wait-for@^3.0.6:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/wdio-wait-for/-/wdio-wait-for-3.0.6.tgz#6b32c437adec478641c983449b804404972c9c53"
-  integrity sha512-pLLwk8xuhGbnq0FAarRGT2oTxsCUny/dbs7q+cH3e61PlxlGekXoN1yNlvOphLH95fBi0rzFYI3UHWj/ObG8SQ==
+wdio-wait-for@^3.0.7:
+  version "3.0.7"
+  resolved "https://registry.yarnpkg.com/wdio-wait-for/-/wdio-wait-for-3.0.7.tgz#5fe8f2da4de9dbe498c079a1d52d74824b03d922"
+  integrity sha512-NLxEg57+DAQvsEgsAcuF0zM2XDAQTfbKn2mN4nw9hDzz3RfgsZbCxvp93Nm/3609QuxpikC+MxgQ5ORLSoptvA==
 
 web-streams-polyfill@^3.0.3:
   version "3.2.1"
