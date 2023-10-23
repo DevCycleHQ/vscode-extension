@@ -280,7 +280,7 @@
     "@types/mocha": "^9.1.0",
     "@types/node": "14.x",
     "@types/sinon": "^10.0.15",
-    "@types/tar": "^6.1.5",
+    "@types/tar": "^6.1.7",
     "@types/vscode": "^1.64.0",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
@@ -317,6 +317,6 @@
     "fuse.js": "^6.6.2",
     "js-yaml": "^4.1.0",
     "lodash.partition": "^4.6.0",
-    "tar": "^6.1.15"
+    "tar": "^6.2.0"
   }
 }
