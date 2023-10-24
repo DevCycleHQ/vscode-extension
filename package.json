@@ -303,7 +303,7 @@
     "wdio-mochawesome-reporter": "^4.0.0",
     "wdio-vscode-service": "^5.2.1",
     "wdio-wait-for": "^3.0.7",
-    "webpack": "^5.88.2",
+    "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
