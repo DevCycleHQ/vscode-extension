@@ -310,36 +310,6 @@
     "@babel/helper-validator-identifier" "^7.22.20"
     to-fast-properties "^2.0.0"
 
-<<<<<<< Updated upstream
-"@devcycle/js-client-sdk@^1.13.10":
-  version "1.13.10"
-  resolved "https://registry.yarnpkg.com/@devcycle/js-client-sdk/-/js-client-sdk-1.13.10.tgz#442763c48282bd4ee78246784582ace6e06767fc"
-  integrity sha512-4n8KR00vq6jNm8xBt8LxpoJ9t4yXW7t8q+7e3DrsSNUcIMYdiuC7JiJnETqZ08frU8B7gh0jIcZGDO1307zdUA==
-  dependencies:
-    "@devcycle/types" "1.1.16"
-    "@nestjs/class-validator" "0.13.4"
-    axios "^1.0.0"
-    axios-retry "^3.3.1"
-    class-transformer "0.5.1"
-    iso-639-1 "2.1.13"
-    lodash "^4.17.21"
-    reflect-metadata "0.1.13"
-    ua-parser-js "^1.0.2"
-    uuid "^8.3.2"
-
-"@devcycle/types@1.1.16":
-  version "1.1.16"
-  resolved "https://registry.yarnpkg.com/@devcycle/types/-/types-1.1.16.tgz#ed8121fb4239821cb45f8b5914563d7e1ff6869c"
-  integrity sha512-lDhtVWoulS86XhgiCrFtXguoVuDcu7g7hJY+ZFKAF294fKzedbV7FkFhs0J7rWghEwF7o/rTMplCGYGwoUDVmQ==
-  dependencies:
-    "@nestjs/class-validator" "0.13.4"
-    class-transformer "0.5.1"
-    iso-639-1 "2.1.13"
-    lodash "4.17.21"
-    reflect-metadata "0.1.13"
-
-=======
->>>>>>> Stashed changes
 "@discoveryjs/json-ext@^0.5.0":
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.7.tgz#1d572bfbbe14b7704e0ba0f39b74815b84870d70"
@@ -1088,10 +1058,10 @@
     "@types/node" "*"
     minipass "^4.0.0"
 
-"@types/vscode-webview@^1.57.1":
-  version "1.57.1"
-  resolved "https://registry.npmjs.org/@types/vscode-webview/-/vscode-webview-1.57.1.tgz"
-  integrity sha512-ghW5SfuDmsGDS2A4xkvGsLwDRNc3Vj5rS6rPOyPm/IryZuf3wceZKxgYaUoW+k9f0f/CB7y2c1rRsdOWZWn0PQ==
+"@types/vscode-webview@^1.57.3":
+  version "1.57.3"
+  resolved "https://registry.yarnpkg.com/@types/vscode-webview/-/vscode-webview-1.57.3.tgz#b57608173f12424b0b650b42a3e6c5b45b604a5f"
+  integrity sha512-8at2UVGjA/6gcLOay+J8wOars6VsDqAqPxRHYihH0XFUaXt+2AZ+Hd9hSoUbnhjicb6V1xe7rfjb7j4Ri2n1fg==
 
 "@types/vscode@^1.64.0":
   version "1.80.0"
@@ -4705,14 +4675,6 @@ isexe@^2.0.0:
   resolved "https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
-<<<<<<< Updated upstream
-iso-639-1@2.1.13:
-  version "2.1.13"
-  resolved "https://registry.yarnpkg.com/iso-639-1/-/iso-639-1-2.1.13.tgz#bfca6c6b49be6f92815f1985e892d497770ea1dc"
-  integrity sha512-stYt3u6OnVDNcK4IWARGXmTOOY5Wa5g4bUmBsttZp/55ZiEjDUibR3C59ZnorKoSS0tfJmFuGMST3ksnY1zu7Q==
-
-=======
->>>>>>> Stashed changes
 isobject@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
