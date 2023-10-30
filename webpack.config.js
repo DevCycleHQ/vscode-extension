@@ -1,5 +1,7 @@
 const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const webpack = require('webpack')
+
 /** @type WebpackConfig */
 const baseConfig = {
   target: 'node',
@@ -43,6 +45,11 @@ const extensionConfig = {
     libraryTarget: "commonjs2",
     devtoolModuleFilenameTemplate: '../[resource-path]'
   },
+  plugins: [
+    new webpack.optimize.LimitChunkCountPlugin({
+      maxChunks: 1,
+    }),
+  ]
 };
 
 // Config for webview source code (to be run in a web-based context)
