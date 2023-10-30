@@ -986,10 +986,10 @@
   resolved "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.12.tgz"
   integrity sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==
 
-"@types/lodash.partition@^4.6.7":
-  version "4.6.7"
-  resolved "https://registry.yarnpkg.com/@types/lodash.partition/-/lodash.partition-4.6.7.tgz#7c4bcfa30e2cd945466401855eb5593a848fadff"
-  integrity sha512-tRAQtiQkNfMLPInsv+o/3vXR/YUj8YaqzFh/bdlTdVYvuydU817+dX/dM7N7sQWMQ2PgF4ziHILuvlvW4aHnnw==
+"@types/lodash.partition@^4.6.8":
+  version "4.6.8"
+  resolved "https://registry.yarnpkg.com/@types/lodash.partition/-/lodash.partition-4.6.8.tgz#158aa620f04e90961ff83a6c2211cf8376444cab"
+  integrity sha512-nghtJk2AOiYBgE2kPNozigsVl9nl92GJmsEuNr1960qhigNg9jjccQhDg57UtQOX/ynQkNzF0/WkdL+6f0Ru0Q==
   dependencies:
     "@types/lodash" "*"
 
