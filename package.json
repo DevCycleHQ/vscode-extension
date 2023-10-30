@@ -288,7 +288,7 @@
     "@vscode/vsce": "^2.20.1",
     "@wdio/browser-runner": "^8.15.10",
     "@wdio/cli": "8.20.2",
-    "@wdio/local-runner": "^8.15.4",
+    "@wdio/local-runner": "^8.20.5",
     "@wdio/mocha-framework": "^8.15.4",
     "@wdio/spec-reporter": "^8.15.0",
     "chai": "^4.3.10",
