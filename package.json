@@ -287,7 +287,7 @@
     "@vscode/test-electron": "^2.3.6",
     "@vscode/vsce": "^2.20.1",
     "@wdio/browser-runner": "^8.15.10",
-    "@wdio/cli": "8.20.2",
+    "@wdio/cli": "8.20.5",
     "@wdio/local-runner": "^8.20.5",
     "@wdio/mocha-framework": "^8.15.4",
     "@wdio/spec-reporter": "^8.15.0",
