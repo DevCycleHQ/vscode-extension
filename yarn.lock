@@ -1444,16 +1444,16 @@
     "@wdio/utils" "8.15.10"
     mocha "^10.0.0"
 
-"@wdio/mocha-framework@^8.15.4":
-  version "8.15.9"
-  resolved "https://registry.yarnpkg.com/@wdio/mocha-framework/-/mocha-framework-8.15.9.tgz#af179a01335b8a643c8f6a61f15e60a0e9eaf40b"
-  integrity sha512-gVmQFTQmtaBYhDH3KvdZSbSXZy0uH9Da2vI+DxmXjaHL7LUsMdnAzyRq8hawDkaZGoHhNB2V91jZLVloAdNkIw==
+"@wdio/mocha-framework@^8.20.3":
+  version "8.20.3"
+  resolved "https://registry.yarnpkg.com/@wdio/mocha-framework/-/mocha-framework-8.20.3.tgz#fb13d8471f9ffdbe23cc76a424346dbcf6d33658"
+  integrity sha512-AF27tW2ToQ4+fzuBwI71ABjPhmPoESj+UtJYx4ahZjHQUyCCEhkiYIeh8T6UEFFpbIQeQV1Fz12UEK/18EGbzw==
   dependencies:
     "@types/mocha" "^10.0.0"
     "@types/node" "^20.1.0"
-    "@wdio/logger" "8.11.0"
-    "@wdio/types" "8.15.7"
-    "@wdio/utils" "8.15.9"
+    "@wdio/logger" "8.16.17"
+    "@wdio/types" "8.20.0"
+    "@wdio/utils" "8.20.3"
     mocha "^10.0.0"
 
 "@wdio/protocols@8.14.6":
@@ -1570,25 +1570,6 @@
     "@puppeteer/browsers" "^1.6.0"
     "@wdio/logger" "8.11.0"
     "@wdio/types" "8.15.10"
-    decamelize "^6.0.0"
-    deepmerge-ts "^5.1.0"
-    edgedriver "^5.3.5"
-    geckodriver "^4.2.0"
-    get-port "^7.0.0"
-    got "^13.0.0"
-    import-meta-resolve "^3.0.0"
-    locate-app "^2.1.0"
-    safaridriver "^0.1.0"
-    wait-port "^1.0.4"
-
-"@wdio/utils@8.15.9":
-  version "8.15.9"
-  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-8.15.9.tgz#582d3db4754003ea9a8b2e17f9084a2fa605d3b6"
-  integrity sha512-bzsmeFGPemnI37QaRrr2aSYRU7T3s0a2QwFPxjELV3RSTAeD6ETpQ8EEKXKbsBRk94ifOkyL0NEpRPX30LYWHw==
-  dependencies:
-    "@puppeteer/browsers" "^1.6.0"
-    "@wdio/logger" "8.11.0"
-    "@wdio/types" "8.15.7"
     decamelize "^6.0.0"
     deepmerge-ts "^5.1.0"
     edgedriver "^5.3.5"

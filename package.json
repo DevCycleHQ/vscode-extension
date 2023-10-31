@@ -289,7 +289,7 @@
     "@wdio/browser-runner": "^8.15.10",
     "@wdio/cli": "8.20.2",
     "@wdio/local-runner": "^8.20.5",
-    "@wdio/mocha-framework": "^8.15.4",
+    "@wdio/mocha-framework": "^8.20.3",
     "@wdio/spec-reporter": "^8.15.0",
     "chai": "^4.3.10",
     "copy-webpack-plugin": "^11.0.0",
