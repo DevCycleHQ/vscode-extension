@@ -8,4 +8,3 @@ node_modules
 .DS_STORE
 /src/analytics.ts
 dvc
-.wdio-vscode-service/
