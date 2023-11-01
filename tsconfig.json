@@ -11,6 +11,10 @@
     "strict": true, /* enable all strict type-checking options */
     "types": [
       "node",
+      "@wdio/mocha-framework",
+      "expect-webdriverio",
+      "wdio-vscode-service",
+      "@wdio/globals/types",
       "@types/vscode-webview"
     ]
     /* Additional Checks */

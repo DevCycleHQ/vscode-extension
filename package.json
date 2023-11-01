@@ -270,7 +270,8 @@
     "test": "node ./out/test/runTest.js",
     "publish": "vsce publish",
     "package": "vsce package",
-    "create-analytics-file": "test -f ./src/analytics.ts || echo 'export const RUDDERSTACK_KEY = \"\";' > ./src/analytics.ts"
+    "create-analytics-file": "test -f ./src/analytics.ts || echo 'export const RUDDERSTACK_KEY = \"\";' > ./src/analytics.ts",
+    "test:integration": "wdio run ./wdio.conf.js"
   },
   "devDependencies": {
     "@types/chai": "^4.3.9",
@@ -285,6 +286,11 @@
     "@typescript-eslint/parser": "^5.12.1",
     "@vscode/test-electron": "^2.3.6",
     "@vscode/vsce": "^2.20.1",
+    "@wdio/browser-runner": "^8.15.10",
+    "@wdio/cli": "8.20.2",
+    "@wdio/local-runner": "^8.20.5",
+    "@wdio/mocha-framework": "^8.15.4",
+    "@wdio/spec-reporter": "^8.15.0",
     "chai": "^4.3.10",
     "copy-webpack-plugin": "^11.0.0",
     "eslint": "^8.52.0",
@@ -294,6 +300,9 @@
     "sinon": "^17.0.0",
     "ts-loader": "^9.5.0",
     "typescript": "^4.5.5",
+    "wdio-mochawesome-reporter": "^4.0.0",
+    "wdio-vscode-service": "^5.2.1",
+    "wdio-wait-for": "^3.0.7",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
   },
