@@ -29,7 +29,12 @@ export class OrganizationsCLIController extends BaseCLIController {
     }
     const { code, error, output } = await this.execDvc('organizations get')
 
-    if (code === 0) {
+    if (code !== 0) {
+      vscode.window.showErrorMessage(
+        `Retrieving organizations failed: ${error?.message}}`,
+      )
+      return {}
+    } else {
       const organizations = JSON.parse(output) as Organization[]
       const orgsMap = organizations.reduce((result, currentOrg) => {
         result[currentOrg.id] = currentOrg
@@ -38,11 +43,6 @@ export class OrganizationsCLIController extends BaseCLIController {
 
       StateManager.setWorkspaceState(KEYS.ORGANIZATIONS, orgsMap)
       return orgsMap
-    } else {
-      vscode.window.showErrorMessage(
-        `Retrieving organizations failed: ${error?.message}}`,
-      )
-      return {}
     }
   }
 

@@ -16,7 +16,7 @@ export function execShell(cmd: string, cwd: string) {
         resolve({
           output: out,
           error: err,
-          code: err.code || 0,
+          code: err.code || 1, // If no error code is provided, return 1 as default code to indicate error
         })
       }
       resolve({
