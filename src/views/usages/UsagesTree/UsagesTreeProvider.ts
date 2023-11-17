@@ -20,7 +20,7 @@ export class UsagesTreeProvider
   readonly onDidChangeTreeData: vscode.Event<CodeUsageNode | undefined | void> =
     this._onDidChangeTreeData.event
   private flagsByFolder: Record<string, CodeUsageNode[]> = {}
-  private matchesByFolder: Record<string, JSONMatch[]> = {}
+  private matchesByFolder: Record<string, JSONMatch[] | undefined> = {}
   private isRefreshing: Record<string, boolean> = {}
   sortKey: 'key' | 'createdAt' | 'updatedAt' = 'key'
   sortAsc: boolean = true
@@ -96,9 +96,9 @@ export class UsagesTreeProvider
           )
 
           let updatedMatches = matches
-          if (relativeSavedFilePath) {
+          if (this.matchesByFolder[folder.name] && relativeSavedFilePath) {
             updatedMatches = updateMatchesFromSavedFile(
-              this.matchesByFolder[folder.name],
+              this.matchesByFolder[folder.name] as JSONMatch[],
               matches,
               relativeSavedFilePath,
             )
