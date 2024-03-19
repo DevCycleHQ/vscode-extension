@@ -300,7 +300,7 @@
   "dependencies": {
     "@types/js-yaml": "^4.0.5",
     "@types/vscode-webview": "^1.57.3",
-    "@vscode/codicons": "^0.0.33",
+    "@vscode/codicons": "^0.0.35",
     "@vscode/webview-ui-toolkit": "^1.2.2",
     "axios": "^0.26.0",
     "change-case": "^4.1.2",
