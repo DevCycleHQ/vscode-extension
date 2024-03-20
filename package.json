@@ -303,7 +303,7 @@
     "@vscode/codicons": "^0.0.33",
     "@vscode/webview-ui-toolkit": "^1.2.2",
     "axios": "^0.26.0",
-    "change-case": "^4.1.2",
+    "change-case": "^5.4.3",
     "fuse.js": "^6.6.2",
     "js-yaml": "^4.1.0",
     "lodash.partition": "^4.6.0",
