@@ -308,8 +308,5 @@
     "js-yaml": "^4.1.0",
     "lodash.partition": "^4.6.0",
     "tar": "^6.2.0"
-  },
-  "resolutions": {
-    "follow-redirects@^1.14.8": "^1.15.6"
   }
 }
