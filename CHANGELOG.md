@@ -1,10 +1,11 @@
 ## Other Changes
 
-- chore: update toggle bot resources by @jsalaber in #273
+- chore: dependabot security updates by @jonathannorris in #281
+- chore: update cli version to fix variable aliases by @jsalaber in #287
 
 
 
 ## Uncategorized
 
-- chore(deps): bump follow-redirects from 1.15.2 to 1.15.4 by @dependabot[bot] in #260
+- Change dependabot to weekly by @JamieSinn in #283
 
