@@ -1,11 +1,15 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
 import * as fs from 'fs'
-import axios from 'axios'
-import tar from 'tar'
+import * as tar from 'tar'
+import * as stream from 'stream'
+import { finished } from 'stream/promises'
 import { CLI_VERSION } from '../../constants'
 import { showDebugOutput } from '../../utils/showDebugOutput'
-import { hideBusyMessage, showBusyMessage } from '../../components/statusBarItem'
+import {
+  hideBusyMessage,
+  showBusyMessage,
+} from '../../components/statusBarItem'
 
 const CLI_ARTIFACTS = 'https://github.com/DevCycleHQ/cli/releases/download'
 const SUPPORTED_PLATFORMS = [
@@ -14,7 +18,7 @@ const SUPPORTED_PLATFORMS = [
   'linux-arm',
   'linux-x64',
   'win32-x64',
-  'win32-x86'
+  'win32-x86',
 ]
 const OUTPUT_DIR = path.join(path.resolve(__dirname), '..')
 const CLI_ROOT = path.join(OUTPUT_DIR, 'dvc')
@@ -39,7 +43,9 @@ function isCliLoaded() {
     const manifestPath = path.join(CLI_ROOT, 'oclif.manifest.json')
     return (
       fs.existsSync(CLI_EXEC) &&
-      fs.existsSync(path.join(CLI_ROOT, 'node_modules/@oclif/core/package.json')) &&
+      fs.existsSync(
+        path.join(CLI_ROOT, 'node_modules/@oclif/core/package.json'),
+      ) &&
       fs.existsSync(manifestPath) &&
       JSON.parse(fs.readFileSync(manifestPath, 'utf8')).version === CLI_VERSION
     )
@@ -51,21 +57,23 @@ function isCliLoaded() {
 async function downloadCli() {
   const sourceUrl = getTarPath()
 
+  showDebugOutput('Attempting to download DevCycle CLI...')
+
   const writeStream = tar.x({ cwd: OUTPUT_DIR })
-  const response = await axios.get(sourceUrl, {
-    responseType: 'stream',
+  const response = await fetch(sourceUrl, {
     headers: { 'accept-encoding': 'gzip' },
   })
-  response.data.pipe(writeStream)
 
-  await new Promise<void>((resolve, reject) => {
-    writeStream.on('error', (err: Error) => {
-      showDebugOutput(`Failed to download ${sourceUrl}: ${err.message}`)
-      reject(err)
-    })
-
-    writeStream.on('close', () => resolve())
-  })
+  try {
+    await finished(
+      stream.Readable.fromWeb(response.body as any).pipe(writeStream),
+    )
+  } catch (e) {
+    if (e instanceof Error) {
+      showDebugOutput(`Failed to download ${sourceUrl}: ${e.message}`)
+    }
+    throw e
+  }
   showDebugOutput('DevCycle CLI download complete!')
 }
 
