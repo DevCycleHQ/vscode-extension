@@ -84,7 +84,7 @@ export async function loadCli() {
       await downloadCli()
     }
   } catch (err) {
-    vscode.window.showErrorMessage('Error downloading DevCycle CLI')
+    vscode.window.showErrorMessage('Error downloading DevCycle CLI: ' + err)
     throw err
   } finally {
     hideBusyMessage()
