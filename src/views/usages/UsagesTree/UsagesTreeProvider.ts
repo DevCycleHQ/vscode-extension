@@ -10,6 +10,7 @@ import { CodeUsageNode } from './CodeUsageNode'
 import { FolderNode } from '../../utils/tree/FolderNode'
 import { KEYS, StateManager } from '../../../StateManager'
 import { updateMatchesFromSavedFile } from './utils'
+import utils from '../../../utils'
 
 export class UsagesTreeProvider
   implements vscode.TreeDataProvider<CodeUsageNode>
@@ -66,6 +67,8 @@ export class UsagesTreeProvider
     showLoading: boolean = true,
     savedFilePath?: string,
   ): Promise<void> {
+    utils.showDebugOutput(`Refreshing usages for ${folder.name}`)
+
     const isLoggedIn = StateManager.getFolderState(folder.name, KEYS.LOGGED_IN)
     if (!isLoggedIn || this.isRefreshing[folder.name]) {
       return
@@ -113,6 +116,7 @@ export class UsagesTreeProvider
       },
     )
     this.isRefreshing[folder.name] = false
+    utils.showDebugOutput(`Finished refreshing usages for ${folder.name}`)
   }
 
   private async populateCodeUsagesNodes(
@@ -137,7 +141,7 @@ export class UsagesTreeProvider
       const noUsagesNode = new CodeUsageNode(
         'noUsages',
         'No usages found',
-        'usage'
+        'usage',
       )
       this.flagsByFolder[folder.name].push(noUsagesNode)
     }
