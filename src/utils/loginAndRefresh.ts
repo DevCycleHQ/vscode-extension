@@ -12,6 +12,7 @@ export async function loginAndRefresh(
   folders: vscode.WorkspaceFolder[],
   headlessLogin = false,
 ) {
+  utils.showDebugOutput('Logging in and refreshing all folders')
   const foldersToRefresh = []
 
   for (const folder of folders) {
@@ -21,11 +22,18 @@ export async function loginAndRefresh(
       foldersToRefresh.push(folder)
     } catch (e) {}
   }
+  utils.showDebugOutput(
+    `Logged in, refreshing all ${foldersToRefresh.length} folders`,
+  )
   await Promise.all(foldersToRefresh.map(executeRefreshAllCommand))
   const loggedInFolders = utils.getLoggedInFolders()
   await vscode.commands.executeCommand(
     'setContext',
     'devcycle-feature-flags.hasCredentialsAndProject',
     loggedInFolders.length > 0,
+  )
+
+  utils.showDebugOutput(
+    `Logged in and refreshed ${loggedInFolders.length} folders`,
   )
 }

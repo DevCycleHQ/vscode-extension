@@ -54,9 +54,12 @@ export const activate = async (context: vscode.ExtensionContext) => {
   StateManager.globalState = context.globalState
   StateManager.workspaceState = context.workspaceState
 
-  await utils.checkForWorkspaceFolders()
+  utils.showDebugOutput('DevCycle extension activating')
 
+  await utils.checkForWorkspaceFolders()
   void cliUtils.loadCli()
+
+  utils.showDebugOutput('DevCycle CLI loaded')
 
   if (!StateManager.getGlobalState(KEYS.SEND_METRICS_PROMPTED)) {
     const sendMetricsMessage = `DevCycle collects usage metrics to gather information on feature adoption, usage, and frequency. 
@@ -78,13 +81,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
     await StateManager.setGlobalState(KEYS.EXTENSION_INSTALLED, true)
   }
 
+  utils.showDebugOutput('Registering View Providers')
   await registerStartupViewProvider(context)
   await registerLoginViewProvider(context)
   const { usagesDataProvider, usagesTreeView } =
     await registerUsagesViewProvider(context)
-  const environmentsDataProvider = await registerEnvironmentsViewProvider(
-    context,
-  )
+  const environmentsDataProvider =
+    await registerEnvironmentsViewProvider(context)
   const inspectorViewProvider = await registerInspectorViewProvider(context)
   const homeViewProvider = await registerHomeViewProvider(context)
   const refreshProviders: (
@@ -190,6 +193,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
     const foldersToRefresh = [...event.added, ...event.removed]
     await loginAndRefresh([...foldersToRefresh], true)
   })
+
+  utils.showDebugOutput('DevCycle extension activated')
 }
 
 export function deactivate() {}
