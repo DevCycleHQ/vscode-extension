@@ -3,12 +3,12 @@ on:
   workflow_dispatch:
     inputs:
       prerelease:
-        description: "Prerelease"
+        description: 'Prerelease'
         required: true
         default: false
         type: boolean
       draft:
-        description: "Draft"
+        description: 'Draft'
         required: true
         default: false
         type: boolean
@@ -22,20 +22,19 @@ on:
           - patch
         default: 'patch'
 
-
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     strategy:
-        matrix:
-            node-version: [18.x]
+      matrix:
+        node-version: [20.x]
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.AUTOMATION_USER_TOKEN }}
           fetch-depth: 0
-      
+
       - uses: DevCycleHQ/release-action/prepare-release@main
         id: prepare-release
         with:
@@ -43,7 +42,7 @@ jobs:
           prerelease: ${{ github.event.inputs.prerelease }}
           draft: ${{ github.event.inputs.draft }}
           version-increment-type: ${{ github.event.inputs.version-increment-type }}
-      
+
       - name: Yarn Install
         run: yarn install
 
