@@ -3,12 +3,12 @@ on:
   workflow_dispatch:
     inputs:
       prerelease:
-        description: "Prerelease"
+        description: 'Prerelease'
         required: true
         default: false
         type: boolean
       draft:
-        description: "Draft"
+        description: 'Draft'
         required: true
         default: false
         type: boolean
@@ -22,20 +22,24 @@ on:
           - patch
         default: 'patch'
 
-
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     strategy:
-        matrix:
-            node-version: [18.x]
+      matrix:
+        node-version: [20.x]
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.AUTOMATION_USER_TOKEN }}
           fetch-depth: 0
-      
+      - name: Set Secrets
+        uses: DevCycleHQ/aws-secrets-action@main
+        with:
+          secrets_map: '{"VSCODE_MARKETPLACE_TOKEN":"DEVCYCLE_GITHUB_vscode-extension_VSCODE_MARKETPLACE_TOKEN"}'
+          aws_account_id: '134377926370'
+
       - uses: DevCycleHQ/release-action/prepare-release@main
         id: prepare-release
         with:
@@ -43,7 +47,7 @@ jobs:
           prerelease: ${{ github.event.inputs.prerelease }}
           draft: ${{ github.event.inputs.draft }}
           version-increment-type: ${{ github.event.inputs.version-increment-type }}
-      
+
       - name: Yarn Install
         run: yarn install
 
@@ -56,7 +60,7 @@ jobs:
 
       - name: Commit version change
         run: |
-          git config --global user.email "github-tracker-bot@taplytics.com"
+          git config --global user.email "foundation-admin@devcycle.com"
           git config --global user.name "DevCycle Automation"
           git add ./package.json ./CHANGELOG.md
           git commit -m "Release ${{ steps.prepare-release.outputs.next-release-tag }}"
@@ -71,7 +75,7 @@ jobs:
 
       - name: Publish VSCode Extension
         run: |
-          yarn run publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
+          yarn run publish -p ${{ env.VSCODE_MARKETPLACE_TOKEN }}
 
       - name: Push version change
         run: |
