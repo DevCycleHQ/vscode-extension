@@ -34,6 +34,10 @@ jobs:
         with:
           token: ${{ secrets.AUTOMATION_USER_TOKEN }}
           fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Set Secrets
         uses: DevCycleHQ/aws-secrets-action@main
         with:
@@ -49,7 +53,7 @@ jobs:
           version-increment-type: ${{ github.event.inputs.version-increment-type }}
 
       - name: Yarn Install
-        run: yarn install
+        run: yarn --immutable
 
       - name: Update version in code
         run: |
