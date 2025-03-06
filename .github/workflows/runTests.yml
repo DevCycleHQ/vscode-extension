@@ -13,6 +13,9 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
     env:
       DISPLAY: ':99.0'
     steps:
@@ -20,19 +23,24 @@ jobs:
         run: /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & echo ">>> Started xvfb"
 
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: ${{ matrix.node-version }}
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn --immutable && yarn install
+        run: yarn --immutable
 
       - name: Lint Project
         run: yarn lint
 
-      - name: Unit Tests
-        run: yarn test
+      - name: Run Tests
+        run: yarn pretest && yarn test
 
       # - name: Integration Tests
       #   run: yarn test:integration

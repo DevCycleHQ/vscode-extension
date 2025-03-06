@@ -8,3 +8,5 @@ node_modules
 .DS_STORE
 /src/analytics.ts
 dvc
+.yarn/cache
+.yarn/install-state.gz
