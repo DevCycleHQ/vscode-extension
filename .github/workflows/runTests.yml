@@ -36,11 +36,11 @@ jobs:
       - name: Install dependencies
         run: yarn --immutable
 
-      - name: Run Tests
-        run: yarn pretest && yarn test
-
       - name: Lint Project
         run: yarn lint
+
+      - name: Run Tests
+        run: yarn pretest && yarn test
 
       # - name: Integration Tests
       #   run: yarn test:integration
