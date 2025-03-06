@@ -311,7 +311,8 @@
     "tar": "^7.1.0"
   },
   "resolutions": {
-    "cross-spawn@^7.0.*": "^7.0.5"
+    "cross-spawn@^7.0.*": "^7.0.5",
+    "serialize-javascript@6.0.0": "^6.0.2"
   },
   "packageManager": "yarn@4.4.0"
 }
