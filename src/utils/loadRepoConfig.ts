@@ -25,7 +25,7 @@ export const loadRepoConfig = async (folder: vscode.WorkspaceFolder): Promise<Re
       vscode.Uri.parse(`file:${rootPath}/${repoConfigPath}`)
     )
     const configFileString = new TextDecoder().decode(configFileByteArray)
-    configFileJson = yaml.load(configFileString) as RepoConfig
+    configFileJson = yaml.load(configFileString, { schema: yaml.JSON_SCHEMA }) as RepoConfig
     const { project, org } = configFileJson
     if (project) StateManager.setFolderState(folder.name, KEYS.PROJECT_ID, project)
     if (org) StateManager.setFolderState(folder.name, KEYS.ORGANIZATION, org)

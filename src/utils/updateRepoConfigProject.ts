@@ -16,7 +16,7 @@ export const updateRepoConfig = async (
       vscode.Uri.parse(`file:${rootPath}/${repoConfigPath}`)
     )
     const configFileString = new TextDecoder().decode(configFileByteArray)
-    const configFileJson = yaml.load(configFileString) as RepoConfig
+    const configFileJson = yaml.load(configFileString, { schema: yaml.JSON_SCHEMA }) as RepoConfig
 
     const updatedConfig = {
         ...configFileJson,
