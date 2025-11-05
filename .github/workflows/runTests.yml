@@ -10,6 +10,14 @@ on:
   workflow_dispatch:
 
 jobs:
+  license-check:
+    name: License Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DevCycleHQ/license-action@main
+        with:
+          language: "javascript"
   test:
     name: Run Tests
     runs-on: ubuntu-latest
