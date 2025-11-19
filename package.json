@@ -289,7 +289,7 @@
     "chai": "^4.3.10",
     "copy-webpack-plugin": "^11.0.0",
     "eslint": "^9.11.0",
-    "glob": "^11.1.0",
+    "glob": "^12.0.0",
     "mocha": "^9.2.1",
     "prettier": "3.0.3",
     "sinon": "^17.0.0",
