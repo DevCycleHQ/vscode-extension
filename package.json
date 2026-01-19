@@ -308,7 +308,7 @@
     "fuse.js": "^6.6.2",
     "js-yaml": "^4.1.1",
     "lodash.partition": "^4.6.0",
-    "tar": "^7.1.0"
+    "tar": "^7.5.3"
   },
   "resolutions": {
     "cross-spawn@^7.0.*": "^7.0.5",
