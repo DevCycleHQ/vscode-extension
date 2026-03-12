@@ -295,7 +295,7 @@
     "sinon": "^17.0.0",
     "ts-loader": "^9.5.0",
     "typescript": "^4.5.5",
-    "webpack": "^5.89.0",
+    "webpack": "^5.105.4",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
@@ -308,11 +308,12 @@
     "fuse.js": "^6.6.2",
     "js-yaml": "^4.1.1",
     "lodash.partition": "^4.6.0",
-    "tar": "^7.5.3"
+    "tar": "^7.5.11"
   },
   "resolutions": {
     "cross-spawn@^7.0.*": "^7.0.5",
-    "serialize-javascript@6.0.0": "^6.0.2"
+    "serialize-javascript": "^7.0.3",
+    "minimatch@4.2.1": "^4.2.5"
   },
   "packageManager": "yarn@4.4.0"
 }
