@@ -2018,7 +2018,7 @@ __metadata:
     tar: "npm:^7.5.11"
     ts-loader: "npm:^9.5.0"
     typescript: "npm:^4.5.5"
-    webpack: "npm:^5.104.1"
+    webpack: "npm:^5.105.4"
     webpack-cli: "npm:^5.1.4"
   languageName: unknown
   linkType: soft
@@ -5571,7 +5571,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.104.1":
+"webpack@npm:^5.105.4":
   version: 5.105.4
   resolution: "webpack@npm:5.105.4"
   dependencies:
