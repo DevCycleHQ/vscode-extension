@@ -269,8 +269,8 @@
     "pretest:integration": "yarn pretest",
     "lint": "eslint src/**/*.ts -f pretty",
     "test": "node ./out/test/runTest.js",
-    "publish": "vsce publish",
-    "package": "vsce package",
+    "publish": "vsce publish --no-dependencies",
+    "package": "vsce package --no-dependencies",
     "create-analytics-file": "test -f ./src/analytics.ts || echo 'export const RUDDERSTACK_KEY = \"\";' > ./src/analytics.ts"
   },
   "devDependencies": {
@@ -285,7 +285,7 @@
     "@typescript-eslint/eslint-plugin": "^8.6.0",
     "@typescript-eslint/parser": "^8.6.0",
     "@vscode/test-electron": "^2.3.6",
-    "@vscode/vsce": "^2.20.1",
+    "@vscode/vsce": "^3.7.1",
     "chai": "^4.3.10",
     "copy-webpack-plugin": "^11.0.0",
     "eslint": "^9.11.0",
