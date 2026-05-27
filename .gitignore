@@ -10,3 +10,4 @@ node_modules
 dvc
 .yarn/cache
 .yarn/install-state.gz
+.worktrees/
