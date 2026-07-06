@@ -306,16 +306,16 @@
     "change-case": "^4.1.2",
     "eslint-formatter-pretty": "^6.0.1",
     "fuse.js": "^6.6.2",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.2.0",
     "lodash.partition": "^4.6.0",
-    "tar": "^7.5.11"
+    "tar": "^7.5.16"
   },
   "resolutions": {
     "fast-uri": "^3.1.2",
     "cross-spawn@^7.0.*": "^7.0.5",
     "serialize-javascript": "^7.0.5",
     "minimatch@4.2.1": "^4.2.5",
-    "undici@^6.19.5": "^6.24.0",
+    "undici@^6.19.5": "^6.27.0",
     "flatted": "^3.4.2",
     "lodash": "^4.18.1",
     "brace-expansion@^1.1.7": "^1.1.13",
@@ -325,7 +325,12 @@
     "uuid": "^14.0.0",
     "ip-address": "^10.1.1",
     "qs": ">=6.15.2",
-    "tmp": "^0.2.6"
+    "tmp": "^0.2.6",
+    "js-yaml": "^4.2.0",
+    "linkify-it": "^5.0.1",
+    "tar": "^7.5.16",
+    "form-data": "^4.0.6",
+    "markdown-it": "^14.2.0"
   },
   "packageManager": "yarn@4.12.0"
 }
