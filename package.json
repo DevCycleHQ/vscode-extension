@@ -308,7 +308,7 @@
     "fuse.js": "^6.6.2",
     "js-yaml": "^4.2.0",
     "lodash.partition": "^4.6.0",
-    "tar": "^7.5.16"
+    "tar": "^7.5.21"
   },
   "resolutions": {
     "fast-uri": "^3.1.4",
@@ -328,7 +328,7 @@
     "tmp": "^0.2.6",
     "js-yaml": "^4.2.0",
     "linkify-it": "^5.0.1",
-    "tar": "^7.5.16",
+    "tar": "^7.5.21",
     "form-data": "^4.0.6",
     "markdown-it": "^14.2.0"
   },
