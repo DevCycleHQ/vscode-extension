@@ -24,6 +24,7 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
     steps:
       # Uses GITHUB_TOKEN, so CI does not run on the release PR by itself.
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
@@ -78,5 +79,6 @@ jobs:
       - name: Update Docs
         uses: ./.github/actions/updateDocs
         with:
-          latest_tag: ${{ needs.release-please.outputs.tag_name }}
+          # updateDocs adds the v prefix itself
+          latest_tag: ${{ needs.release-please.outputs.version }}
           access_token: ${{ secrets.AUTOMATION_USER_TOKEN }}
